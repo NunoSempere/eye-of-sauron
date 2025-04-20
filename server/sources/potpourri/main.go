@@ -8,6 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
 )
 
 func main() {
@@ -31,19 +33,58 @@ func main() {
 	for {
 		log.Println("Starting potpourri sources processing")
 		
-		// Process CNN feeds
-		log.Println("Processing CNN feeds")
-		cnnSources, err := cnn.FetchAllFeeds()
-		if err != nil {
-			log.Printf("Error fetching CNN feeds: %v", err)
-		} else {
-			log.Printf("Found %d CNN articles", len(cnnSources))
-			for i, source := range cnnSources {
-				log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
-				expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
-				if passes_filters {
-					expanded_source.Origin = source.Origin
-					SaveSource(expanded_source)
+		// Process sources in configured order
+		for _, sourceCfg := range getEnabledSources() {
+			switch sourceCfg.Name {
+			case "DSCA":
+				log.Println("Processing DSCA feed")
+				dscaSources, err := dsca.FetchFeed()
+				if err != nil {
+					log.Printf("Error fetching DSCA feed: %v", err)
+				} else {
+					log.Printf("Found %d DSCA articles", len(dscaSources))
+					for i, source := range dscaSources {
+						log.Printf("\nProcessing DSCA article %d/%d: %s", i+1, len(dscaSources), source.Title)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if passes_filters {
+							expanded_source.Origin = source.Origin
+							SaveSource(expanded_source)
+						}
+					}
+				}
+
+			case "WhiteHouse":
+				log.Println("Processing White House feed")
+				whSources, err := whitehouse.FetchFeed()
+				if err != nil {
+					log.Printf("Error fetching White House feed: %v", err)
+				} else {
+					log.Printf("Found %d White House articles", len(whSources))
+					for i, source := range whSources {
+						log.Printf("\nProcessing White House article %d/%d: %s", i+1, len(whSources), source.Title)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if passes_filters {
+							expanded_source.Origin = source.Origin
+							SaveSource(expanded_source)
+						}
+					}
+				}
+
+			case "CNN":
+				log.Println("Processing CNN feeds")
+				cnnSources, err := cnn.FetchAllFeeds()
+				if err != nil {
+					log.Printf("Error fetching CNN feeds: %v", err)
+				} else {
+					log.Printf("Found %d CNN articles", len(cnnSources))
+					for i, source := range cnnSources {
+						log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if passes_filters {
+							expanded_source.Origin = source.Origin
+							SaveSource(expanded_source)
+						}
+					}
 				}
 			}
 		}
