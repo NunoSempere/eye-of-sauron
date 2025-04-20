@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
 )
