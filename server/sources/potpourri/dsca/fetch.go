@@ -121,8 +121,12 @@ func FetchFeed() ([]types.Source, error) {
 		return nil, err
 	}
 
+	log.Printf("Found %d items in feed", len(feed.Channel.Items))
+
 	var sources []types.Source
 	for _, item := range feed.Channel.Items {
+		log.Printf("Processing item with date: %s", item.PubDate)
+		
 		// Try to parse the date
 		var pubDate time.Time
 		formats := []string{
@@ -146,6 +150,14 @@ func FetchFeed() ([]types.Source, error) {
 		if !parsed {
 			log.Printf("Could not parse date '%s' with any known format, using current time", item.PubDate)
 			pubDate = time.Now()
+		}
+
+		// Skip articles older than 24 hours
+		age := time.Since(pubDate)
+		log.Printf("Article age: %v", age)
+		if age > 24*time.Hour {
+			log.Printf("Skipping article older than 24 hours")
+			continue
 		}
 
 		// Clean up the title

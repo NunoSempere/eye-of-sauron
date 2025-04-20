@@ -8,8 +8,8 @@ type SourceConfig struct {
 
 var sourceConfigs = []SourceConfig{
 	{Name: "DSCA", Enabled: true, Order: 1},        // Defense news first
-	{Name: "WhiteHouse", Enabled: false, Order: 2},   // Government news second
-	{Name: "CNN", Enabled: false, Order: 3},         // General news last
+	{Name: "WhiteHouse", Enabled: true, Order: 2},   // Government news second
+	{Name: "CNN", Enabled: true, Order: 3},         // General news last
 }
 
 func getEnabledSources() []SourceConfig {

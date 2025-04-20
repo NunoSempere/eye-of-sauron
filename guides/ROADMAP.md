@@ -25,32 +25,37 @@
     - But not for Chinese sources
 - [ ] Add more sources. Some options:
   - [ ] Individual blogs and rss feeds, like those in my minutes
-    - [ ] CNN RSS <https://support.itesmedia.tv/available-rss-feeds-from-cnn> CRUCIAL.
+    - [x] CNN RSS <https://support.itesmedia.tv/available-rss-feeds-from-cnn> CRUCIAL.
     - [x] Wikipedia current events. <https://www.to-rss.xyz/wikipedia/current_events/> | <https://en.wikipedia.org/wiki/Portal:Current_events>
-    - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-april-7/>
-    - [ ] <https://iris.who.int/handle/10665/1642/browse?type=dateissued&order=DESC>
-    - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-march-31/>
-    - [ ] <https://www.who.int/publications/i>
-    - [ ] <https://www.swpc.noaa.gov/> | <https://x.com/NWSSWPC>
-    - [ ] <https://www.dsca.mil/press-media/major-arms-sales> | <https://www.dsca.mil/press-media/major-arms-sales/feed>
-    - [ ] <https://www.whitehouse.gov/briefing-room/statements-releases/feed/>
-    - [ ] <https://news.un.org/en/news>
-    - [ ] <https://www.cdc.gov/bird-flu/spotlights/>
-    - [ ] <https://www.bbc.com/news/topics/cp3mvpdp1r2t>
-    - [ ] <https://globalbiodefense.com/2024/11/10/biodefense-headlines-10-november-2024/>
-    - [ ] <https://research.checkpoint.com/2024/11th-november-threat-intelligence-report/>
-    - [ ] <https://www.cisa.gov/news-events/cybersecurity-advisories>
-    - [ ] <https://freerepublic.com> for more right wing stuff?
-    - [ ] <https://www.globalsecurity.org>
-    - [ ] <https://globalbiodefense.com/2025/02/28/biodefense-headlines-28-february-2025/>
-    - [ ] <https://www.newscatcherapi.com/>
+    - [x] <https://www.whitehouse.gov/briefing-room/statements-releases/feed/>
+    - [x] <https://www.dsca.mil/press-media/major-arms-sales> | <https://www.dsca.mil/press-media/major-arms-sales/feed> <https://www.dsca.mil/DesktopModules/ArticleCS/RSS.ashx?ContentType=700&Site=1509&isdashboardselected=0&max=20>
+    - Bio
+      - [ ] <https://iris.who.int/handle/10665/1642/browse?type=dateissued&order=DESC>
+      - [ ] <https://www.who.int/publications/i>
+      - [ ] <https://www.cdc.gov/bird-flu/spotlights/>
+      - [ ] <https://globalbiodefense.com/2024/11/10/biodefense-headlines-10-november-2024/>
+      - [ ] <https://globalbiodefense.com/2025/02/28/biodefense-headlines-28-february-2025/>
+    - Disasters
+      - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-april-7/>
+      - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-march-31/>
+      - [ ] <https://www.swpc.noaa.gov/> | <https://x.com/NWSSWPC>
+    - Geopolitics
+      - [ ] <https://news.un.org/en/news>
+      - [ ] <https://research.checkpoint.com/2024/11th-november-threat-intelligence-report/>
+      - [ ] <https://freerepublic.com> for more right wing stuff?
+      - [ ] <https://www.globalsecurity.org>
+    - Cyberattacks
+      - [ ] <https://www.bbc.com/news/topics/cp3mvpdp1r2t>
+      - [ ] <https://www.cisa.gov/news-events/cybersecurity-advisories>
+    - Misc
+      - [ ] <https://www.newscatcherapi.com/>
   - [ ] Forecaster suggestions => this could be a whole thing
   - [ ] Neuters.de <https://neuters.de/> shows what seems to be the most recent 10K news??
   - [ ] AP news?
   - [ ] News API
   - [ ] Reuters/AP/AFP
   - [ ] Jihadi Watch
-  - [ ] https://research.checkpoint.com/2024/4th-november-threat-intelligence-report/
+  - [ ] <https://research.checkpoint.com/2024/4th-november-threat-intelligence-report/>
   - [ ] Various press releases, e.g., from US military <https://www.globalsecurity.org/military/library/news/2024/11/mil-241112-dod01.htm>
 
 Improve ops:
