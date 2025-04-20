@@ -48,6 +48,18 @@ rotate-data-gmw:
 	tail -n $(MAX_LOG_SIZE) sources/gmw/mil/v2.log | tee -a sources/gmw/mil/v2.log.tmp
 	mv sources/gmw/mil/v2.log.tmp sources/gmw/mil/v2.log
 
+# potpourri
+run-potpourri:
+	go run sources/potpourri/main.go sources/potpourri/filterAndExpandSource.go sources/potpourri/saveSource.go 
+
+listen-potpourri:
+	tail -f sources/potpourri/v2.log
+
+rotate-data-potpourri:
+	# TODO: rotate postgres stuff
+	tail -n $(MAX_LOG_SIZE) sources/potpourri/v2.log | tee -a sources/potpourri/v2.log.tmp
+	mv sources/potpourri/v2.log.tmp sources/potpourri/v2.log
+
 # Others
 deps:
 	go mod tidy
@@ -59,9 +71,11 @@ systemd: systemd/*
 	sudo cp systemd/gdelt.service /etc/systemd/system
 	sudo cp systemd/wikinews.service /etc/systemd/system
 	sudo cp systemd/gmw.service /etc/systemd/system
+	sudo cp systemd/potpourri.service /etc/systemd/system
 	sudo systemctl daemon-reload
 	sudo systemctl enable galerts
 	sudo systemctl restart galerts
 	sudo systemctl restart gdelt
 	sudo systemctl restart wikinews
-	sudo systemctl restart gmw 
+	sudo systemctl restart gmw
+	sudo systemctl restart potpourri

@@ -26,6 +26,9 @@ On this date
 Oscar
 Greenpeace
 Boeing
+nightclub
+club
+quake
 
 # local
 landslide

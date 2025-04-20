@@ -25,6 +25,7 @@
     - But not for Chinese sources
 - [ ] Add more sources. Some options:
   - [ ] Individual blogs and rss feeds, like those in my minutes
+    - [ ] CNN RSS <https://support.itesmedia.tv/available-rss-feeds-from-cnn> CRUCIAL.
     - [x] Wikipedia current events. <https://www.to-rss.xyz/wikipedia/current_events/> | <https://en.wikipedia.org/wiki/Portal:Current_events>
     - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-april-7/>
     - [ ] <https://iris.who.int/handle/10665/1642/browse?type=dateissued&order=DESC>
