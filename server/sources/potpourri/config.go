@@ -12,7 +12,7 @@ var sourceConfigs = []SourceConfig{
 	{Name: "CNN", Enabled: true, Order: 3},         // General news last
 }
 
-func getEnabledSources() []SourceConfig {
+func GetEnabledSources() []SourceConfig {
 	enabled := make([]SourceConfig, 0)
 	for _, cfg := range sourceConfigs {
 		if cfg.Enabled {
