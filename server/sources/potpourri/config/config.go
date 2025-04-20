@@ -1,4 +1,4 @@
-package main
+package config
 
 type SourceConfig struct {
 	Name    string
@@ -12,7 +12,7 @@ var sourceConfigs = []SourceConfig{
 	{Name: "CNN", Enabled: false, Order: 3},         // General news last
 }
 
-func getEnabledSources() []SourceConfig {
+func GetEnabledSources() []SourceConfig {
 	enabled := make([]SourceConfig, 0)
 	for _, cfg := range sourceConfigs {
 		if cfg.Enabled {

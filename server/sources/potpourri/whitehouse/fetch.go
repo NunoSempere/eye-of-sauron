@@ -56,11 +56,9 @@ func FetchFeed() ([]types.Source, error) {
 		}
 
 		// Skip articles older than 24 hours
-		/*
 		if time.Since(pubDate) > 24*time.Hour {
 			continue
 		}
-		*/
 
 		sources = append(sources, types.Source{
 			Title:  item.Title,

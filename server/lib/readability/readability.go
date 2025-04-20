@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"net/http"
 	"strings"
+	"time"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -45,6 +46,23 @@ func ReplaceWithOSFrontend(u string) (string, error) {
 	return u, nil
 }
 
+// makeRequest creates a new request with browser-like headers
+func makeRequest(url string) (*http.Request, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add headers to look more like a browser
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+
+	return req, nil
+}
+
 // Try to extract title from HTML
 func ExtractTitle(url string) string {
 	url_for_title := url 
@@ -52,11 +70,25 @@ func ExtractTitle(url string) string {
 	if err == nil {
 		url_for_title = oss_url
 	}
-	resp, err := http.Get(url_for_title)
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	req, err := makeRequest(url_for_title)
+	if err != nil {
+		return ""
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return ""
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {

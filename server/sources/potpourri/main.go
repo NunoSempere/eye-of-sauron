@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
 )
@@ -34,7 +35,7 @@ func main() {
 		log.Println("Starting potpourri sources processing")
 		
 		// Process sources in configured order
-		for _, sourceCfg := range getEnabledSources() {
+		for _, sourceCfg := range config.GetEnabledSources() {
 			switch sourceCfg.Name {
 			case "DSCA":
 				log.Println("Processing DSCA feed")

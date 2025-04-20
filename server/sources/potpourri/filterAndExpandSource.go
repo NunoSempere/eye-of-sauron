@@ -1,8 +1,8 @@
 package main
 
 import (
-	"time"
 	"log"
+	"time"
 
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
@@ -39,7 +39,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	// Get article content
 	content, err := readability.GetArticleContent(source.Link)
 	if err != nil {
-		log.Printf("Readability extraction failed for %s: %v", source.Link, err)
+		log.Printf("Content extraction failed for %s: %v", source.Link, err)
 		return expanded_source, false
 	}
 	
