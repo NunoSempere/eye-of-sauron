@@ -2,12 +2,14 @@ package main
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
 	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 )
 
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
@@ -37,7 +39,16 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	expanded_source.Title = filters.CleanTitle(expanded_source.Title)
 
 	// Get article content
-	content, err := readability.GetArticleContent(source.Link)
+	var content string
+	var err error
+	
+	// Use direct extraction for DSCA articles
+	if strings.Contains(source.Origin, "DSCA") {
+		content, err = dsca.GetArticleContent(source.Link)
+	} else {
+		content, err = readability.GetArticleContent(source.Link)
+	}
+
 	if err != nil {
 		log.Printf("Content extraction failed for %s: %v", source.Link, err)
 		return expanded_source, false
