@@ -39,10 +39,10 @@ func main() {
 		} else {
 			log.Printf("Found %d CNN articles", len(cnnSources))
 			for i, source := range cnnSources {
-				log.Printf("\nProcessing CNN article %d/%d: %s", i+1, len(cnnSources), source.Title)
+				log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
 				expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 				if passes_filters {
-					expanded_source.Origin = "CNN"
+					expanded_source.Origin = source.Origin
 					SaveSource(expanded_source)
 				}
 			}

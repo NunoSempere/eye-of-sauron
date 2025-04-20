@@ -1,9 +1,10 @@
 package types
 
 type Source struct {
-	Title string
-	Link  string
-	Date  string
+	Title  string
+	Link   string
+	Date   string
+	Origin string
 }
 
 type CacheChecker func(string) (bool, error)
