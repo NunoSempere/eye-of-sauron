@@ -1,39 +1,23 @@
-package main
+package cnn
 
 import (
-	"encoding/xml"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"git.nunosempere.com/NunoSempere/news/lib/web"
 	"log"
 	"time"
+  "encoding/xml"
 )
 
-type RSSFeed struct {
-	XMLName xml.Name `xml:"rss"`
-	Channel Channel  `xml:"channel"`
-}
-
-type Channel struct {
-	Items []Item `xml:"item"`
-}
-
-type Item struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	PubDate     string `xml:"pubDate"`
-	Description string `xml:"description"`
-}
-
-var cnnFeeds = map[string]string{
+var feeds = map[string]string{
 	"top":        "http://rss.cnn.com/rss/cnn_topstories.rss",
 	"world":      "http://rss.cnn.com/rss/cnn_world.rss",
 	"us":         "http://rss.cnn.com/rss/cnn_us.rss",
 	"politics":   "http://rss.cnn.com/rss/cnn_allpolitics.rss",
 	"technology": "http://rss.cnn.com/rss/cnn_tech.rss",
-	"latest": "http://rss.cnn.com/rss/cnn_latest.rss",
+	"latest":     "http://rss.cnn.com/rss/cnn_latest.rss",
 }
 
-func FetchCNNFeed(feedURL string) ([]types.Source, error) {
+func FetchFeed(feedURL string) ([]types.Source, error) {
 	log.Printf("Fetching CNN feed: %s", feedURL)
 	
 	xml_bytes, err := web.Get(feedURL)
@@ -72,12 +56,12 @@ func FetchCNNFeed(feedURL string) ([]types.Source, error) {
 	return sources, nil
 }
 
-func FetchAllCNNFeeds() ([]types.Source, error) {
+func FetchAllFeeds() ([]types.Source, error) {
 	var allSources []types.Source
 	
-	for feedName, feedURL := range cnnFeeds {
+	for feedName, feedURL := range feeds {
 		log.Printf("Processing CNN %s feed", feedName)
-		sources, err := FetchCNNFeed(feedURL)
+		sources, err := FetchFeed(feedURL)
 		if err != nil {
 			log.Printf("Error fetching CNN %s feed: %v", feedName, err)
 			continue

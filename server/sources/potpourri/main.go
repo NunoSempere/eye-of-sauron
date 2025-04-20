@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		
 		// Process CNN feeds
 		log.Println("Processing CNN feeds")
-		cnnSources, err := FetchAllCNNFeeds()
+		cnnSources, err := cnn.FetchAllFeeds()
 		if err != nil {
 			log.Printf("Error fetching CNN feeds: %v", err)
 		} else {
