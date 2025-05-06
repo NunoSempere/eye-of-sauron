@@ -53,6 +53,7 @@ News in Brief
 # Events that popped up a lot
 # but I should eventually discard
 # ...
+Tahawwur Rana
 
 # Old filters
 # Haiti

@@ -44,7 +44,7 @@ func IsGoodHost(source types.Source) bool {
 		log.Printf("Error parsing link: %v", err)
 		return false
 	}
-	skippable_hosts := []string{"www.washingtonpost.com", "www.youtube.com", "www.naturalnews.com", "facebook.com", "m.facebook.com"}
+	skippable_hosts := []string{"www.washingtonpost.com", "www.youtube.com", "www.naturalnews.com", "facebook.com", "m.facebook.com", "www.bignewsnetwork.com"}
 	is_bad_host := slices.Contains(skippable_hosts, parsedURL.Host)
 	if is_bad_host {
 		log.Printf("Article is from a bad host")

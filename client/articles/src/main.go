@@ -249,7 +249,8 @@ func reorderSources(sources []Source) ([]Source, error) {
     sort.Slice(remaining_sources, func(i, j int) bool {
         return remaining_sources[i].Title < remaining_sources[j].Title
     })
-    reordered_sources = append(reordered_sources, remaining_sources...)
+    // Show sources that don't fit neatly into a topic first
+    reordered_sources = append(remaining_sources, reordered_sources...)
 
     return reordered_sources, nil
 }
