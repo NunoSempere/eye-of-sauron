@@ -4,6 +4,7 @@
 
 ## logs
 **/**.log
+**/**log
 
 ## swap files
 *.swp

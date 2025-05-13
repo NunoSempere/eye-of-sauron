@@ -62,15 +62,15 @@ rotate-data-potpourri:
 
 # hackernews
 run-hn:
-	go run sources/potpourri/hn/main.go sources/potpourri/hn/fetch.go sources/potpourri/hn/types.go sources/potpourri/hn/filterAndExpandSource.go sources/potpourri/hn/saveSource.go
+	go run sources/hn/main.go sources/hn/fetch.go sources/hn/types.go sources/hn/filterAndExpandSource.go sources/hn/saveSource.go
 
 listen-hn:
-	tail -f sources/potpourri/hn.log
+	tail -f sources/hn.log
 
 rotate-data-hn:
 	# TODO: rotate postgres stuff
-	tail -n $(MAX_LOG_SIZE) sources/potpourri/hn.log | tee -a sources/potpourri/hn.log.tmp
-	mv sources/potpourri/hn.log.tmp sources/potpourri/hn.log
+	tail -n $(MAX_LOG_SIZE) sources/hn.log | tee -a sources/hn.log.tmp
+	mv sources/hn.log.tmp sources/hn.log
 
 # Others
 deps:

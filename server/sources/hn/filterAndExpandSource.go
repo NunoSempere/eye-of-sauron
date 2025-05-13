@@ -11,9 +11,9 @@ import (
 
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
 	expanded_source := types.ExpandedSource{
-		Title: source.Title,
-		Link:  source.Link,
-		Date:  time.Now().Format(time.RFC3339),
+		Title:  source.Title,
+		Link:   source.Link,
+		Date:   time.Now().Format(time.RFC3339),
 		Origin: "HackerNews",
 	}
 
@@ -38,41 +38,43 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		log.Printf("Found title from HTML: %s", expanded_source.Title)
 	}
 
-	// Try to determine importance from title first
-	titleImportanceBox, err := llm.CheckExistentialImportance(expanded_source.Title, openai_key)
-	if err == nil && titleImportanceBox != nil && titleImportanceBox.ExistentialImportanceBool {
-		// If title alone indicates importance, get full content
-		content, err := readability.GetArticleContent(source.Link)
-		if err != nil {
-			log.Printf("Content extraction failed for %s: %v", source.Link, err)
-			return expanded_source, false
-		}
-		
-		// Summarize the article
-		summary, err := llm.Summarize(content, openai_key)
-		if err != nil {
-			log.Printf("Summarization failed for %s: %v", source.Link, err)
-			return expanded_source, false
-		}
-		expanded_source.Summary = summary
-
-		// Final importance check with full context
-		existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + summary
-		existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
-		if err != nil || existential_importance_box == nil {
-			log.Printf("Full importance check failed for %s: %v", source.Link, err)
-			return expanded_source, false
-		}
-		expanded_source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
-		expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
-		
-		log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
-		log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
-		
-		return expanded_source, expanded_source.ImportanceBool
+	// Get article content
+	content, err := readability.GetArticleContent(source.Link)
+	if err != nil {
+		log.Printf("Content extraction failed for %s: %v", source.Link, err)
+		return expanded_source, false
 	}
+	
+	// Summarize the article
+	summary, err := llm.Summarize(content, openai_key)
+	if err != nil {
+		log.Printf("Summarization failed for %s: %v", source.Link, err)
+		return expanded_source, false
+	}
+	expanded_source.Summary = summary
+	log.Printf("Summary: %s", expanded_source.Summary)
 
-	// If title wasn't important enough, we can skip full article processing
-	log.Printf("Title not important enough, skipping full article processing")
-	return expanded_source, false
+	// Check importance
+	existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + summary
+	existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
+	if err != nil || existential_importance_box == nil {
+		log.Printf("Importance check failed for %s: %v", source.Link, err)
+		return expanded_source, false
+	}
+	expanded_source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
+	expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
+	log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
+	log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
+
+	return expanded_source, expanded_source.ImportanceBool
+}
+
+// Cache of story texts by object ID
+var storyTextCache = make(map[string]string)
+
+func getStoryTextByID(objectID string) string {
+	if text, ok := storyTextCache[objectID]; ok {
+		return text
+	}
+	return ""
 }

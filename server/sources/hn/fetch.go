@@ -62,7 +62,7 @@ func FetchFeed() ([]types.Source, error) {
 				continue
 			}
 
-			// Skip low engagement posts (less than 2 points or comments). May come back to this.
+			// Skip low engagement posts (less than 2 points or comments)
 			if hit.Points < 2 && hit.NumComments < 2 {
 				continue
 			}

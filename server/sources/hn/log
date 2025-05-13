@@ -55,3 +55,52 @@ Processing HackerNews article 8/25: Show HN: Get Unlimited Startup Ideas
 2025/05/13 19:01:57 Title not important enough, skipping full article processing
 2025/05/13 19:01:57 
 Processing HackerNews article 9/25: PyPI Organizations
+2025/05/13 19:08:34 Starting HackerNews processing
+2025/05/13 19:08:34 Fetching HN feed page 0: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156114,created_at_i<1747159714&page=0
+2025/05/13 19:08:35 Found 57 HN stories across 3 pages
+2025/05/13 19:08:35 Fetching HN feed page 1: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156114,created_at_i<1747159714&page=1
+2025/05/13 19:08:36 Fetching HN feed page 2: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156114,created_at_i<1747159714&page=2
+2025/05/13 19:08:36 Processed 25 valid HN stories
+2025/05/13 19:08:36 Found 25 HackerNews articles
+2025/05/13 19:08:36 
+Processing HackerNews article 1/25: Effortless iOS Snapshot Testing Using Emerge Tools
+2025/05/13 19:08:37 Article is not a duplicate
+2025/05/13 19:08:37 Article is from a good host
+2025/05/13 19:08:37 Found title from HTML: Effortless iOS Snapshot Testing Using Emerge Tools
+2025/05/13 19:08:39 Title not important enough, skipping full article processing
+2025/05/13 19:08:39 
+Processing HackerNews article 2/25: Factors steadily fueling Linux's desktop rise
+2025/05/13 19:08:40 Article is not a duplicate
+2025/05/13 19:08:40 Article is from a good host
+2025/05/13 19:08:41 Found title from HTML: 5 factors steadily fueling Linux's desktop rise
+2025/05/13 19:08:43 Title not important enough, skipping full article processing
+2025/05/13 19:08:43 
+Processing HackerNews article 3/25: OpenTelemetry Protocol with Apache Arrow
+2025/05/13 19:08:45 Article is not a duplicate
+2025/05/13 19:08:45 Article is from a good host
+2025/05/13 19:08:45 Found title from HTML: OpenTelemetry Protocol with Apache Arrow
+2025/05/13 19:08:47 Title not important enough, skipping full article processing
+2025/05/13 19:08:47 
+Processing HackerNews article 4/25: Global Job Seekers' Interest in Foreign Roles Slowed Dramatically in 2024
+2025/05/13 19:08:48 Article is not a duplicate
+2025/05/13 19:08:48 Article is from a good host
+2025/05/13 19:08:48 Found title from HTML: Global Job Seekers’ Interest in Foreign Roles Slowed Dramatically in 2024
+2025/05/13 19:08:50 Title not important enough, skipping full article processing
+2025/05/13 19:08:50 
+Processing HackerNews article 5/25: AWRS SMC: Fast new algorithm for guiding LLMs as Bayesian inference
+2025/05/13 19:11:40 Starting HackerNews processing
+2025/05/13 19:11:40 Fetching HN feed page 0: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156300,created_at_i<1747159900&page=0
+2025/05/13 19:11:41 Found 57 HN stories across 3 pages
+2025/05/13 19:11:41 Fetching HN feed page 1: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156300,created_at_i<1747159900&page=1
+2025/05/13 19:11:41 Fetching HN feed page 2: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747156300,created_at_i<1747159900&page=2
+2025/05/13 19:11:42 Processed 25 valid HN stories
+2025/05/13 19:11:42 Found 25 HackerNews articles
+2025/05/13 19:11:42 
+Processing HackerNews article 1/25: Effortless iOS Snapshot Testing Using Emerge Tools
+2025/05/13 19:11:43 Article is not a duplicate
+2025/05/13 19:11:43 Article is from a good host
+2025/05/13 19:11:43 Found title from HTML: Effortless iOS Snapshot Testing Using Emerge Tools
+2025/05/13 19:11:44 Req url: https://joinhandshake.com/blog/our-team/effortless-ios-snapshot-testing-using-emerge-tools/
+2025/05/13 19:11:47 Summary: Writing tests is essential for iOS development at Handshake, where multiple teams update the codebase frequently. The testing strategy includes unit tests, UI tests, and snapshot tests to ensure UI consistency and prevent regressions that affect user experience. Snapshot tests compare the actual UI against reference images to detect visual changes, thereby addressing shortcomings in both unit and UI tests.
+
+The migration to Emerge Tools for snapshot testing has significantly improved the testing process. Features such as automatic generation of snapshot test cases, elimination of unnecessary code, and ease of use have streamlined workflows. Emerge's system automatically tracks reference images and integrates with existing CI processes, allowing teams to focus on development while maintaining high testing standards.
