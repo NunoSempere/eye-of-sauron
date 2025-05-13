@@ -40,6 +40,7 @@
       - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-march-31/>
       - [ ] <https://www.swpc.noaa.gov/> | <https://x.com/NWSSWPC>
     - Geopolitics
+      - [ ] Parse <@RapidResponse47> on twitter
       - [ ] <https://news.un.org/en/news>
       - [ ] <https://research.checkpoint.com/2024/11th-november-threat-intelligence-report/>
       - [ ] <https://freerepublic.com> for more right wing stuff?
