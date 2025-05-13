@@ -92,6 +92,11 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
 	log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
 	log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
+	
+	if strings.Contains(source.Title, "Saudi Arabia") {
+		expanded_source.ImportanceBool = true
+		expanded_source.ImportanceReasoning = "Contains keyword"
+	}
 
 	return expanded_source, expanded_source.ImportanceBool
 }

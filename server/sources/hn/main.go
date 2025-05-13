@@ -1,9 +1,9 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -28,24 +28,27 @@ func main() {
 	openai_key := os.Getenv("OPENAI_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
-	for {
-		log.Println("Starting HackerNews processing")
-		
-		hnSources, err := FetchFeed()
-		if err != nil {
-			log.Printf("Error fetching HackerNews feed: %v", err)
-		} else {
-			log.Printf("Found %d HackerNews articles", len(hnSources))
-			for i, hit := range hnSources {
-				log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), hit.Title)
-				expanded_source, passes_filters := FilterAndExpandSource(hit, openai_key, pg_database_url)
-				if passes_filters {
-					SaveSource(expanded_source)
+	ticker_gkg := time.NewTicker(60 * time.Minute)
+	defer ticker_gkg.Stop()
+	for ; true; <-ticker_gkg.C {
+		go func() {
+
+			log.Println("Starting HackerNews processing")
+
+			hnSources, err := FetchFeed()
+			if err != nil {
+				log.Printf("Error fetching HackerNews feed: %v", err)
+			} else {
+				log.Printf("Found %d HackerNews articles", len(hnSources))
+				for i, hit := range hnSources {
+					log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), hit.Title)
+					expanded_source, passes_filters := FilterAndExpandSource(hit, openai_key, pg_database_url)
+					if passes_filters {
+						SaveSource(expanded_source)
+					}
 				}
 			}
-		}
-		
-		log.Printf("Finished processing HackerNews, sleeping for 1 hour")
-		time.Sleep(1 * time.Hour)
+			log.Printf("Finished processing HackerNews, sleeping for 1 hour")
+		}()
 	}
 }
