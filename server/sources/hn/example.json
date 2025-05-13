@@ -1,0 +1,647 @@
+{
+	"exhaustive": { "nbHits": true, "typo": true },
+	"exhaustiveNbHits": true,
+	"exhaustiveTypo": true,
+	"hits": [
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "GreenGames"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Trump administration officially rescinds Biden's AI diffusion rules"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://techcrunch.com/2025/05/13/trump-administration-officially-rescinds-bidens-ai-diffusion-rules/"
+				}
+			},
+			"_tags": ["story", "author_GreenGames", "story_43975629"],
+			"author": "GreenGames",
+			"created_at": "2025-05-13T17:45:23Z",
+			"created_at_i": 1747158323,
+			"num_comments": 0,
+			"objectID": "43975629",
+			"points": 1,
+			"story_id": 43975629,
+			"title": "Trump administration officially rescinds Biden's AI diffusion rules",
+			"updated_at": "2025-05-13T17:46:53Z",
+			"url": "https://techcrunch.com/2025/05/13/trump-administration-officially-rescinds-bidens-ai-diffusion-rules/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "GreenGames"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Google's bringing Gemini to your car with Android Auto"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://techcrunch.com/2025/05/13/googles-bringing-gemini-to-your-car-with-android-auto/"
+				}
+			},
+			"_tags": ["story", "author_GreenGames", "story_43975623"],
+			"author": "GreenGames",
+			"created_at": "2025-05-13T17:44:29Z",
+			"created_at_i": 1747158269,
+			"num_comments": 0,
+			"objectID": "43975623",
+			"points": 1,
+			"story_id": 43975623,
+			"title": "Google's bringing Gemini to your car with Android Auto",
+			"updated_at": "2025-05-13T17:45:38Z",
+			"url": "https://techcrunch.com/2025/05/13/googles-bringing-gemini-to-your-car-with-android-auto/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "GreenGames"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Microsoft is reportedly about to lay off 3% of its workforce"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://techcrunch.com/2025/05/13/microsoft-is-reportedly-about-to-lay-off-3-of-its-workforce/"
+				}
+			},
+			"_tags": ["story", "author_GreenGames", "story_43975620"],
+			"author": "GreenGames",
+			"created_at": "2025-05-13T17:44:04Z",
+			"created_at_i": 1747158244,
+			"num_comments": 0,
+			"objectID": "43975620",
+			"points": 1,
+			"story_id": 43975620,
+			"title": "Microsoft is reportedly about to lay off 3% of its workforce",
+			"updated_at": "2025-05-13T17:45:38Z",
+			"url": "https://techcrunch.com/2025/05/13/microsoft-is-reportedly-about-to-lay-off-3-of-its-workforce/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "LAsteNERD"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Nvidia sending 18,000 of its top AI chips to Saudi Arabia"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://www.cnbc.com/2025/05/13/nvidia-blackwell-ai-chips-saudi-arabia.html"
+				}
+			},
+			"_tags": ["story", "author_LAsteNERD", "story_43975617"],
+			"author": "LAsteNERD",
+			"children": [43975618],
+			"created_at": "2025-05-13T17:43:34Z",
+			"created_at_i": 1747158214,
+			"num_comments": 1,
+			"objectID": "43975617",
+			"points": 2,
+			"story_id": 43975617,
+			"title": "Nvidia sending 18,000 of its top AI chips to Saudi Arabia",
+			"updated_at": "2025-05-13T17:45:38Z",
+			"url": "https://www.cnbc.com/2025/05/13/nvidia-blackwell-ai-chips-saudi-arabia.html"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "fanf2"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Eradicating Trivial Vulnerabilities, at Scale"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://www.ncsc.gov.uk/blog-post/eradicating-trivial-vulnerabilities-at-scale"
+				}
+			},
+			"_tags": ["story", "author_fanf2", "story_43975596"],
+			"author": "fanf2",
+			"created_at": "2025-05-13T17:42:03Z",
+			"created_at_i": 1747158123,
+			"num_comments": 0,
+			"objectID": "43975596",
+			"points": 1,
+			"story_id": 43975596,
+			"title": "Eradicating Trivial Vulnerabilities, at Scale",
+			"updated_at": "2025-05-13T17:45:38Z",
+			"url": "https://www.ncsc.gov.uk/blog-post/eradicating-trivial-vulnerabilities-at-scale"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "vojtechrichter"
+				},
+				"story_text": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Hey HN!<p>Many new founders have the vision to start making their own products, but get stuck and the idea stage, and i was victim to this as well.<p>With FounderEvolve you can start generating unlimited number of ideas, to give you inspiration for your next project.<p>This is one my first projects, and I would appreciate any constructive feedback.<p>Have a great day!"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Show HN: Get Unlimited Startup Ideas"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://founderevolve.com/"
+				}
+			},
+			"_tags": ["story", "author_vojtechrichter", "story_43975584", "show_hn"],
+			"author": "vojtechrichter",
+			"created_at": "2025-05-13T17:40:54Z",
+			"created_at_i": 1747158054,
+			"num_comments": 0,
+			"objectID": "43975584",
+			"points": 1,
+			"story_id": 43975584,
+			"story_text": "Hey HN!<p>Many new founders have the vision to start making their own products, but get stuck and the idea stage, and i was victim to this as well.<p>With FounderEvolve you can start generating unlimited number of ideas, to give you inspiration for your next project.<p>This is one my first projects, and I would appreciate any constructive feedback.<p>Have a great day!",
+			"title": "Show HN: Get Unlimited Startup Ideas",
+			"updated_at": "2025-05-13T17:45:38Z",
+			"url": "https://founderevolve.com/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "sahil423"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Ask HN: I am 17y/o failed 16 indie ideas, any programs suggestions"
+				}
+			},
+			"_tags": ["story", "author_sahil423", "story_43975578", "ask_hn"],
+			"author": "sahil423",
+			"created_at": "2025-05-13T17:40:24Z",
+			"created_at_i": 1747158024,
+			"num_comments": 0,
+			"objectID": "43975578",
+			"points": 1,
+			"story_id": 43975578,
+			"title": "Ask HN: I am 17y/o failed 16 indie ideas, any programs suggestions",
+			"updated_at": "2025-05-13T17:45:38Z"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "cratermoon"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "On the Very Real Dangers of the Artificial Intelligence Hype Machine"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://lithub.com/on-the-very-real-dangers-of-the-artificial-intelligence-hype-machine/"
+				}
+			},
+			"_tags": ["story", "author_cratermoon", "story_43975563"],
+			"author": "cratermoon",
+			"created_at": "2025-05-13T17:39:11Z",
+			"created_at_i": 1747157951,
+			"num_comments": 0,
+			"objectID": "43975563",
+			"points": 1,
+			"story_id": 43975563,
+			"title": "On the Very Real Dangers of the Artificial Intelligence Hype Machine",
+			"updated_at": "2025-05-13T17:42:23Z",
+			"url": "https://lithub.com/on-the-very-real-dangers-of-the-artificial-intelligence-hype-machine/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "sahil423"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Show HN: Gamod Build games powered by AI"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://gamod.vercel.app/#waitlist"
+				}
+			},
+			"_tags": ["story", "author_sahil423", "story_43975560", "show_hn"],
+			"author": "sahil423",
+			"created_at": "2025-05-13T17:38:56Z",
+			"created_at_i": 1747157936,
+			"num_comments": 0,
+			"objectID": "43975560",
+			"points": 1,
+			"story_id": 43975560,
+			"title": "Show HN: Gamod Build games powered by AI",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://gamod.vercel.app/#waitlist"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "calpaterson"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "PyPI Organizations"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://blog.pypi.org/posts/2023-04-23-introducing-pypi-organizations/"
+				}
+			},
+			"_tags": ["story", "author_calpaterson", "story_43975541"],
+			"author": "calpaterson",
+			"created_at": "2025-05-13T17:37:58Z",
+			"created_at_i": 1747157878,
+			"num_comments": 0,
+			"objectID": "43975541",
+			"points": 1,
+			"story_id": 43975541,
+			"title": "PyPI Organizations",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://blog.pypi.org/posts/2023-04-23-introducing-pypi-organizations/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "ulrischa"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "ElephantShadow: Use PHP for SSR of Webcomponents"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://github.com/ulrischa/ElephantShadow"
+				}
+			},
+			"_tags": ["story", "author_ulrischa", "story_43975524"],
+			"author": "ulrischa",
+			"created_at": "2025-05-13T17:36:35Z",
+			"created_at_i": 1747157795,
+			"num_comments": 0,
+			"objectID": "43975524",
+			"points": 1,
+			"story_id": 43975524,
+			"title": "ElephantShadow: Use PHP for SSR of Webcomponents",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://github.com/ulrischa/ElephantShadow"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "matteodelabre"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Free the Lizard"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://github.com/mozilla-firefox/firefox/commit/c4cc52826abd53e1121e4234d719cfd89ce58093"
+				}
+			},
+			"_tags": ["story", "author_matteodelabre", "story_43975521"],
+			"author": "matteodelabre",
+			"created_at": "2025-05-13T17:36:20Z",
+			"created_at_i": 1747157780,
+			"num_comments": 0,
+			"objectID": "43975521",
+			"points": 1,
+			"story_id": 43975521,
+			"title": "Free the Lizard",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://github.com/mozilla-firefox/firefox/commit/c4cc52826abd53e1121e4234d719cfd89ce58093"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "thoughtpeddler"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "California Institute for Machine Consciousness (CIMC) seeks research proposals"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://cimc.ai/#/proposals"
+				}
+			},
+			"_tags": ["story", "author_thoughtpeddler", "story_43975519"],
+			"author": "thoughtpeddler",
+			"created_at": "2025-05-13T17:36:19Z",
+			"created_at_i": 1747157779,
+			"num_comments": 0,
+			"objectID": "43975519",
+			"points": 1,
+			"story_id": 43975519,
+			"title": "California Institute for Machine Consciousness (CIMC) seeks research proposals",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://cimc.ai/#/proposals"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "cliffy"
+				},
+				"story_text": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Ubiquiti recently added HTTPS REST APIs to their Network and Protect applications. While exploring what was available, I came across a pair of interesting endpoints that promised to stream Protect events like detections, motions, doorbell rings, etc. over a Websocket connection.<p>My UniFi doorbell works great, but I frequently miss the sound of the doorbell because the main chime is far from my workstation, plus I prefer to mostly silence my phone while I'm working. Physical UniFi Chimes are available, but are usually out of stock, and their price seems to keep going up! So my initial motivation was to write enough of a client to enable a doorbell application which would play a sound whenever a &quot;ring&quot; event was emitted by Protect's API.<p>A few dozen commits later, I found I had built a half decent client and CLI command utility for talking to the Network and Protect APIs. So I'm pleased to announce the initial v0.1.0 release of `unified`:<p>`unified` is a command line utility (and Golang client) for talking to UniFi\nNetwork and Protect APIs.<p>You can check out the code at: <a href=\"https://github.com/ClifHouck/unified\">https://github.com/ClifHouck/unified</a><p>v0.1.0 supports the following:<p>UniFi Network API V1 is fully supported as of Network application version &quot;9.1.120&quot;.<p>UniFi Protect API V1 is only partially supported, with the following endpoints supported:<p>- `/v1/meta/info`<p>- `/v1/subscribe/devices`: only partial type support.<p>- `/v1/subscribe/events`<p>- `/v1/cameras/`<p>- `/v1/cameras/{id}`<p>But I'm committed to working towards full Protect API V1 support.<p>I think there's a lot of potential for interesting uses of these APIs. Hopefully someone besides me finds this useful.<p>Disclaimer: This client is not in any way affiliated with Ubiquiti. I do \nnot take any responsibility for any harm that may come to your device(s) by \nutilizing this client. Use at your own risk!"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Show HN: Golang UniFi Network and Protect API CLI and Client"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://github.com/ClifHouck/unified"
+				}
+			},
+			"_tags": ["story", "author_cliffy", "story_43975512", "show_hn"],
+			"author": "cliffy",
+			"created_at": "2025-05-13T17:35:57Z",
+			"created_at_i": 1747157757,
+			"num_comments": 0,
+			"objectID": "43975512",
+			"points": 1,
+			"story_id": 43975512,
+			"story_text": "Ubiquiti recently added HTTPS REST APIs to their Network and Protect applications. While exploring what was available, I came across a pair of interesting endpoints that promised to stream Protect events like detections, motions, doorbell rings, etc. over a Websocket connection.<p>My UniFi doorbell works great, but I frequently miss the sound of the doorbell because the main chime is far from my workstation, plus I prefer to mostly silence my phone while I&#x27;m working. Physical UniFi Chimes are available, but are usually out of stock, and their price seems to keep going up! So my initial motivation was to write enough of a client to enable a doorbell application which would play a sound whenever a &quot;ring&quot; event was emitted by Protect&#x27;s API.<p>A few dozen commits later, I found I had built a half decent client and CLI command utility for talking to the Network and Protect APIs. So I&#x27;m pleased to announce the initial v0.1.0 release of `unified`:<p>`unified` is a command line utility (and Golang client) for talking to UniFi\nNetwork and Protect APIs.<p>You can check out the code at: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;ClifHouck&#x2F;unified\">https:&#x2F;&#x2F;github.com&#x2F;ClifHouck&#x2F;unified</a><p>v0.1.0 supports the following:<p>UniFi Network API V1 is fully supported as of Network application version &quot;9.1.120&quot;.<p>UniFi Protect API V1 is only partially supported, with the following endpoints supported:<p>- `&#x2F;v1&#x2F;meta&#x2F;info`<p>- `&#x2F;v1&#x2F;subscribe&#x2F;devices`: only partial type support.<p>- `&#x2F;v1&#x2F;subscribe&#x2F;events`<p>- `&#x2F;v1&#x2F;cameras&#x2F;`<p>- `&#x2F;v1&#x2F;cameras&#x2F;{id}`<p>But I&#x27;m committed to working towards full Protect API V1 support.<p>I think there&#x27;s a lot of potential for interesting uses of these APIs. Hopefully someone besides me finds this useful.<p>Disclaimer: This client is not in any way affiliated with Ubiquiti. I do \nnot take any responsibility for any harm that may come to your device(s) by \nutilizing this client. Use at your own risk!",
+			"title": "Show HN: Golang UniFi Network and Protect API CLI and Client",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://github.com/ClifHouck/unified"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Brysonbw"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Google V8 (JavaScript Engine) Blog Posts Archive"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://v8.dev/blog"
+				}
+			},
+			"_tags": ["story", "author_Brysonbw", "story_43975498"],
+			"author": "Brysonbw",
+			"created_at": "2025-05-13T17:34:47Z",
+			"created_at_i": 1747157687,
+			"num_comments": 0,
+			"objectID": "43975498",
+			"points": 1,
+			"story_id": 43975498,
+			"title": "Google V8 (JavaScript Engine) Blog Posts Archive",
+			"updated_at": "2025-05-13T17:40:23Z",
+			"url": "https://v8.dev/blog"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Brysonbw"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "BlinkOn 6 Day 1 Talk 2: Ignition \u2013 an interpreter for V8"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://www.youtube.com/watch?v=r5OWCtuKiAk"
+				}
+			},
+			"_tags": ["story", "author_Brysonbw", "story_43975472"],
+			"author": "Brysonbw",
+			"created_at": "2025-05-13T17:31:29Z",
+			"created_at_i": 1747157489,
+			"num_comments": 0,
+			"objectID": "43975472",
+			"points": 1,
+			"story_id": 43975472,
+			"title": "BlinkOn 6 Day 1 Talk 2: Ignition \u2013 an interpreter for V8",
+			"updated_at": "2025-05-13T17:35:08Z",
+			"url": "https://www.youtube.com/watch?v=r5OWCtuKiAk"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "ohjeez"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Amiga Video Toaster Tips"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://gekk.info/articles/amiga-toaster.htm"
+				}
+			},
+			"_tags": ["story", "author_ohjeez", "story_43975469"],
+			"author": "ohjeez",
+			"children": [43975547],
+			"created_at": "2025-05-13T17:31:14Z",
+			"created_at_i": 1747157474,
+			"num_comments": 1,
+			"objectID": "43975469",
+			"points": 2,
+			"story_id": 43975469,
+			"title": "Amiga Video Toaster Tips",
+			"updated_at": "2025-05-13T17:38:53Z",
+			"url": "https://gekk.info/articles/amiga-toaster.htm"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Uigatai"
+				},
+				"story_text": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Current AI app builders produce &quot;junior developer code&quot; that struggles with complex business logic. The fundamental problem? They generate UI-first code rather than modeling the business domain properly.\nWe built Swoft (<a href=\"https://app.swoft.ai\" rel=\"nofollow\">https://app.swoft.ai</a>) to take a domain-first approach, using AI to define your domain model and generate applications following DDD/CQRS patterns.\nThe results:<p>Technical debt ratio of just 0.2% (industry average &gt;10%)\nTime-to-market reduced by &gt;52%\nScalable applications that handle complex business rules<p>Instead of generating raw code, Swoft produces configuration for a framework that enforces clean architecture - critical for enterprise applications or any system with non-trivial business logic.\nIf you've hit limitations with current AI app builders, I'd love your feedback on this domain-first approach."
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Show HN: We built an AI app generator with no technical debt"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://app.swoft.ai/"
+				}
+			},
+			"_tags": ["story", "author_Uigatai", "story_43975464", "show_hn"],
+			"author": "Uigatai",
+			"created_at": "2025-05-13T17:30:25Z",
+			"created_at_i": 1747157425,
+			"num_comments": 0,
+			"objectID": "43975464",
+			"points": 1,
+			"story_id": 43975464,
+			"story_text": "Current AI app builders produce &quot;junior developer code&quot; that struggles with complex business logic. The fundamental problem? They generate UI-first code rather than modeling the business domain properly.\nWe built Swoft (<a href=\"https:&#x2F;&#x2F;app.swoft.ai\" rel=\"nofollow\">https:&#x2F;&#x2F;app.swoft.ai</a>) to take a domain-first approach, using AI to define your domain model and generate applications following DDD&#x2F;CQRS patterns.\nThe results:<p>Technical debt ratio of just 0.2% (industry average &gt;10%)\nTime-to-market reduced by &gt;52%\nScalable applications that handle complex business rules<p>Instead of generating raw code, Swoft produces configuration for a framework that enforces clean architecture - critical for enterprise applications or any system with non-trivial business logic.\nIf you&#x27;ve hit limitations with current AI app builders, I&#x27;d love your feedback on this domain-first approach.",
+			"title": "Show HN: We built an AI app generator with no technical debt",
+			"updated_at": "2025-05-13T17:35:08Z",
+			"url": "https://app.swoft.ai/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "GeorgeCurtis"
+				},
+				"story_text": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Hey HN, we want to share HelixDB (<a href=\"https://github.com/HelixDB/helix-db/\">https://github.com/HelixDB/helix-db/</a>), a project a college friend and I are working on. It\u2019s a new database that natively intertwines graph and vector types, without sacrificing performance. It\u2019s written in Rust and our initial focus is on supporting RAG. Here\u2019s a video runthrough: <a href=\"https://screen.studio/share/szgQu3yq\" rel=\"nofollow\">https://screen.studio/share/szgQu3yq</a>.<p>Why a hybrid? Vector databases are useful for similarity queries, while graph databases are useful for relationship queries. Each stores data in a way that\u2019s best for its main type of query (e.g. key-value stores vs. node-and-edge tables). However, many AI-driven applications need <i>both</i> similarity and relationship queries. For example, you might use vector-based semantic search to retrieve relevant legal documents, and then use graph traversal to identify relationships between cases.<p>Developers of such apps have the quandary of needing to build on top of two different databases\u2014a vector one and a graph one\u2014plus you have to link them together and sync the data. Even then, your two databases aren't designed to work together\u2014for example, there\u2019s no native way to perform joins or queries that span both systems. You\u2019ll need to handle that logic at the application level.<p>Helix started when we realized that there are ways to integrate vector and graph data that are both fast and suitable for AI applications, especially RAG-based ones. See this cool research paper: <a href=\"https://arxiv.org/html/2408.04948v1\" rel=\"nofollow\">https://arxiv.org/html/2408.04948v1</a>. After reading that and some other papers on graph and hybrid RAG, we decided to build a hybrid DB. Our aim was to make something better to use from a developer standpoint, while also making it fast as hell.<p>After a few months of working on this as a side project, our benchmarking shows that we are on par with Pinecone and Qdrant for vectors, and our graph is up to three orders of magnitude faster than Neo4j.<p>Problems where a hybrid approach works particularly well include:<p>- Indexing codebases: you can vectorize code-snippets within a function (connected by edges) based on context and then create an AST (in a graph) from function calls, imports, dependencies, etc. Agents can look up code by similarity or keyword and then traverse the AST to get only the relevant code, which reduces hallucinations and prevents the LLM from guessing object shapes or variable/function names.<p>- Molecule discovery: Model biological interactions (e.g., proteins \u2192 genes \u2192 diseases) using graph types and then embed molecule structures to find similar compounds or case studies.<p>- Enterprise knowledge management: you can represent organisational structure, projects, and people (e.g., employee \u2192 team \u2192 project) in graph form, then index internal documents, emails, or notes as vectors for semantic search and link them directly employees/teams/projects in the graph.<p>I naively assumed when learning about databases for the first time that queries would be compiled and executed like functions in traditional programming. Turns out I was wrong, but this creates unnecessary latency by sending extra data (the whole written query), compiling it at run time, and then executing it. With Helix, you write the queries in our query language (HelixQL), which is then transpiled into Rust code and built directly into the database server, where you can call a generated API endpoint.<p>Many people have a thing against \u201cyet another query language\u201d (doubtless for good reason!) but we went ahead and did it anyway, because we think it makes working with our database so much easier that it\u2019s worth a bit of a learning curve. HelixQL takes from other query languages such as Gremlin, Cypher and SQL with some extra ideas added in. It is declarative while the traversals themselves are functional. This allows complete control over the traversal flow while also having a cleaner syntax. HelixQL returns JSON to make things easy for clients. Also, it uses a schema, so the queries are type-checked.<p>We took a crude approach to building the original graph engine as a way to get an MVP out, so we are now working on improving the graph engine by making traversals massively parallel and pipelined. This means data is only ever decoded from disk when it is needed, and parts of reads are all processed in parallel.<p>If you\u2019d like to try it out in a simple RAG demo, you can follow this guide and run our Jupyter notebook: <a href=\"https://github.com/HelixDB/helix-db/tree/main/examples/rag_demo\">https://github.com/HelixDB/helix-db/tree/main/examples/rag_d...</a><p>Many thanks! Comments and feedback welcome!"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "Show HN: Helixdb \u2013 Open-source vector-graph database for AI applications (Rust)"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://github.com/HelixDB/helix-db/"
+				}
+			},
+			"_tags": [
+				"story",
+				"author_GeorgeCurtis",
+				"story_43975423",
+				"show_hn",
+				"front_page"
+			],
+			"author": "GeorgeCurtis",
+			"created_at": "2025-05-13T17:26:38Z",
+			"created_at_i": 1747157198,
+			"num_comments": 0,
+			"objectID": "43975423",
+			"points": 5,
+			"story_id": 43975423,
+			"story_text": "Hey HN, we want to share HelixDB (<a href=\"https:&#x2F;&#x2F;github.com&#x2F;HelixDB&#x2F;helix-db&#x2F;\">https:&#x2F;&#x2F;github.com&#x2F;HelixDB&#x2F;helix-db&#x2F;</a>), a project a college friend and I are working on. It\u2019s a new database that natively intertwines graph and vector types, without sacrificing performance. It\u2019s written in Rust and our initial focus is on supporting RAG. Here\u2019s a video runthrough: <a href=\"https:&#x2F;&#x2F;screen.studio&#x2F;share&#x2F;szgQu3yq\" rel=\"nofollow\">https:&#x2F;&#x2F;screen.studio&#x2F;share&#x2F;szgQu3yq</a>.<p>Why a hybrid? Vector databases are useful for similarity queries, while graph databases are useful for relationship queries. Each stores data in a way that\u2019s best for its main type of query (e.g. key-value stores vs. node-and-edge tables). However, many AI-driven applications need <i>both</i> similarity and relationship queries. For example, you might use vector-based semantic search to retrieve relevant legal documents, and then use graph traversal to identify relationships between cases.<p>Developers of such apps have the quandary of needing to build on top of two different databases\u2014a vector one and a graph one\u2014plus you have to link them together and sync the data. Even then, your two databases aren&#x27;t designed to work together\u2014for example, there\u2019s no native way to perform joins or queries that span both systems. You\u2019ll need to handle that logic at the application level.<p>Helix started when we realized that there are ways to integrate vector and graph data that are both fast and suitable for AI applications, especially RAG-based ones. See this cool research paper: <a href=\"https:&#x2F;&#x2F;arxiv.org&#x2F;html&#x2F;2408.04948v1\" rel=\"nofollow\">https:&#x2F;&#x2F;arxiv.org&#x2F;html&#x2F;2408.04948v1</a>. After reading that and some other papers on graph and hybrid RAG, we decided to build a hybrid DB. Our aim was to make something better to use from a developer standpoint, while also making it fast as hell.<p>After a few months of working on this as a side project, our benchmarking shows that we are on par with Pinecone and Qdrant for vectors, and our graph is up to three orders of magnitude faster than Neo4j.<p>Problems where a hybrid approach works particularly well include:<p>- Indexing codebases: you can vectorize code-snippets within a function (connected by edges) based on context and then create an AST (in a graph) from function calls, imports, dependencies, etc. Agents can look up code by similarity or keyword and then traverse the AST to get only the relevant code, which reduces hallucinations and prevents the LLM from guessing object shapes or variable&#x2F;function names.<p>- Molecule discovery: Model biological interactions (e.g., proteins \u2192 genes \u2192 diseases) using graph types and then embed molecule structures to find similar compounds or case studies.<p>- Enterprise knowledge management: you can represent organisational structure, projects, and people (e.g., employee \u2192 team \u2192 project) in graph form, then index internal documents, emails, or notes as vectors for semantic search and link them directly employees&#x2F;teams&#x2F;projects in the graph.<p>I naively assumed when learning about databases for the first time that queries would be compiled and executed like functions in traditional programming. Turns out I was wrong, but this creates unnecessary latency by sending extra data (the whole written query), compiling it at run time, and then executing it. With Helix, you write the queries in our query language (HelixQL), which is then transpiled into Rust code and built directly into the database server, where you can call a generated API endpoint.<p>Many people have a thing against \u201cyet another query language\u201d (doubtless for good reason!) but we went ahead and did it anyway, because we think it makes working with our database so much easier that it\u2019s worth a bit of a learning curve. HelixQL takes from other query languages such as Gremlin, Cypher and SQL with some extra ideas added in. It is declarative while the traversals themselves are functional. This allows complete control over the traversal flow while also having a cleaner syntax. HelixQL returns JSON to make things easy for clients. Also, it uses a schema, so the queries are type-checked.<p>We took a crude approach to building the original graph engine as a way to get an MVP out, so we are now working on improving the graph engine by making traversals massively parallel and pipelined. This means data is only ever decoded from disk when it is needed, and parts of reads are all processed in parallel.<p>If you\u2019d like to try it out in a simple RAG demo, you can follow this guide and run our Jupyter notebook: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;HelixDB&#x2F;helix-db&#x2F;tree&#x2F;main&#x2F;examples&#x2F;rag_demo\">https:&#x2F;&#x2F;github.com&#x2F;HelixDB&#x2F;helix-db&#x2F;tree&#x2F;main&#x2F;examples&#x2F;rag_d...</a><p>Many thanks! Comments and feedback welcome!",
+			"title": "Show HN: Helixdb \u2013 Open-source vector-graph database for AI applications (Rust)",
+			"updated_at": "2025-05-13T17:46:53Z",
+			"url": "https://github.com/HelixDB/helix-db/"
+		},
+		{
+			"_highlightResult": {
+				"author": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "ajdude"
+				},
+				"title": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "VPN firm says it didn't know customers had lifetime subscriptions, cancels them"
+				},
+				"url": {
+					"matchLevel": "none",
+					"matchedWords": [],
+					"value": "https://arstechnica.com/gadgets/2025/05/vpn-firm-says-it-didnt-know-customers-had-lifetime-subscriptions-cancels-them/"
+				}
+			},
+			"_tags": ["story", "author_ajdude", "story_43975420"],
+			"author": "ajdude",
+			"children": [43975508],
+			"created_at": "2025-05-13T17:26:30Z",
+			"created_at_i": 1747157190,
+			"num_comments": 1,
+			"objectID": "43975420",
+			"points": 2,
+			"story_id": 43975420,
+			"title": "VPN firm says it didn't know customers had lifetime subscriptions, cancels them",
+			"updated_at": "2025-05-13T17:46:53Z",
+			"url": "https://arstechnica.com/gadgets/2025/05/vpn-firm-says-it-didnt-know-customers-had-lifetime-subscriptions-cancels-them/"
+		}
+	],
+	"hitsPerPage": 20,
+	"nbHits": 66,
+	"nbPages": 4,
+	"page": 0,
+	"params": "tags=story&numericFilters=created_at_i%3E1747154828%2Ccreated_at_i%3C1747158428&advancedSyntax=true&analyticsTags=backend",
+	"processingTimeMS": 2,
+	"processingTimingsMS": {
+		"_request": { "roundTrip": 14 },
+		"fetch": { "query": 1 },
+		"total": 2
+	},
+	"query": "",
+	"serverTimeMS": 3
+}

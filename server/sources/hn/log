@@ -1,0 +1,57 @@
+2025/05/13 19:01:28 Starting HackerNews processing
+2025/05/13 19:01:28 Fetching HN feed page 0: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747155688,created_at_i<1747159288&page=0
+2025/05/13 19:01:29 Found 59 HN stories across 3 pages
+2025/05/13 19:01:29 Fetching HN feed page 1: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747155688,created_at_i<1747159288&page=1
+2025/05/13 19:01:29 Fetching HN feed page 2: http://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=created_at_i>1747155688,created_at_i<1747159288&page=2
+2025/05/13 19:01:29 Processed 25 valid HN stories
+2025/05/13 19:01:29 Found 25 HackerNews articles
+2025/05/13 19:01:29 
+Processing HackerNews article 1/25: Global Job Seekers' Interest in Foreign Roles Slowed Dramatically in 2024
+2025/05/13 19:01:30 Article is not a duplicate
+2025/05/13 19:01:30 Article is from a good host
+2025/05/13 19:01:31 Found title from HTML: Global Job Seekers’ Interest in Foreign Roles Slowed Dramatically in 2024
+2025/05/13 19:01:33 Title not important enough, skipping full article processing
+2025/05/13 19:01:33 
+Processing HackerNews article 2/25: AWRS SMC: Fast new algorithm for guiding LLMs as Bayesian inference
+2025/05/13 19:01:34 Article is not a duplicate
+2025/05/13 19:01:34 Article is from a good host
+2025/05/13 19:01:34 Found title from HTML: [2504.05410] Fast Controlled Generation from Language Models with Adaptive Weighted Rejection Samplingopen searchopen navigation menucontact arXivsubscribe to arXiv mailings
+2025/05/13 19:01:36 Title not important enough, skipping full article processing
+2025/05/13 19:01:36 
+Processing HackerNews article 3/25: The Digital Storytelling Handbook
+2025/05/13 19:01:37 Article is not a duplicate
+2025/05/13 19:01:37 Article is from a good host
+2025/05/13 19:01:37 Found title from HTML: The Digital Storytelling Handbook
+2025/05/13 19:01:40 Title not important enough, skipping full article processing
+2025/05/13 19:01:40 
+Processing HackerNews article 4/25: Perl Community Conference Summer 2025
+2025/05/13 19:01:41 Article is not a duplicate
+2025/05/13 19:01:41 Article is from a good host
+2025/05/13 19:01:41 Found title from HTML: Call for Papers! - Perl Community Conference, Summer 2025
+2025/05/13 19:01:43 Title not important enough, skipping full article processing
+2025/05/13 19:01:43 
+Processing HackerNews article 5/25: Microsoft is reportedly about to lay off 3% of its workforce
+2025/05/13 19:01:44 Article is not a duplicate
+2025/05/13 19:01:44 Article is from a good host
+2025/05/13 19:01:44 Found title from HTML: Microsoft to lay off 3% of its workforce | TechCrunchMicrosoft to lay off 3% of its workforce
+2025/05/13 19:01:46 Title not important enough, skipping full article processing
+2025/05/13 19:01:46 
+Processing HackerNews article 6/25: Nvidia sending 18,000 of its top AI chips to Saudi Arabia
+2025/05/13 19:01:47 Article is not a duplicate
+2025/05/13 19:01:47 Article is from a good host
+2025/05/13 19:01:48 Found title from HTML: Nvidia sending 18,000 of its top AI chips to Saudi Arabia
+2025/05/13 19:01:50 Title not important enough, skipping full article processing
+2025/05/13 19:01:50 
+Processing HackerNews article 7/25: Eradicating Trivial Vulnerabilities, at Scale
+2025/05/13 19:01:51 Article is not a duplicate
+2025/05/13 19:01:51 Article is from a good host
+2025/05/13 19:01:52 Found title from HTML: NCSC
+2025/05/13 19:01:53 Title not important enough, skipping full article processing
+2025/05/13 19:01:53 
+Processing HackerNews article 8/25: Show HN: Get Unlimited Startup Ideas
+2025/05/13 19:01:54 Article is not a duplicate
+2025/05/13 19:01:54 Article is from a good host
+2025/05/13 19:01:55 Found title from HTML: FounderEvolve
+2025/05/13 19:01:57 Title not important enough, skipping full article processing
+2025/05/13 19:01:57 
+Processing HackerNews article 9/25: PyPI Organizations

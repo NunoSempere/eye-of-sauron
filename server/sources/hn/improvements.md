@@ -1,0 +1,4 @@
+- Add pagination
+- Process the description field
+- Only fetch the full article if the title and the description field, which may be empty, is not enough for determining whether the item is relevant
+- Check what the number of items submitted is, and whether it's a sustainable burden

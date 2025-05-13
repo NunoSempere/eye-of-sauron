@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"git.nunosempere.com/NunoSempere/news/sources/potpourri/hn"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
+	// "git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
 func main() {
 	// Set up logging
-	logFile, err := os.OpenFile("sources/potpourri/hn.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("sources/hn/log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -32,17 +31,17 @@ func main() {
 	for {
 		log.Println("Starting HackerNews processing")
 		
-		hnSources, err := hn.FetchFeed()
+		hnSources, err := FetchFeed()
 		if err != nil {
 			log.Printf("Error fetching HackerNews feed: %v", err)
 		} else {
 			log.Printf("Found %d HackerNews articles", len(hnSources))
 			for i, source := range hnSources {
 				log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), source.Title)
-				expanded_source, passes_filters := hn.FilterAndExpandSource(source, openai_key, pg_database_url)
+				expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 				if passes_filters {
 					expanded_source.Origin = source.Origin
-					hn.SaveSource(expanded_source)
+					SaveSource(expanded_source)
 				}
 			}
 		}
