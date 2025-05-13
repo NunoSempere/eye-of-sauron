@@ -10,6 +10,7 @@ import (
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/hn"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
 )
 
@@ -80,6 +81,23 @@ func main() {
 					log.Printf("Found %d CNN articles", len(cnnSources))
 					for i, source := range cnnSources {
 						log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if passes_filters {
+							expanded_source.Origin = source.Origin
+							SaveSource(expanded_source)
+						}
+					}
+				}
+
+			case "HackerNews":
+				log.Println("Processing HackerNews feed")
+				hnSources, err := hn.FetchFeed()
+				if err != nil {
+					log.Printf("Error fetching HackerNews feed: %v", err)
+				} else {
+					log.Printf("Found %d HackerNews articles", len(hnSources))
+					for i, source := range hnSources {
+						log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), source.Title)
 						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 						if passes_filters {
 							expanded_source.Origin = source.Origin

@@ -60,6 +60,18 @@ rotate-data-potpourri:
 	tail -n $(MAX_LOG_SIZE) sources/potpourri/v2.log | tee -a sources/potpourri/v2.log.tmp
 	mv sources/potpourri/v2.log.tmp sources/potpourri/v2.log
 
+# hackernews
+run-hn:
+	go run sources/potpourri/hn/main.go sources/potpourri/hn/fetch.go sources/potpourri/hn/types.go sources/potpourri/hn/filterAndExpandSource.go sources/potpourri/hn/saveSource.go
+
+listen-hn:
+	tail -f sources/potpourri/hn.log
+
+rotate-data-hn:
+	# TODO: rotate postgres stuff
+	tail -n $(MAX_LOG_SIZE) sources/potpourri/hn.log | tee -a sources/potpourri/hn.log.tmp
+	mv sources/potpourri/hn.log.tmp sources/potpourri/hn.log
+
 # Others
 deps:
 	go mod tidy
@@ -72,6 +84,7 @@ systemd: systemd/*
 	sudo cp systemd/wikinews.service /etc/systemd/system
 	sudo cp systemd/gmw.service /etc/systemd/system
 	sudo cp systemd/potpourri.service /etc/systemd/system
+	sudo cp systemd/hn.service /etc/systemd/system
 	sudo systemctl daemon-reload
 	sudo systemctl enable galerts
 	sudo systemctl restart galerts
@@ -79,3 +92,4 @@ systemd: systemd/*
 	sudo systemctl restart wikinews
 	sudo systemctl restart gmw
 	sudo systemctl restart potpourri
+	sudo systemctl restart hn
