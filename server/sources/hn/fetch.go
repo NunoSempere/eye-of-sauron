@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"git.nunosempere.com/NunoSempere/news/lib/web"
 	"log"
 	"time"
@@ -30,16 +29,17 @@ func fetchPage(page int, startTime, endTime int64) (*HNResponse, error) {
 	return &response, nil
 }
 
-func FetchFeed() ([]types.Source, error) {
+func FetchFeed() ([]HNHit, error) {
 	// Calculate time range for the last hour
 	now := time.Now()
 	oneHourAgo := now.Add(-1 * time.Hour)
+	twoHoursAgo := now.Add(-2 * time.Hour) // give time to accumulate upvotes
 	
-	var allSources []types.Source
+	var allSources []HNHit
 	currentPage := 0
 	
 	// Fetch first page to get pagination info
-	response, err := fetchPage(currentPage, oneHourAgo.Unix(), now.Unix())
+	response, err := fetchPage(currentPage, twoHoursAgo.Unix(), oneHourAgo.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -55,36 +55,10 @@ func FetchFeed() ([]types.Source, error) {
 				continue
 			}
 		}
-
-		for _, hit := range response.Hits {
-			// Skip items without URLs and with low engagement
-			if hit.URL == "" && hit.StoryText == "" {
-				continue
-			}
-
-			// Skip low engagement posts (less than 2 points or comments)
-			if hit.Points < 2 && hit.NumComments < 2 {
-				continue
-			}
-
-			// Parse the created_at time
-			createdAt, err := time.Parse(time.RFC3339, hit.CreatedAt)
-			if err != nil {
-				log.Printf("Could not parse date '%s', using current time", hit.CreatedAt)
-				createdAt = time.Now()
-			}
-
-			source := types.Source{
-				Title:  hit.Title,
-				Link:   hit.URL,
-				Date:   createdAt.Format(time.RFC3339),
-				Origin: "HackerNews",
-			}
-
-			allSources = append(allSources, source)
-		}
+		allSources = append(allSources, response.Hits...)
 	}
 
 	log.Printf("Processed %d valid HN stories", len(allSources))
 	return allSources, nil
 }
+

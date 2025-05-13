@@ -36,11 +36,10 @@ func main() {
 			log.Printf("Error fetching HackerNews feed: %v", err)
 		} else {
 			log.Printf("Found %d HackerNews articles", len(hnSources))
-			for i, source := range hnSources {
-				log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), source.Title)
-				expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+			for i, hit := range hnSources {
+				log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), hit.Title)
+				expanded_source, passes_filters := FilterAndExpandSource(hit, openai_key, pg_database_url)
 				if passes_filters {
-					expanded_source.Origin = source.Origin
 					SaveSource(expanded_source)
 				}
 			}
