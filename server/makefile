@@ -65,7 +65,7 @@ run-hn:
 	go run sources/hn/main.go sources/hn/fetch.go sources/hn/types.go sources/hn/filterAndExpandSource.go sources/hn/saveSource.go
 
 listen-hn:
-	tail -f sources/hn.log
+	tail -f sources/hn/v2.log
 
 rotate-data-hn:
 	# TODO: rotate postgres stuff
@@ -86,7 +86,12 @@ systemd: systemd/*
 	sudo cp systemd/potpourri.service /etc/systemd/system
 	sudo cp systemd/hn.service /etc/systemd/system
 	sudo systemctl daemon-reload
-	sudo systemctl enable galerts
+	sudo systemctl restart galerts
+	sudo systemctl enable gdelt
+	sudo systemctl enable wikinews
+	sudo systemctl enable gmw
+	sudo systemctl enable potpourri
+	sudo systemctl enable hn
 	sudo systemctl restart galerts
 	sudo systemctl restart gdelt
 	sudo systemctl restart wikinews
