@@ -39,6 +39,7 @@
       - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-april-7/>
       - [ ] <https://disasterphilanthropy.org/blog/what-were-watching-weekly-disaster-update-march-31/>
       - [ ] <https://www.swpc.noaa.gov/> | <https://x.com/NWSSWPC>
+      - [ ] <https://www.board-cybersecurity.com/alerts/>
     - Geopolitics
       - [ ] Parse <@RapidResponse47> on twitter
       - [ ] <https://news.un.org/en/news>
