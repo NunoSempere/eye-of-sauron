@@ -14,6 +14,8 @@ The main sources we are parsing are:
 - Wikipedia current events
 - Twitter (WIP)
 
+We are also parsing: HN, CNN, Weapons sales announcements, the whitehouse presidential actions feed, and have a long list of other sources we want to incorporate in guides/ROADMAP.md.
+
 News are first parsed on a server, filtered using LLMs, and then manually filtered with the UI defined in the client folder. The results are then discussed by forecasters and aggregated into Sentinel's [Global Risks Weekly Roundup](https://blog.sentinel-team.org/).
 
 ![](./guides/imgs/architecture.png)
