@@ -919,6 +919,8 @@ func (a *App) run() error {
 				if !a.detailMode && len(a.sources) > 0 {
 					a.detailMode = true
 					a.detailIdx = a.selectedIdx
+				} else if a.detailMode && len(a.sources) > 0 {
+					a.detailMode = false
 				}
 			}
 		case *tcell.EventResize:
