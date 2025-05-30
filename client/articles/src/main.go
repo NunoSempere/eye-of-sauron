@@ -54,6 +54,8 @@ type App struct {
 	failureMark    bool
 	waitgroup      sync.WaitGroup
 	statusMessage  string
+	detailMode     bool  // New field to track if we're in detail view
+	detailIdx      int   // Index of item being viewed in detail
 }
 
 type Topic struct {
@@ -78,6 +80,8 @@ func newApp() (*App, error) {
 		showImportance: make(map[int]bool),
 		currentPage:    0,
 		itemsPerPage:   10, // 17,
+		detailMode:     false,
+		detailIdx:      -1,
 	}, nil
 }
 
@@ -348,10 +352,14 @@ func (a *App) draw() {
 	a.screen.Clear()
 	width, height := a.screen.Size()
 	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
-	// selectedStyle := tcell.StyleDefault.Background(tcell.ColorDarkBlue).Foreground(tcell.ColorWhite)
 	selectedStyle := tcell.StyleDefault.Background(tcell.Color24).Foreground(tcell.ColorWhite)
 	summaryStyle := style.Foreground(tcell.Color248)
 	importanceStyle := style.Foreground(tcell.ColorYellow)
+
+	if a.detailMode {
+		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
+		return
+	}
 
 	startIdx := a.currentPage * a.itemsPerPage
 	endIdx := startIdx + a.itemsPerPage
@@ -396,9 +404,7 @@ func (a *App) draw() {
 			host = parsedURL.Host
 		}
 
-		// title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, padStringWithWhitespace(source.Title, 85), padStringWithWhitespace(host, 30), source.Date.Format("2006-01-02")) // why isn't the padding here working???
-		title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, source.Title, host, source.Date.Format("2006-01-02")) // why isn't the padding here working???
-		// title := "[" + processedMark + "] " + padStringWithWhitespace(source.Title, 85) + " | " + padStringWithWhitespace(host, 30) + " | " + source.Date.Format("2006-01-02")
+		title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, source.Title, host, source.Date.Format("2006-01-02"))
 		lineIdx = drawText(a.screen, 0, lineIdx, width, currentStyle, title)
 
 		// If this is the selected item and we're in expanded mode, show the summary
@@ -423,7 +429,7 @@ func (a *App) draw() {
 	current_item := a.selectedIdx
 	num_items := len(a.sources)
 	num_pages := int(math.Ceil(float64(num_items) / float64(a.itemsPerPage)))
-	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: Expand/Collapse | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
+	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
 	helpText2 := "O: Open in Browser \n | M: Toggle mark | S: Save | Q: Quit"
 	if a.statusMessage != "" {
 		helpText2 = fmt.Sprintf("%s | %s", helpText2, a.statusMessage)
@@ -433,6 +439,62 @@ func (a *App) draw() {
 	if height > 0 {
 		drawText(a.screen, 0, height-2, width, style, helpText)
 		drawText(a.screen, 0, height-1, width, style, helpText2)
+	}
+
+	a.screen.Show()
+}
+
+func (a *App) drawDetailView(width, height int, style, summaryStyle, importanceStyle tcell.Style) {
+	if a.detailIdx < 0 || a.detailIdx >= len(a.sources) {
+		return
+	}
+
+	source := a.sources[a.detailIdx]
+	lineIdx := 0
+
+	// Title
+	titleStyle := style.Bold(true)
+	lineIdx = drawText(a.screen, 0, lineIdx, width, titleStyle, source.Title)
+	lineIdx++
+
+	// URL and Date
+	host := ""
+	parsedURL, err := url.Parse(source.Link)
+	if err == nil {
+		host = parsedURL.Host
+	}
+	metaInfo := fmt.Sprintf("Source: %s | Date: %s", host, source.Date.Format("2006-01-02 15:04"))
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style, metaInfo)
+	lineIdx++
+	lineIdx++
+
+	// Summary
+	if source.Summary != "" {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, summaryStyle.Bold(true), "Summary:")
+		lineIdx++
+		lineIdx = drawText(a.screen, 0, lineIdx, width, summaryStyle, source.Summary)
+		lineIdx++
+		lineIdx++
+	}
+
+	// Importance Reasoning
+	if source.ImportanceReasoning != "" {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, importanceStyle.Bold(true), "Importance Reasoning:")
+		lineIdx++
+		lineIdx = drawText(a.screen, 0, lineIdx, width, importanceStyle, source.ImportanceReasoning)
+		lineIdx++
+		lineIdx++
+	}
+
+	// Full URL
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style.Bold(true), "URL:")
+	lineIdx++
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style, source.Link)
+
+	// Help text at bottom
+	helpText := "ESC/Backspace: Back to list | O: Open in Browser | M: Toggle mark | S: Save | Q: Quit"
+	if height > 0 {
+		drawText(a.screen, 0, height-1, width, style, helpText)
 	}
 
 	a.screen.Show()
@@ -690,16 +752,30 @@ func (a *App) run() error {
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				return nil
+				if a.detailMode {
+					a.detailMode = false
+					a.detailIdx = -1
+				} else {
+					return nil
+				}
+			case tcell.KeyBackspace, tcell.KeyBackspace2:
+				if a.detailMode {
+					a.detailMode = false
+					a.detailIdx = -1
+				}
 			case tcell.KeyRight:
-				if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
-					a.currentPage++
-					a.selectedIdx = a.currentPage * a.itemsPerPage
+				if !a.detailMode {
+					if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+						a.currentPage++
+						a.selectedIdx = a.currentPage * a.itemsPerPage
+					}
 				}
 			case tcell.KeyLeft:
-				if a.currentPage > 0 {
-					a.currentPage--
-					a.selectedIdx = a.currentPage * a.itemsPerPage
+				if !a.detailMode {
+					if a.currentPage > 0 {
+						a.currentPage--
+						a.selectedIdx = a.currentPage * a.itemsPerPage
+					}
 				}
 			case tcell.KeyRune:
 				switch ev.Rune() {
@@ -708,122 +784,142 @@ func (a *App) run() error {
 					return nil
 				case 'o', 'O':
 					if len(a.sources) > 0 {
-						openBrowser(a.sources[a.selectedIdx].Link)
+						idx := a.selectedIdx
+						if a.detailMode {
+							idx = a.detailIdx
+						}
+						openBrowser(a.sources[idx].Link)
 					}
 				case 'n', 'N':
-					if a.selectedIdx < len(a.sources)-1 {
+					if !a.detailMode && a.selectedIdx < len(a.sources)-1 {
 						a.selectedIdx++
 					}
 				case 'm', 'M', 'x':
 					if len(a.sources) > 0 {
-						a.markProcessed(a.selectedIdx, a.sources[a.selectedIdx])
-						if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
-							a.selectedIdx++
-						} else if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+						idx := a.selectedIdx
+						if a.detailMode {
+							idx = a.detailIdx
+						}
+						a.markProcessed(idx, a.sources[idx])
+						if !a.detailMode {
+							if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
+								a.selectedIdx++
+							} else if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+								a.currentPage++
+								a.selectedIdx = a.currentPage * a.itemsPerPage
+							}
+						}
+					}
+				case 'X', 'p':
+					if !a.detailMode {
+						startIdx := a.currentPage * a.itemsPerPage
+						endIdx := startIdx + a.itemsPerPage
+						if endIdx > len(a.sources) {
+							endIdx = len(a.sources)
+						}
+						for idx := startIdx; idx < endIdx; idx++ {
+							a.markProcessed(idx, a.sources[a.selectedIdx])
+						}
+						if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
 							a.currentPage++
 							a.selectedIdx = a.currentPage * a.itemsPerPage
 						}
 					}
-				case 'X', 'p':
-					startIdx := a.currentPage * a.itemsPerPage
-					endIdx := startIdx + a.itemsPerPage
-					if endIdx > len(a.sources) {
-						endIdx = len(a.sources)
-					}
-					for idx := startIdx; idx < endIdx; idx++ {
-						a.markProcessed(idx, a.sources[a.selectedIdx])
-					}
-					if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
-						a.currentPage++
-						a.selectedIdx = a.currentPage * a.itemsPerPage
-					}
 				case 'r':
-					a.screen.Clear()
-					a.screen.Show()
-					a.currentPage = 0
-					a.selectedIdx = 0
-					for i := range a.expandedItems {
-						a.expandedItems[i] = false
-						a.showImportance[i] = false
-					}
+					if !a.detailMode {
+						a.screen.Clear()
+						a.screen.Show()
+						a.currentPage = 0
+						a.selectedIdx = 0
+						for i := range a.expandedItems {
+							a.expandedItems[i] = false
+							a.showImportance[i] = false
+						}
 
-					a.sources = filterSourcesForUnread(a.sources)
+						a.sources = filterSourcesForUnread(a.sources)
+					}
 				case 'R':
-					a.screen.Clear()
-					a.screen.Show()
-					a.currentPage = 0
-					a.selectedIdx = 0
-					a.loadSources()
+					if !a.detailMode {
+						a.screen.Clear()
+						a.screen.Show()
+						a.currentPage = 0
+						a.selectedIdx = 0
+						a.loadSources()
+					}
 				case 's', 'S':
 					if len(a.sources) > 0 {
-						a.saveToFile(a.sources[a.selectedIdx])
+						idx := a.selectedIdx
+						if a.detailMode {
+							idx = a.detailIdx
+						}
+						a.saveToFile(a.sources[idx])
+						a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, idx)
 					}
-					a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, a.selectedIdx)
 				case 'w', 'W':
-					a.webSearch(a.sources[a.selectedIdx])
+					if len(a.sources) > 0 {
+						idx := a.selectedIdx
+						if a.detailMode {
+							idx = a.detailIdx
+						}
+						a.webSearch(a.sources[idx])
+					}
 				case 'f', 'F':
-					// Add new filter
-					filter_input := a.getInput("Enter filter keyword: ")
-					if filter_input != "" {
-						a.statusMessage = "Filtering items..."
-						a.draw()
+					if !a.detailMode {
+						// Add new filter
+						filter_input := a.getInput("Enter filter keyword: ")
+						if filter_input != "" {
+							a.statusMessage = "Filtering items..."
+							a.draw()
 
-						// Add to filters file
-						// f, err := os.OpenFile("src/filters.txt", os.O_APPEND|os.O_WRONLY, 0644)
-						// if err == nil {
-						// 	_, err = f.WriteString("\n" + filter)
-						// 	f.Close()
-						// }
-						// if err != nil {
-						// 		log.Printf("Error writing filter: %v", err)
-						// }
-
-						filterRegex, err := regexp.Compile("(?i)" + filter_input)
-						if err != nil {
-							log.Printf("Error compiling regex: %v", err)
-							continue
-						}
-
-						// Filter items locally and mark them in server
-						var remaining_sources []Source
-						for _, source := range a.sources {
-							if filterRegex.MatchString(source.Title) {
-								go markProcessedInServer(true, source.ID, source)
-							} else {
-								remaining_sources = append(remaining_sources, source)
+							filterRegex, err := regexp.Compile("(?i)" + filter_input)
+							if err != nil {
+								log.Printf("Error compiling regex: %v", err)
+								continue
 							}
-						}
-						a.sources = remaining_sources
 
-						// Reset page if needed
-						if a.selectedIdx >= len(a.sources) {
-							a.selectedIdx = len(a.sources) - 1
-						}
-						if a.selectedIdx < 0 {
-							a.selectedIdx = 0
-						}
-						a.currentPage = a.selectedIdx / a.itemsPerPage
+							// Filter items locally and mark them in server
+							var remaining_sources []Source
+							for _, source := range a.sources {
+								if filterRegex.MatchString(source.Title) {
+									go markProcessedInServer(true, source.ID, source)
+								} else {
+									remaining_sources = append(remaining_sources, source)
+								}
+							}
+							a.sources = remaining_sources
 
-						// Clear status message
-						a.statusMessage = ""
-						a.draw()
+							// Reset page if needed
+							if a.selectedIdx >= len(a.sources) {
+								a.selectedIdx = len(a.sources) - 1
+							}
+							if a.selectedIdx < 0 {
+								a.selectedIdx = 0
+							}
+							a.currentPage = a.selectedIdx / a.itemsPerPage
+
+							// Clear status message
+							a.statusMessage = ""
+							a.draw()
+						}
 					}
 				case 'i', 'I':
-					if len(a.sources) > 0 {
+					if !a.detailMode && len(a.sources) > 0 {
 						a.showImportance[a.selectedIdx] = !a.showImportance[a.selectedIdx]
 					}
 				}
 			case tcell.KeyUp:
-				if a.selectedIdx > 0 {
+				if !a.detailMode && a.selectedIdx > 0 {
 					a.selectedIdx--
 				}
 			case tcell.KeyDown:
-				if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
+				if !a.detailMode && a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
 					a.selectedIdx++
 				}
 			case tcell.KeyEnter:
-				a.expandedItems[a.selectedIdx] = !a.expandedItems[a.selectedIdx]
-				a.showImportance[a.selectedIdx] = false
+				if !a.detailMode && len(a.sources) > 0 {
+					a.detailMode = true
+					a.detailIdx = a.selectedIdx
+				}
 			}
 		case *tcell.EventResize:
 			a.screen.Sync()
