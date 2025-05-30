@@ -29,6 +29,8 @@ Boeing
 nightclub
 club
 quake
+Cannes
+actor
 
 # local
 landslide
