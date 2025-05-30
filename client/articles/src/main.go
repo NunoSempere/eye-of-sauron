@@ -79,7 +79,7 @@ func newApp() (*App, error) {
 		expandedItems:  make(map[int]bool),
 		showImportance: make(map[int]bool),
 		currentPage:    0,
-		itemsPerPage:   10, // 17,
+		itemsPerPage:   17, // 17,
 		detailMode:     false,
 		detailIdx:      -1,
 	}, nil
