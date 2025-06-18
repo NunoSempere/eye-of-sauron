@@ -98,3 +98,11 @@ systemd: systemd/*
 	sudo systemctl restart gmw
 	sudo systemctl restart potpourri
 	sudo systemctl restart hn
+
+listen: sources/*/*.log
+	tail -f sources/galerts/v2.log
+	tail -f sources/gdelt/v2.log
+	tail -f sources/wikinews/v2.log
+	tail -f sources/gmw/mil/v2.log
+	tail -f sources/potpourri/v2.log
+	tail -f sources/hn/v2.log
