@@ -137,7 +137,7 @@ func isSourceRepeat(i int, sources []Source) bool {
 
 func filterSources(sources []Source) ([]Source, error) {
 	var filtered_sources []Source
-	regexes, err := readRegexesFromFile("src/filters.txt")
+	regexes, err := readRegexesFromFile("data/filters.txt")
 	if err != nil {
 		log.Printf("Error loading regexes: %v", err)
 		return filtered_sources, err
@@ -213,7 +213,7 @@ func reorderSources(sources []Source) ([]Source, error) {
     var reordered_sources []Source
     remaining_sources := sources
 
-    topics, err := readTopicsFromFile("src/topics.txt")
+    topics, err := readTopicsFromFile("data/topics.txt")
     if err != nil {
         log.Printf("Error loading topics: %v", err)
         return sources, err
@@ -991,7 +991,7 @@ func truncateString(s string, maxLen int) string {
 }
 
 func main() {
-	logFile, err := os.OpenFile("src/client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("data/client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
