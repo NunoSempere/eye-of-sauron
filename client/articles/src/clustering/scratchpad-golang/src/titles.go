@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"strings"
 )
 
 func ReadFileLines(filename string) ([]string, error) {
@@ -18,7 +19,11 @@ func ReadFileLines(filename string) ([]string, error) {
 	// Create a new scanner to read the file
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text()) // Append each line to the slice
+		line := scanner.Text()
+		clean := strings.ReplaceAll(line, "<b>", "")
+		clean = strings.ReplaceAll(line, "</b>", "")
+		clean = strings.ReplaceAll(line, "&#39;", "'")
+		lines = append(lines, clean) // Append each line to the slice
 	}
 
 	// Check for errors during scanning

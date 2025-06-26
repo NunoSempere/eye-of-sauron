@@ -30,7 +30,7 @@ func GetEmbeddings(texts []string, token string) ([][]float64, error) {
 			f64s[i] = float64(v)
 		}
 		es = append(es, f64s)
-		fmt.Printf("Embedding for %s is [%f, %f, %f, ...]\n", texts[i], f64s[0], f64s[1], f64s[2])
+		fmt.Printf("%s => [%f, %f, %f, ...]\n", texts[i], f64s[0], f64s[1], f64s[2])
 	}
 
 	return es, nil

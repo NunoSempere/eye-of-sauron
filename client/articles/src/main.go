@@ -303,6 +303,7 @@ func (a *App) loadSources() error {
 	}
 	defer conn.Close(ctx)
 
+	// rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false AND EXTRACT('week' from date) = 22 ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
 	rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
 	// date '+%j'
 	if err != nil {
@@ -653,7 +654,10 @@ func (a *App) saveToFile(source Source) error {
 }
 
 func cleanTitle(s string) string {
-	return s
+  s2 := strings.ReplaceAll(s, "<b>", "")
+	s3 := strings.ReplaceAll(s2, "</b>", "")
+	s4 := strings.ReplaceAll(s3, "&#39;", "'")
+	return s4
 	/*
 	n := 10
 	if len(s) < n {
@@ -870,8 +874,9 @@ func (a *App) run() error {
 						if filter_input != "" {
 							a.statusMessage = "Filtering items..."
 							a.draw()
-
-							filterRegex, err := regexp.Compile("(?i)" + filter_input)
+							regex_with_lookaheads := strings.ReplaceAll(filter_input, "ANY(", "(?=.*")
+							// ANY(x)ANY(y) will match sentences that contain both x and y in any order, per o3
+							filterRegex, err := regexp.Compile("(?i)" + regex_with_lookaheads)
 							if err != nil {
 								log.Printf("Error compiling regex: %v", err)
 								continue

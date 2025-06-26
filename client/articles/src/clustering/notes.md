@@ -32,6 +32,10 @@ https://pkg.go.dev/github.com/milvus-io/milvus
 
 Plan 2:
 
-- [ ] Implement in golang, but keep in mind this limitaitions, and consider having elements in other languages in the future?
+- [x] Implement in golang, but keep in mind this limitaitions, and consider having elements in other languages in the future?
+- [ ] Get some sample titles
+- [ ] Add embeddings
+- [ ] Integrate into client
+- [ ] 
 
-Not viable. Only one hbdscan library in golang, and it is a) nondeterministic, b) unmantained, c) wrong, d) nonexhaustive on points. Reasonably angry.
+~~Not viable. Only one hbdscan library in golang, and it is a) nondeterministic, b) unmantained, c) wrong, d) nonexhaustive on points. Reasonably angry.~~
