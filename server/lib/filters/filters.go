@@ -71,8 +71,12 @@ func CleanTitle(s string) string {
 	s2 := CleanTitle0(s, " – ")
 	s3 := CleanTitle0(s2, " - ")
 	s4 := CleanTitle0(s3, "|")
-	s5 := strings.TrimSpace(s4)
-	return s5
+  s5 := strings.ReplaceAll(s4, "<b>", "")
+	s6 := strings.ReplaceAll(s5, "</b>", "")
+	s7 := strings.ReplaceAll(s6, "&#39;", "'")
+
+	s8 := strings.TrimSpace(s7)
+	return s8
 }
 
 

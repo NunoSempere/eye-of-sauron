@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -36,5 +35,5 @@ func SaveSource(source types.ExpandedSource) {
 		return
 	}
 
-	fmt.Printf("Saved source: %v\n", source.Title)
+	log.Printf("Saved source: %v\n", source.Title)
 }
