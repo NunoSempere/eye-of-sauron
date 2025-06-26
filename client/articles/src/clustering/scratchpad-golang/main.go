@@ -5,18 +5,58 @@ import(
     "fmt"
 )
 
+func unique[A comparable](input []A) []A {
+	seen := make(map[A]bool)
+	var result []A
+	for _, v := range input {
+		if !seen[v] {
+			seen[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func extractClusters(clusters hdbscan.Clustering) [][]int{
+    ns := [][]int{}
+
+    for _, cluster := range clusters.Clusters {
+        // fmt.Printf("Cluster %d: %+v\n", i, cluster)
+        ps := []int{}
+        os := []int{}
+        
+        for _, p := range cluster.Points {
+            ps = append(ps, p)
+        }
+        for _, o := range cluster.Outliers {
+            // ps = append(ps, o.Index)
+            os = append(os, o.Index)
+        }
+        ps = unique(ps)
+        ns = append(ns, ps)
+        ns = append(ns, os)
+    }
+    return ns
+}
+
 func printClusters(clusters hdbscan.Clustering, data [][]float64) {
-    for i, cluster := range clusters.Clusters {
-        fmt.Printf("Cluster %d:\n", i)
-        for _, point := range cluster.Points {
-            // fmt.Println(point) // Assuming cluster.Points contains the points in the cluster
-            fmt.Println(point)
-            // fmt.Println(data[point])
+    for _, cluster := range clusters.Clusters {
+        // fmt.Printf("Cluster %d: %+v\n", i, cluster)
+        ps := []int{}
+        
+        for _, p := range cluster.Points {
+            ps = append(ps, p)
+        }
+        for _, o := range cluster.Outliers {
+            ps = append(ps, o.Index)
+        }
+        ps = unique(ps)
+        for _, p := range ps {
+            fmt.Printf("%v, ", data[p])
         }
         fmt.Println()
     }
 }
-
 
 func main() {
     data := [][]float64{
@@ -26,6 +66,7 @@ func main() {
         []float64{3.1,2,1},
         []float64{5,5,5},
         []float64{5.2,5,5},
+        []float64{7, -1, 0},
     }
     minimumClusterSize := 2
     minimumSpanningTree :=  false
@@ -33,6 +74,7 @@ func main() {
     // create
     clustering, err := hdbscan.NewClustering(data, minimumClusterSize)
     if err != nil {
+        fmt.Println(err)
         panic(err)
     }
 
@@ -46,13 +88,8 @@ func main() {
     // If using sampling, then can use the Assign() method afterwards on the total dataset.
     cs := (clustering)
     // fmt.Printf("Number of clusters: %d\n", len(cs))
-    //  fmt.Printf("%+v\n", cs)
+    fmt.Printf("\n%+v\n\n", *cs)
+    // fmt.Printf("%+v\n", *cs.Clusters)
     printClusters(*cs, data)
-    // fmt.Printf(*cs.)
-    // Returns 
-    // hdbscan.clusters{(*hdbscan.cluster)(0xc000138000)}
-
 
 }
-
-// THIS SHIT IS A) NONDETERMINISTIC, B) NONCOMPREHENSIVE, C) WRONG
