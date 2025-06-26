@@ -1,3 +1,9 @@
+package main
+
+import (
+	"strings"
+)
+
 func padStringWithWhitespace(s string, n int) string {
 	if len(s) > n {
 		return s

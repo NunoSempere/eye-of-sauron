@@ -2,6 +2,8 @@ package main
 
 import (
   "os"
+    "log"
+    "regexp"
   "bufio"
   "strings"
   "sort"

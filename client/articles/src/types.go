@@ -3,6 +3,8 @@ package main
 import (
 	"sync"
 	"time"
+		"github.com/gdamore/tcell/v2"
+
 )
 
 type Source struct {

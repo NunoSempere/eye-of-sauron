@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"os"
 	"regexp"
+	"strings"
+	"log"
 	"github.com/adrg/strutil/metrics"
 )
 

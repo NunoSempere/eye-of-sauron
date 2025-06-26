@@ -74,7 +74,7 @@ func GetClusters(data [][]float64) []Cluster {
 	    []float64{5.2,5,5},
 	    []float64{7, -1, 0},
 	}*/
-	minimumClusterSize := 4
+	minimumClusterSize := 2
 	minimumSpanningTree := false
 
 	// create
