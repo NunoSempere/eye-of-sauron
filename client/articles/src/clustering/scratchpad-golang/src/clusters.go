@@ -17,8 +17,13 @@ func unique[A comparable](input []A) []A {
 	return result
 }
 
-func extractClusters(clusters hdbscan.Clustering) [][]int {
-	ns := [][]int{}
+type Cluster struct {
+	points []int
+	outliers []int
+}
+
+func extractClusters(clusters hdbscan.Clustering) []Cluster {
+	cs := []Cluster{}
 
 	for _, cluster := range clusters.Clusters {
 		// fmt.Printf("Cluster %d: %+v\n", i, cluster)
@@ -33,10 +38,11 @@ func extractClusters(clusters hdbscan.Clustering) [][]int {
 			os = append(os, o.Index)
 		}
 		ps = unique(ps)
-		ns = append(ns, ps)
-		ns = append(ns, os)
+
+		c := Cluster{points: ps, outliers: os}
+		cs = append(cs, c)
 	}
-	return ns
+	return cs
 }
 
 func printClusters(clusters hdbscan.Clustering, data [][]float64) {
@@ -58,7 +64,7 @@ func printClusters(clusters hdbscan.Clustering, data [][]float64) {
 	}
 }
 
-func Cluster(data [][]float64) [][]int {
+func GetClusters(data [][]float64) []Cluster {
 	/*data := [][]float64{
 	    []float64{1,2,3},
 	    []float64{1,2.2,3},

@@ -31,11 +31,16 @@ func main() {
 	}
 
 	fmt.Println("Calculating clusters")
-	clusters := Cluster(embeddings)
+	clusters := GetClusters(embeddings)
 	for i, c := range clusters {
 		fmt.Printf("\nCluster #%d\n", i)
-		for _, j := range c {
-			fmt.Printf("%s\n",titles[j])
+		fmt.Printf("  Central points:")
+		for _, j := range c.points {
+			fmt.Printf("  %s\n",titles[j])
+		}
+		fmt.Println("  Related outliers:")
+		for _, k := range c.outliers {
+			fmt.Printf("  %s\n",titles[k])
 		}
 	}
 
