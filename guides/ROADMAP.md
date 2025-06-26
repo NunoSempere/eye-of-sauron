@@ -51,6 +51,8 @@
       - [ ] <https://www.cisa.gov/news-events/cybersecurity-advisories>
     - Misc
       - [ ] <https://www.newscatcherapi.com/>
+      - [ ] <https://www.defenseone.com/topic/The-d-brief/>
+  - [ ] EXA? <https://exa.ai/pricing?tab=api>, <https://docs.exa.ai/reference/search>; keyword search by date? <https://simonwillison.net/2025/May/29/llm-tools-exa/#atom-everything>
   - [ ] Forecaster suggestions => this could be a whole thing
   - [ ] Neuters.de <https://neuters.de/> shows what seems to be the most recent 10K news??
   - [ ] AP news?

@@ -52,6 +52,7 @@ psql $DATABASE_URL -c "COPY () TO STDOUT WITH CSV;"
 psql $DATABASE_URL -c "SELECT id, title, link, date, created_at, processed FROM sources WHERE EXTRACT(MONTH FROM date) = $1 AND processed = false ORDER BY date ASC, id ASC"
 psql $DATABASE_URL -c "COPY (SELECT title FROM sources WHERE EXTRACT(MONTH FROM date) = 3) TO STDOUT WITH CSV;"
 psql $DATABASE_URL -c "COPY (SELECT title, link, date FROM sources WHERE relevant_per_human_check = 'yes' AND EXTRACT('week' from date) = 22) TO STDOUT WITH CSV;"
+psql $DATABASE_URL -c "SELECT id, title, link, date, created_at, processed FROM sources WHERE EXTRACT('week' FROM date) = 26 AND processed = false ORDER BY date ASC, id ASC"
 ```
 
 To drop other connections
