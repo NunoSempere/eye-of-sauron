@@ -1,0 +1,133 @@
+$ o3 "I have a list of article titles, and I want to cluster them together. What are some options, from word similarity, to embeddings, to some other complex workflow with LLMs?"
+Below is a menu of approaches, going from “quick-n-dirty” lexical tricks all the way to workflows that keep an LLM in the loop.  You can mix-and-match; many production systems actually chain two or three of these steps.  Rough Python snippets are included where they fit on one screen.
+
+──────────────────────
+1. Purely Lexical / Bag-of-Words
+──────────────────────
+1-A. Jaccard or simple token overlap
+   • Tokenise titles, drop stop-words, optionally stem.
+   • Similarity(i,j) = |tokens_i ∩ tokens_j| / |tokens_i ∪ tokens_j|.
+   • Cluster with Agglomerative or DBSCAN.
+
+1-B. TF–IDF + Cosine
+   • More forgiving on synonymy, still 100 % interpretable.
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import AgglomerativeClustering
+vec = TfidfVectorizer(ngram_range=(1,2), min_df=2)
+X   = vec.fit_transform(titles)
+cl  = AgglomerativeClustering(n_clusters=None, distance_threshold=0.7,
+                              affinity='cosine', linkage='average').fit(X.toarray())
+```
+
+Pros: fast, no GPUs, easy to explain.
+Cons: fails on paraphrases (“U.S. GDP rises” vs “American economy grows”).
+
+──────────────────────
+2. Traditional Topic Models
+──────────────────────
+2-A. LDA or NMF on the TF-IDF matrix.
+   • Good when titles are long enough to contain multiple topical signals (often not the case).
+   • Gives you topic word lists out-of-the-box for labelling.
+
+──────────────────────
+3. Word Vector Averaging
+──────────────────────
+3-A. Average of word2vec / GloVe / fastText vectors
+```python
+import gensim.downloader as api, numpy as np
+w2v = api.load('word2vec-google-news-300')
+def title_vec(t):
+    toks=[w for w in t.lower().split() if w in w2v]
+    return np.mean(w2v[toks],0) if toks else np.zeros(300)
+X = np.vstack([title_vec(t) for t in titles])
+```
+   • Better than TF-IDF on synonyms, still cheap.
+   • OOV words and sarcasm remain problems.
+
+──────────────────────
+4. Sentence / Document Embeddings (recommended sweet spot)
+──────────────────────
+4-A. Sentence-BERT or MiniLM
+   • One line with sentence-transformers, works great on short texts.
+```python
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')   # 384-d and <100 ms per title
+X = model.encode(titles, normalize_embeddings=True)
+```
+   • Cluster with K-Means (needs k), HDBSCAN (density-based, no k), or community detection on a similarity graph.
+
+4-B. OpenAI text-embedding-ada-002 / Cohere / VertexAI
+   • Best raw accuracy today; cost ≈ $0.0001 per title at OpenAI.
+   • Same downstream clustering algorithms.
+
+4-C. UMAP + HDBSCAN visual workflow
+   • UMAP for 2-D plotting, HDBSCAN for automatic cluster counting.
+   • Iterate by eyeballing the scatter plot.
+
+──────────────────────
+5. Lightweight LLM-in-the-Loop
+──────────────────────
+5-A. LLM for zero-shot classification
+   • If you already know the categories (e.g., “finance, sports, tech”), just prompt GPT-4 or Claude:
+   “Classify each of the following headlines into one of {categories}. Return JSON.”
+
+5-B. LLM for cluster labelling only
+   • Pipeline: SBERT vectors → HDBSCAN clusters → For each cluster, send top 10 titles to GPT-4:
+     “Summarize the common topic of these headlines in ≤5 words.”
+
+5-C. LLM-guided similarity threshold
+   • Use embeddings to propose neighbour pairs (similarity > 0.7), then ask GPT-4 whether the pair is “same topic” to learn an adaptive threshold or fine-tune a classifier.
+
+──────────────────────
+6. Fully LLM-Driven Workflows
+──────────────────────
+6-A. Self-Consistency Voting
+   • Prompt GPT-4 n times: “Group the following headlines into coherent piles. Output JSON.”
+   • Convert each run to partitions, then take majority vote on whether two titles belong together; build a similarity graph and run community detection.
+
+6-B. Chain-of-Thought + Retrieval
+   1. Ask GPT-4 to extract key entities and concepts for each title → vectorise those summaries (better SNR).
+   2. Cluster the concept embeddings.
+   3. Send back to GPT-4 to merge or split borderline clusters.
+
+6-C. RAG-style auto-labeller
+   • For every cluster, retrieve a couple of full articles, let GPT-4 read & produce a high-quality label/summary paragraph.
+
+──────────────────────
+7. Algorithms to Actually Form the Clusters
+──────────────────────
+• K-Means / MiniBatchKMeans – fast, needs k.
+• Agglomerative (Ward, average-link) – good for dendrograms.
+• DBSCAN / HDBSCAN – finds arbitrary shapes, auto-estimates #clusters.
+• Spectral clustering on similarity graph (works well with cosine sim ≥0.75 edges).
+• Louvain / Leiden (community detection) when you already have a graph.
+
+──────────────────────
+8. Choosing k or Validating Quality
+──────────────────────
+• Elbow or silhouette score on K-Means.
+• Density-based methods (HDBSCAN) output “probabilities” per point.
+• Purity / NMI if you happen to have some ground truth.
+• Manual spot checks—titles per cluster should “feel” coherent within 5 seconds.
+
+──────────────────────
+9. Putting It All Together – Example Production Recipe
+──────────────────────
+1. Embed with Sentence-BERT (‘all-MiniLM-L6-V2’).
+2. Build 15-nearest-neighbour graph (cosine).
+3. Run Leiden community detection → raw clusters.
+4. Remove singleton/noisy nodes (<3 titles) or push them into nearest cluster.
+5. For each cluster: top-n TF-IDF words + GPT-4 summary, store as label.
+6. Re-index nightly as new titles arrive; update only affected clusters.
+
+──────────────────────
+10. When to Use What
+──────────────────────
+• Toy project / very small list → Jaccard or TF-IDF.
+• Medium-sized corpus, cost-sensitive → Sentence-BERT + HDBSCAN.
+• Need best quality, budget okay → OpenAI embeddings, UMAP + HDBSCAN, GPT-4 for labelling.
+• No predefined taxonomy but you still need explainability → Step 4-A or 4-C plus Step 5-B.
+
+Hope this gives you a clear decision tree and enough code snippets to get started.
