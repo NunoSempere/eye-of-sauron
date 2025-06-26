@@ -3,8 +3,7 @@ package main
 import (
 	"sync"
 	"time"
-		"github.com/gdamore/tcell/v2"
-
+	"github.com/gdamore/tcell/v2"
 )
 
 type Source struct {
@@ -18,6 +17,8 @@ type Source struct {
 	CreatedAt             time.Time
 	Processed             bool
 	RelevantPerHumanCheck string
+	ClusterID             int    // New field for cluster assignment
+	IsClusterCentral      bool   // New field to mark central points vs outliers
 }
 
 var RELEVANT_PER_HUMAN_CHECK_NO = "no"
@@ -44,4 +45,8 @@ type Topic struct {
 	keywords []string
 }
 
-
+type Cluster struct {
+	ID       int
+	Points   []int // indices of central points
+	Outliers []int // indices of outliers
+}

@@ -40,7 +40,6 @@ func newApp() (*App, error) {
 	}, nil
 }
 
-
 func (a *App) loadSources() error {
 	/* This syntax is a method in go <https://go.dev/tour/methods/8>
 	the point is to pass a pointer
@@ -96,6 +95,13 @@ func (a *App) loadSources() error {
 	}
 	a.sources = unsimilar_sources
 
+	// Add clustering
+	err = a.clusterSources()
+	if err != nil {
+		fmt.Printf("Warning: clustering failed: %v\n", err)
+		// Continue without clustering
+	}
+
 	return nil
 }
 
@@ -147,6 +153,16 @@ func (a *App) draw() {
 		if source.Processed {
 			processedMark = "x"
 		}
+		
+		clusterMark := " "
+		if source.ClusterID >= 0 {
+			if source.IsClusterCentral {
+				clusterMark = fmt.Sprintf("C%d", source.ClusterID)
+			} else {
+				clusterMark = fmt.Sprintf("O%d", source.ClusterID)
+			}
+		}
+		
 		host := ""
 		parsedURL, err := url.Parse(source.Link)
 		if err != nil {
@@ -155,7 +171,7 @@ func (a *App) draw() {
 			host = parsedURL.Host
 		}
 
-		title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, source.Title, host, source.Date.Format("2006-01-02"))
+		title := fmt.Sprintf("[%s][%s] %s | %s | %s", processedMark, clusterMark, source.Title, host, source.Date.Format("2006-01-02"))
 		lineIdx = drawText(a.screen, 0, lineIdx, width, currentStyle, title)
 
 		// If this is the selected item and we're in expanded mode, show the summary
@@ -181,7 +197,7 @@ func (a *App) draw() {
 	num_items := len(a.sources)
 	num_pages := int(math.Ceil(float64(num_items) / float64(a.itemsPerPage)))
 	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
-	helpText2 := "O: Open in Browser \n | M: Toggle mark | S: Save | Q: Quit"
+	helpText2 := "O: Open in Browser | M: Toggle mark | S: Save | Q: Quit | [C#/O#]: Cluster Central/Outlier"
 	if a.statusMessage != "" {
 		helpText2 = fmt.Sprintf("%s | %s", helpText2, a.statusMessage)
 	} else if a.failureMark {
