@@ -215,10 +215,10 @@ func (a *App) draw() {
 				fg, _, _ := clusterStyle.Decompose()
 				clusterStyle = tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attrs)
 			}
-			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s]", processedMark, clusterMark, distanceInfo))
+			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s] ", processedMark, clusterMark, distanceInfo))
 			titleStyles = append(titleStyles, clusterStyle)
 		} else {
-			titleParts = append(titleParts, fmt.Sprintf("[%s%s]", clusterMark, distanceInfo))
+			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s] ", processedMark, clusterMark, distanceInfo))
 			titleStyles = append(titleStyles, currentStyle)
 		}
 		
