@@ -576,11 +576,10 @@ func (a *App) run() error {
 						currentCluster := a.sources[a.selectedIdx].ClusterID
 						clusterType := a.sources[a.selectedIdx].IsClusterCentral
 						for {
-							a.selectedIdx++
-							if a.sources[a.selectedIdx].ClusterID == currentCluster && a.sources[a.selectedIdx].IsClusterCentral == clusterType {
-								a.selectedIdx++
-							} else {
+							if a.sources[a.selectedIdx].ClusterID != currentCluster || a.sources[a.selectedIdx].IsClusterCentral != clusterType {
 								break
+							} else {
+								a.selectedIdx++
 							}
 
 						}
@@ -642,7 +641,7 @@ func (a *App) markClusterPartsAsProcessed(selectedIdx int) {
 	}
 	
 	if markedCount > 0 {
-		a.statusMessage = fmt.Sprintf("Marked %d %s cluster members as processed", partTypeName, markedCount)
+		a.statusMessage = fmt.Sprintf("Marked %d %s cluster members as processed", markedCount, partTypeName)
 		// Clear status message after 2 seconds
 		go func() {
 			time.Sleep(2 * time.Second)
