@@ -114,6 +114,7 @@ func (a *App) clusterSources() error {
 	}
 
 	// Get embeddings
+	fmt.Printf("\nGetting embeddings...")
 	embeddings, err := getEmbeddings(titles, openaiKey)
 	if err != nil {
 		fmt.Printf("Error getting embeddings: %v\n", err)
@@ -121,6 +122,7 @@ func (a *App) clusterSources() error {
 	}
 
 	// Get clusters
+	fmt.Printf("\nCalculating clusters...")
 	clusters := getClusters(embeddings)
 
 	// Assign cluster information to sources
@@ -146,5 +148,61 @@ func (a *App) clusterSources() error {
 		}
 	}
 
+	// Sort sources by cluster
+	a.sortSourcesByCluster()
+
 	return nil
+}
+
+func (a *App) sortSourcesByCluster() {
+	// Create a map to group sources by cluster
+	clusterGroups := make(map[int][]Source)
+	unclusteredSources := []Source{}
+
+	// Group sources by cluster ID
+	for _, source := range a.sources {
+		if source.ClusterID >= 0 {
+			clusterGroups[source.ClusterID] = append(clusterGroups[source.ClusterID], source)
+		} else {
+			unclusteredSources = append(unclusteredSources, source)
+		}
+	}
+
+	// Sort within each cluster: central points first, then outliers
+	for clusterID := range clusterGroups {
+		cluster := clusterGroups[clusterID]
+		centralPoints := []Source{}
+		outliers := []Source{}
+
+		for _, source := range cluster {
+			if source.IsClusterCentral {
+				centralPoints = append(centralPoints, source)
+			} else {
+				outliers = append(outliers, source)
+			}
+		}
+
+		// Combine central points first, then outliers
+		clusterGroups[clusterID] = append(centralPoints, outliers...)
+	}
+
+	// Rebuild the sources slice: unclustered first, then clusters in order
+	newSources := []Source{}
+	newSources = append(newSources, unclusteredSources...)
+
+	// Add clusters in order (0, 1, 2, ...)
+	maxClusterID := -1
+	for clusterID := range clusterGroups {
+		if clusterID > maxClusterID {
+			maxClusterID = clusterID
+		}
+	}
+
+	for clusterID := 0; clusterID <= maxClusterID; clusterID++ {
+		if cluster, exists := clusterGroups[clusterID]; exists {
+			newSources = append(newSources, cluster...)
+		}
+	}
+
+	a.sources = newSources
 }

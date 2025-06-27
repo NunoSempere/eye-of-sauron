@@ -53,6 +53,7 @@ func (a *App) loadSources() error {
 	On top of that, you can define an interface, as a type that implements
 	some method. <https://go.dev/tour/methods/10>
 	*/
+	fmt.Printf("Getting sources...")
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
 	if err != nil {
@@ -95,6 +96,7 @@ func (a *App) loadSources() error {
 	}
 	a.sources = unsimilar_sources
 
+	fmt.Printf("\nClustering surces...")
 	// Add clustering
 	err = a.clusterSources()
 	if err != nil {
