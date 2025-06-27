@@ -36,7 +36,7 @@ type App struct {
 	failureMark    bool
 	waitgroup      sync.WaitGroup
 	statusMessage  string
-	detailMode     bool  // New field to track if we're in detail view
+	mode           string // "main", "detail", "help"
 	detailIdx      int   // Index of item being viewed in detail
 	embeddings     [][]float64 // Store embeddings for distance calculations
 	clusters       []Cluster   // Store clusters with centroids

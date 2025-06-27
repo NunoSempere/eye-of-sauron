@@ -36,7 +36,7 @@ func newApp() (*App, error) {
 		showImportance: make(map[int]bool),
 		currentPage:    0,
 		itemsPerPage:   17, // 17,
-		detailMode:     false,
+		mode:     "main",
 		detailIdx:      -1,
 	}, nil
 }
@@ -120,10 +120,15 @@ func (a *App) draw() {
 	summaryStyle := style.Foreground(tcell.Color248)
 	importanceStyle := style.Foreground(tcell.ColorYellow)
 
-	if a.detailMode {
+	if a.mode == "detail "{
 		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
 		return
-	}
+	} 
+
+	if a.mode == "help"{
+		// TODO
+		return
+	} 
 
 	startIdx := a.currentPage * a.itemsPerPage
 	endIdx := startIdx + a.itemsPerPage
@@ -329,15 +334,9 @@ func (a *App) getInput(prompt string) string {
 }
 
 func (a *App) drawLines(lines []string) {
-	width, height := a.screen.Size()
+	width, _ := a.screen.Size()
 	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
-	summaryStyle := style.Foreground(tcell.Color248)
-	importanceStyle := style.Foreground(tcell.ColorYellow)
 
-	if a.detailMode {
-		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
-		return
-	}
 	lineIdx := 0
 	for _, line := range lines {
 		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
@@ -359,26 +358,26 @@ func (a *App) run() error {
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				if a.detailMode {
-					a.detailMode = false
+				if a.mode == "detail"{
+					a.mode = "main"
 					a.detailIdx = -1
 				} else {
 					return nil
 				}
 			case tcell.KeyBackspace, tcell.KeyBackspace2:
-				if a.detailMode {
-					a.detailMode = false
+				if a.mode == "detail" {
+					a.mode = "main"
 					a.detailIdx = -1
 				}
 			case tcell.KeyRight:
-				if !a.detailMode {
+				if a.mode == "main" {
 					if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
 						a.currentPage++
 						a.selectedIdx = a.currentPage * a.itemsPerPage
 					}
 				}
 			case tcell.KeyLeft:
-				if !a.detailMode {
+				if a.mode == "main" {
 					if a.currentPage > 0 {
 						a.currentPage--
 						a.selectedIdx = a.currentPage * a.itemsPerPage
@@ -392,23 +391,23 @@ func (a *App) run() error {
 				case 'o', 'O':
 					if len(a.sources) > 0 {
 						idx := a.selectedIdx
-						if a.detailMode {
+						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
 						openBrowser(a.sources[idx].Link)
 					}
 				case 'n', 'N':
-					if !a.detailMode && a.selectedIdx < len(a.sources)-1 {
+					if (a.mode == "main") && a.selectedIdx < len(a.sources)-1 {
 						a.selectedIdx++
 					}
 				case 'm', 'M', 'x':
 					if len(a.sources) > 0 {
 						idx := a.selectedIdx
-						if a.detailMode {
+						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
 						a.markProcessed(idx, a.sources[idx])
-						if !a.detailMode {
+						if a.mode == "main" {
 							if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
 								a.selectedIdx++
 							} else if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
@@ -418,7 +417,7 @@ func (a *App) run() error {
 						}
 					}
 				case 'X', 'p':
-					if !a.detailMode {
+					if a.mode == "main" {
 						startIdx := a.currentPage * a.itemsPerPage
 						endIdx := startIdx + a.itemsPerPage
 						if endIdx > len(a.sources) {
@@ -433,7 +432,7 @@ func (a *App) run() error {
 						}
 					}
 				case 'r':
-					if !a.detailMode {
+					if a.mode == "main" {
 						a.screen.Clear()
 						a.screen.Show()
 						a.currentPage = 0
@@ -446,7 +445,7 @@ func (a *App) run() error {
 						a.sources = filterSourcesForUnread(a.sources)
 					}
 				case 'R':
-					if !a.detailMode {
+					if a.mode == "main" {
 						a.screen.Clear()
 						a.screen.Show()
 						a.currentPage = 0
@@ -456,7 +455,7 @@ func (a *App) run() error {
 				case 's', 'S':
 					if len(a.sources) > 0 {
 						idx := a.selectedIdx
-						if a.detailMode {
+						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
 						a.saveToFile(a.sources[idx])
@@ -465,13 +464,13 @@ func (a *App) run() error {
 				case 'w', 'W':
 					if len(a.sources) > 0 {
 						idx := a.selectedIdx
-						if a.detailMode {
+						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
 						a.webSearch(a.sources[idx])
 					}
 				case 'f', 'F':
-					if !a.detailMode {
+					if a.mode == "main" {
 						// Add new filter
 						filter_input := a.getInput("Enter filter keyword: ")
 						if filter_input != "" {
@@ -511,28 +510,28 @@ func (a *App) run() error {
 						}
 					}
 				case 'i', 'I':
-					if !a.detailMode && len(a.sources) > 0 {
+					if a.mode == "main" && len(a.sources) > 0 {
 						a.showImportance[a.selectedIdx] = !a.showImportance[a.selectedIdx]
 					}
 				case 'c', 'C':
-					if !a.detailMode && len(a.sources) > 0 {
+					if a.mode == "main" && len(a.sources) > 0 {
 						a.markClusterCentralsAsProcessed(a.selectedIdx)
 					}
 				}
 			case tcell.KeyUp:
-				if !a.detailMode && a.selectedIdx > 0 {
+				if a.mode == "main" && a.selectedIdx > 0 {
 					a.selectedIdx--
 				}
 			case tcell.KeyDown:
-				if !a.detailMode && a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
+				if a.mode == "main" && a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
 					a.selectedIdx++
 				}
 			case tcell.KeyEnter:
-				if !a.detailMode && len(a.sources) > 0 {
-					a.detailMode = true
+				if a.mode == "main" && len(a.sources) > 0 {
+					a.mode = "detail" 
 					a.detailIdx = a.selectedIdx
-				} else if a.detailMode && len(a.sources) > 0 {
-					a.detailMode = false
+				} else if a.mode == "detail" && len(a.sources) > 0 {
+					a.mode = "main" 
 				}
 			}
 		case *tcell.EventResize:
