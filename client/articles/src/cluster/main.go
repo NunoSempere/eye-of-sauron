@@ -34,13 +34,21 @@ func main() {
 	clusters := GetClusters(embeddings)
 	for i, c := range clusters {
 		fmt.Printf("\nCluster #%d\n", i)
+		
+		// Display centroid info
+		if c.centroid != nil {
+			fmt.Printf("  Centroid: [%.4f, %.4f, %.4f, ...]\n", c.centroid[0], c.centroid[1], c.centroid[2])
+		}
+		
 		fmt.Printf("\n  Central points:\n")
 		for _, j := range c.points {
-			fmt.Printf("    %s\n",titles[j])
+			distance := calculateDistance(embeddings[j], c.centroid)
+			fmt.Printf("    %s (distance: %.4f)\n", titles[j], distance)
 		}
 		fmt.Printf("\n  Related outliers:\n")
 		for _, k := range c.outliers {
-			fmt.Printf("    %s\n",titles[k])
+			distance := calculateDistance(embeddings[k], c.centroid)
+			fmt.Printf("    %s (distance: %.4f)\n", titles[k], distance)
 		}
 	}
 

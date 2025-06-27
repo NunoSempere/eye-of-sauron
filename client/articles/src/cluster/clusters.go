@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+	"math"
 	"github.com/bringyour/cluster/hdbscan"
 )
 
@@ -20,6 +21,44 @@ func unique[A comparable](input []A) []A {
 type Cluster struct {
 	points []int
 	outliers []int
+	centroid []float64
+}
+
+func calculateCentroid(points []int, data [][]float64) []float64 {
+	if len(points) == 0 {
+		return nil
+	}
+	
+	dimensions := len(data[0])
+	centroid := make([]float64, dimensions)
+	
+	// Sum all coordinates
+	for _, pointIdx := range points {
+		for dim := 0; dim < dimensions; dim++ {
+			centroid[dim] += data[pointIdx][dim]
+		}
+	}
+	
+	// Calculate mean
+	for dim := 0; dim < dimensions; dim++ {
+		centroid[dim] /= float64(len(points))
+	}
+	
+	return centroid
+}
+
+func calculateDistance(point1, point2 []float64) float64 {
+	if len(point1) != len(point2) {
+		return 0
+	}
+	
+	sum := 0.0
+	for i := 0; i < len(point1); i++ {
+		diff := point1[i] - point2[i]
+		sum += diff * diff
+	}
+	
+	return math.Sqrt(sum)
 }
 
 func extractClusters(clusters hdbscan.Clustering) []Cluster {
@@ -91,6 +130,11 @@ func GetClusters(data [][]float64) []Cluster {
 	// fmt.Printf("\n%+v\n\n", *cs)
 	// printClusters(*cs, data)
 	result := extractClusters(*clustering)
+	
+	// Calculate centroids for each cluster
+	for i := range result {
+		result[i].centroid = calculateCentroid(result[i].points, data)
+	}
+	
 	return result
-
 }

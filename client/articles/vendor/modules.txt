@@ -4,6 +4,9 @@ github.com/adrg/strutil/internal/mathutil
 github.com/adrg/strutil/internal/ngram
 github.com/adrg/strutil/internal/stringutil
 github.com/adrg/strutil/metrics
+# github.com/bringyour/cluster v0.0.0-20241030112351-e27f802a09af
+## explicit; go 1.13
+github.com/bringyour/cluster/hdbscan
 # github.com/gdamore/encoding v1.0.0
 ## explicit; go 1.9
 github.com/gdamore/encoding
@@ -85,9 +88,16 @@ github.com/mattn/go-runewidth
 # github.com/rivo/uniseg v0.4.3
 ## explicit; go 1.18
 github.com/rivo/uniseg
+# github.com/sashabaranov/go-openai v1.40.3
+## explicit; go 1.18
+github.com/sashabaranov/go-openai
+github.com/sashabaranov/go-openai/internal
 # golang.org/x/crypto v0.20.0
 ## explicit; go 1.18
 golang.org/x/crypto/pbkdf2
+# golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2
+## explicit
+golang.org/x/exp/rand
 # golang.org/x/sys v0.17.0
 ## explicit; go 1.18
 golang.org/x/sys/plan9
@@ -113,3 +123,27 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 golang.org/x/text/width
+# gonum.org/v1/gonum v0.7.0
+## explicit; go 1.13
+gonum.org/v1/gonum/blas
+gonum.org/v1/gonum/blas/blas64
+gonum.org/v1/gonum/blas/cblas128
+gonum.org/v1/gonum/blas/gonum
+gonum.org/v1/gonum/floats
+gonum.org/v1/gonum/internal/asm/c128
+gonum.org/v1/gonum/internal/asm/c64
+gonum.org/v1/gonum/internal/asm/f32
+gonum.org/v1/gonum/internal/asm/f64
+gonum.org/v1/gonum/internal/cmplx64
+gonum.org/v1/gonum/internal/math32
+gonum.org/v1/gonum/lapack
+gonum.org/v1/gonum/lapack/gonum
+gonum.org/v1/gonum/lapack/lapack64
+gonum.org/v1/gonum/mat
+gonum.org/v1/gonum/mathext
+gonum.org/v1/gonum/mathext/internal/amos
+gonum.org/v1/gonum/mathext/internal/cephes
+gonum.org/v1/gonum/mathext/internal/gonum
+gonum.org/v1/gonum/stat
+gonum.org/v1/gonum/stat/combin
+gonum.org/v1/gonum/stat/distuv

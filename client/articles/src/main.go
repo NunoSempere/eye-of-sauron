@@ -53,7 +53,9 @@ func (a *App) loadSources() error {
 	On top of that, you can define an interface, as a type that implements
 	some method. <https://go.dev/tour/methods/10>
 	*/
-	fmt.Printf("Getting sources...")
+	// fmt.Printf("Getting sources...")
+	a.drawLines([]string{"Getting sources..."})
+	// drawText(a.screen, 0, 0, 0, tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite),"Getting sources...")
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
 	if err != nil {
@@ -96,7 +98,9 @@ func (a *App) loadSources() error {
 	}
 	a.sources = unsimilar_sources
 
-	fmt.Printf("\nClustering surces...")
+	// drawText(a.screen, 0, 2, 0, tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite),"Clustering sources")
+	// fmt.Printf("Clustering sources...")
+	a.drawLines([]string{"Getting sources...", "Clustering sources..."})
 	// Add clustering
 	err = a.clusterSources()
 	if err != nil {
@@ -311,6 +315,24 @@ func (a *App) getInput(prompt string) string {
 			a.screen.Show()
 		}
 	}
+}
+
+func (a *App) drawLines(lines []string) {
+	width, height := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+	summaryStyle := style.Foreground(tcell.Color248)
+	importanceStyle := style.Foreground(tcell.ColorYellow)
+
+	if a.detailMode {
+		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
+		return
+	}
+	lineIdx := 0
+	for _, line := range lines {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
+		lineIdx++
+	}
+	a.screen.Show()
 }
 
 func (a *App) run() error {

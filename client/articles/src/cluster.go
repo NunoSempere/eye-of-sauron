@@ -114,7 +114,8 @@ func (a *App) clusterSources() error {
 	}
 
 	// Get embeddings
-	fmt.Printf("\nGetting embeddings...")
+	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings..."})
+	// fmt.Printf("\nGetting embeddings...")
 	embeddings, err := getEmbeddings(titles, openaiKey)
 	if err != nil {
 		fmt.Printf("Error getting embeddings: %v\n", err)
@@ -122,7 +123,8 @@ func (a *App) clusterSources() error {
 	}
 
 	// Get clusters
-	fmt.Printf("\nCalculating clusters...")
+	// fmt.Printf("\nCalculating clusters...")
+	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings...", "Calculating clusters... [this may take a while]"})
 	clusters := getClusters(embeddings)
 
 	// Assign cluster information to sources
