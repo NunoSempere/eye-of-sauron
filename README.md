@@ -83,7 +83,7 @@ make
 
 You will see a ncurses based application, which looks as follows.
 
-![](./guides/imgs/client-clustered.png)
+![](./guides/imgs/client-clustering.png)
 
 Actions you can do from this screen are:
 
