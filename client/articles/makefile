@@ -12,7 +12,7 @@ deps:
 	go mod download
 	go mod vendor
 
-
+# RANDOM_CLUSTERS=true make
 ## SELECT COUNT(*) FROM your_table_name
 # WHERE created_at >= NOW() - INTERVAL '8 HOUR';
 

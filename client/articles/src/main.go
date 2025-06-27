@@ -571,7 +571,19 @@ func (a *App) run() error {
 					}
 				case 'c', 'C':
 					if a.mode == "main" && len(a.sources) > 0 {
-						a.markClusterCentralsAsProcessed(a.selectedIdx)
+						a.markClusterPartsAsProcessed(a.selectedIdx)
+
+						currentCluster := a.sources[a.selectedIdx].ClusterID
+						clusterType := a.sources[a.selectedIdx].IsClusterCentral
+						for {
+							a.selectedIdx++
+							if a.sources[a.selectedIdx].ClusterID == currentCluster && a.sources[a.selectedIdx].IsClusterCentral == clusterType {
+								a.selectedIdx++
+							} else {
+								break
+							}
+
+						}
 					}
 				case 'h', 'H':
 					if a.mode == "main" {
@@ -603,12 +615,17 @@ func (a *App) run() error {
 	}
 }
 
-func (a *App) markClusterCentralsAsProcessed(selectedIdx int) {
+func (a *App) markClusterPartsAsProcessed(selectedIdx int) {
 	if selectedIdx >= len(a.sources) {
 		return
 	}
 	
 	selectedSource := a.sources[selectedIdx]
+	partType := selectedSource.IsClusterCentral
+	partTypeName := "central"
+	if !partType {
+		partTypeName = "outlier"
+	}
 	if selectedSource.ClusterID < 0 {
 		return // Not in a cluster
 	}
@@ -618,18 +635,19 @@ func (a *App) markClusterCentralsAsProcessed(selectedIdx int) {
 	
 	// Mark all central members of this cluster as processed
 	for i := range a.sources {
-		if a.sources[i].ClusterID == clusterID && a.sources[i].IsClusterCentral {
+		if a.sources[i].ClusterID == clusterID && a.sources[i].IsClusterCentral == partType {
 			a.markProcessed(i, a.sources[i])
 			markedCount++
 		}
 	}
 	
 	if markedCount > 0 {
-		a.statusMessage = fmt.Sprintf("Marked %d central cluster members as processed", markedCount)
+		a.statusMessage = fmt.Sprintf("Marked %d %s cluster members as processed", partTypeName, markedCount)
 		// Clear status message after 2 seconds
 		go func() {
 			time.Sleep(2 * time.Second)
 			a.statusMessage = ""
+			a.screen.Sync()
 		}()
 	}
 }
