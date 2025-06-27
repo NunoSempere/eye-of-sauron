@@ -109,6 +109,11 @@ func (a *App) loadSources() error {
 		// Continue without clustering
 	}
 
+	// Initialize cluster styles after clustering is done
+	if len(a.clusters) > 0 {
+		a.clusterStyles = generateClusterStyles(len(a.clusters))
+	}
+
 	return nil
 }
 
@@ -193,23 +198,43 @@ func (a *App) draw() {
 			host = parsedURL.Host
 		}
 
-		title := fmt.Sprintf("[%s][%s%s] %s | %s | %s", processedMark, clusterMark, distanceInfo, source.Title, host, source.Date.Format("2006-01-02"))
-		lineIdx = drawText(a.screen, 0, lineIdx, width, currentStyle, title)
-
-		// If this is the selected item and we're in expanded mode, show the summary
-		if a.expandedItems[idx] && source.Summary != "" {
-			lineIdx++
-			if lineIdx < height {
-				lineIdx = drawText(a.screen, 2, lineIdx, width-2, summaryStyle, source.Summary)
+		// Build title with colored cluster section
+		titleParts := []string{}
+		titleStyles := []tcell.Style{}
+		
+		// Processed mark
+		titleParts = append(titleParts, fmt.Sprintf("[%s]", processedMark))
+		titleStyles = append(titleStyles, currentStyle)
+		
+		// Cluster mark with color
+		if source.ClusterID >= 0 && source.ClusterID < len(a.clusterStyles) {
+			clusterStyle := a.clusterStyles[source.ClusterID]
+			if idx == a.selectedIdx {
+				// Keep selected background but use cluster foreground color
+				_, bg, attrs := selectedStyle.Decompose()
+				fg, _, _ := clusterStyle.Decompose()
+				clusterStyle = tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attrs)
 			}
+			titleParts = append(titleParts, fmt.Sprintf("[%s%s]", clusterMark, distanceInfo))
+			titleStyles = append(titleStyles, clusterStyle)
+		} else {
+			titleParts = append(titleParts, fmt.Sprintf("[%s%s]", clusterMark, distanceInfo))
+			titleStyles = append(titleStyles, currentStyle)
 		}
-
-		// Add importance reasoning display
-		if a.showImportance[idx] && source.ImportanceReasoning != "" {
-			lineIdx++
-			if lineIdx < height {
-				lineIdx = drawText(a.screen, 2, lineIdx, width-2, importanceStyle, "Importance: "+source.ImportanceReasoning)
+		
+		// Rest of title
+		titleParts = append(titleParts, fmt.Sprintf(" %s | %s | %s", source.Title, host, source.Date.Format("2006-01-02")))
+		titleStyles = append(titleStyles, currentStyle)
+		
+		// Draw title parts with different styles
+		currentX := 0
+		for i, part := range titleParts {
+			for j, r := range part {
+				if currentX+j < width {
+					a.screen.SetContent(currentX+j, lineIdx, r, nil, titleStyles[i])
+				}
 			}
+			currentX += len(part)
 		}
 		lineIdx++
 	}
@@ -599,6 +624,42 @@ func (a *App) markClusterCentralsAsProcessed(selectedIdx int) {
 			a.statusMessage = ""
 		}()
 	}
+}
+
+func generateClusterStyles(numClusters int) []tcell.Style {
+	if numClusters == 0 {
+		return []tcell.Style{}
+	}
+	
+	styles := make([]tcell.Style, numClusters)
+	
+	// Predefined colors that work well in terminals
+	colors := []tcell.Color{
+		tcell.ColorRed,
+		tcell.ColorGreen, 
+		tcell.ColorBlue,
+		tcell.ColorYellow,
+		tcell.ColorMagenta,
+		tcell.ColorCyan,
+		tcell.ColorOrange,
+		tcell.ColorPurple,
+		tcell.ColorLime,
+		tcell.ColorPink,
+		tcell.ColorTeal,
+		tcell.ColorSilver,
+		tcell.ColorGold,
+		tcell.ColorCoral,
+		tcell.ColorSkyblue,
+		tcell.ColorViolet,
+	}
+	
+	for i := 0; i < numClusters; i++ {
+		// Cycle through predefined colors
+		colorIndex := i % len(colors)
+		styles[i] = tcell.StyleDefault.Foreground(colors[colorIndex])
+	}
+	
+	return styles
 }
 
 func drawText(screen tcell.Screen, x, y, maxWidth int, style tcell.Style, text string) int {

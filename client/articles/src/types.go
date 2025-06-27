@@ -40,6 +40,7 @@ type App struct {
 	detailIdx      int   // Index of item being viewed in detail
 	embeddings     [][]float64 // Store embeddings for distance calculations
 	clusters       []Cluster   // Store clusters with centroids
+	clusterStyles  []tcell.Style // Store cluster-specific colors
 }
 
 type Topic struct {
