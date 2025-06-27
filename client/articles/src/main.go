@@ -36,7 +36,7 @@ func newApp() (*App, error) {
 		showImportance: make(map[int]bool),
 		currentPage:    0,
 		itemsPerPage:   17, // 17,
-		mode:     "main",
+		mode:           "main",
 		detailIdx:      -1,
 	}, nil
 }
@@ -120,15 +120,15 @@ func (a *App) draw() {
 	summaryStyle := style.Foreground(tcell.Color248)
 	importanceStyle := style.Foreground(tcell.ColorYellow)
 
-	if a.mode == "detail "{
+	if a.mode == "detail" {
 		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
 		return
 	} 
 
-	if a.mode == "help"{
-		// TODO
+	if a.mode == "help" {
+		a.drawHelpView()
 		return
-	} 
+	}
 
 	startIdx := a.currentPage * a.itemsPerPage
 	endIdx := startIdx + a.itemsPerPage
@@ -218,16 +218,14 @@ func (a *App) draw() {
 	current_item := a.selectedIdx
 	num_items := len(a.sources)
 	num_pages := int(math.Ceil(float64(num_items) / float64(a.itemsPerPage)))
-	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
-	helpText2 := "O: Open in Browser | M: Toggle mark | S: Save | C: Mark cluster centrals | Q: Quit | [C#/O#]: Cluster Central/Outlier"
+	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | H: Help", current_item+1, num_items, a.currentPage+1, num_pages)
 	if a.statusMessage != "" {
-		helpText2 = fmt.Sprintf("%s | %s", helpText2, a.statusMessage)
+		helpText =  a.statusMessage
 	} else if a.failureMark {
-		helpText2 = helpText2 + " [database F]"
+		helpText = "[database F]"
 	}
 	if height > 0 {
-		drawText(a.screen, 0, height-2, width, style, helpText)
-		drawText(a.screen, 0, height-1, width, style, helpText2)
+		drawText(a.screen, 0, height-1, width, style, helpText)
 	}
 
 	a.screen.Show()
@@ -331,6 +329,31 @@ func (a *App) getInput(prompt string) string {
 			a.screen.Show()
 		}
 	}
+}
+
+func (a *App) drawHelpView() {
+	width, _ := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+
+	lines := []string{
+		"^/v: Navigate",
+		"<>: Change Page",
+		"Enter: View Details",
+		"I: Show Importance",
+		"O: Open in Browser",
+		"M: Toggle mark",
+		"S: Save",
+		"C: Mark cluster centrals as processed", 
+		"Q: Quit",
+		"[C#/O#]: Cluster Central/Outlier",
+
+	}
+	lineIdx := 0
+	for _, line := range lines {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
+		lineIdx++
+	}
+	a.screen.Show()
 }
 
 func (a *App) drawLines(lines []string) {
@@ -517,6 +540,10 @@ func (a *App) run() error {
 					if a.mode == "main" && len(a.sources) > 0 {
 						a.markClusterCentralsAsProcessed(a.selectedIdx)
 					}
+				case 'h', 'H':
+					if a.mode == "main" {
+						a.mode = "help"
+					}
 				}
 			case tcell.KeyUp:
 				if a.mode == "main" && a.selectedIdx > 0 {
@@ -530,8 +557,11 @@ func (a *App) run() error {
 				if a.mode == "main" && len(a.sources) > 0 {
 					a.mode = "detail" 
 					a.detailIdx = a.selectedIdx
+					a.draw()
 				} else if a.mode == "detail" && len(a.sources) > 0 {
 					a.mode = "main" 
+				} else if a.mode == "help" {
+					a.mode = "main"
 				}
 			}
 		case *tcell.EventResize:
