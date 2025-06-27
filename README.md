@@ -85,7 +85,9 @@ You will see a ncurses based application, which looks as follows.
 
 ![](./guides/imgs/client-clustering.png)
 
-Actions you can do from this screen are:
+![](./guides/imgs/summary.png)
+
+Actions you can do from the main screen are:
 
 - navigate between items and pages with the arrow keys
 - mark/unmark an item as processed with x
@@ -94,6 +96,10 @@ Actions you can do from this screen are:
 - open in browser. This might require to customize the logic for your OS+browser combination
 - save to a file. You can configure which folder in the .env file.
 - expand the items with enter to also show their summary
+- mark items in a cluster all as processed
+- etc.
+
+
 
 Similarly, for the wip twitter client:
 
