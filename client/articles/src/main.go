@@ -185,7 +185,7 @@ func (a *App) draw() {
 				cluster := a.clusters[source.ClusterID]
 				if cluster.Centroid != nil {
 					distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
-					distanceInfo = fmt.Sprintf(" (d:%.3f)", distance)
+					distanceInfo = fmt.Sprintf(" %.3f", distance)
 				}
 			}
 		}
@@ -203,8 +203,8 @@ func (a *App) draw() {
 		titleStyles := []tcell.Style{}
 		
 		// Processed mark
-		titleParts = append(titleParts, fmt.Sprintf("[%s]", processedMark))
-		titleStyles = append(titleStyles, currentStyle)
+		// titleParts = append(titleParts, fmt.Sprintf("[%s]", processedMark))
+		// titleStyles = append(titleStyles, currentStyle)
 		
 		// Cluster mark with color
 		if source.ClusterID >= 0 && source.ClusterID < len(a.clusterStyles) {
@@ -215,7 +215,7 @@ func (a *App) draw() {
 				fg, _, _ := clusterStyle.Decompose()
 				clusterStyle = tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attrs)
 			}
-			titleParts = append(titleParts, fmt.Sprintf("[%s%s]", clusterMark, distanceInfo))
+			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s]", processedMark, clusterMark, distanceInfo))
 			titleStyles = append(titleStyles, clusterStyle)
 		} else {
 			titleParts = append(titleParts, fmt.Sprintf("[%s%s]", clusterMark, distanceInfo))
@@ -226,15 +226,23 @@ func (a *App) draw() {
 		titleParts = append(titleParts, fmt.Sprintf(" %s | %s | %s", source.Title, host, source.Date.Format("2006-01-02")))
 		titleStyles = append(titleStyles, currentStyle)
 		
-		// Draw title parts with different styles
-		currentX := 0
-		for i, part := range titleParts {
-			for j, r := range part {
-				if currentX+j < width {
-					a.screen.SetContent(currentX+j, lineIdx, r, nil, titleStyles[i])
-				}
+		// Draw title with overflow handling
+		lineIdx = drawTitleWithOverflow(a.screen, 0, lineIdx, width, titleParts, titleStyles)
+
+		// If this is the selected item and we're in expanded mode, show the summary
+		if a.expandedItems[idx] && source.Summary != "" {
+			lineIdx++
+			if lineIdx < height {
+				lineIdx = drawText(a.screen, 2, lineIdx, width-2, summaryStyle, source.Summary)
 			}
-			currentX += len(part)
+		}
+
+		// Add importance reasoning display
+		if a.showImportance[idx] && source.ImportanceReasoning != "" {
+			lineIdx++
+			if lineIdx < height {
+				lineIdx = drawText(a.screen, 2, lineIdx, width-2, importanceStyle, "Importance: "+source.ImportanceReasoning)
+			}
 		}
 		lineIdx++
 	}
@@ -660,6 +668,86 @@ func generateClusterStyles(numClusters int) []tcell.Style {
 	}
 	
 	return styles
+}
+
+func drawTitleWithOverflow(screen tcell.Screen, x, y, maxWidth int, titleParts []string, titleStyles []tcell.Style) int {
+	if len(titleParts) == 0 {
+		return y
+	}
+	
+	// First, draw the fixed parts (processed mark and cluster mark) on the first line
+	currentX := x
+	currentY := y
+	fixedPartsCount := 1 // processed mark and cluster mark
+	
+	// Draw fixed parts that should always be on the first line
+	for i := 0; i < fixedPartsCount && i < len(titleParts); i++ {
+		part := titleParts[i]
+		style := titleStyles[i]
+		
+		for j, r := range part {
+			if currentX+j < maxWidth {
+				screen.SetContent(currentX+j, currentY, r, nil, style)
+			}
+		}
+		currentX += len(part)
+	}
+	
+	// Handle the remaining parts (title, host, date) with word wrapping
+	if len(titleParts) > fixedPartsCount {
+		remainingText := titleParts[fixedPartsCount]
+		remainingStyle := titleStyles[fixedPartsCount]
+		
+		// Calculate remaining width on first line
+		remainingWidth := maxWidth - currentX
+		
+		// Split the remaining text into words
+		words := strings.Fields(remainingText)
+		if len(words) == 0 {
+			return currentY
+		}
+		
+		currentLine := ""
+		
+		for _, word := range words {
+			// Check if adding this word would exceed the line width
+			testLine := currentLine
+			if testLine != "" {
+				testLine += " "
+			}
+			testLine += word
+			
+			if len(testLine) <= remainingWidth {
+				// Word fits on current line
+				currentLine = testLine
+			} else {
+				// Word doesn't fit, draw current line and start new one
+				if currentLine != "" {
+					// Draw current line
+					for i, r := range currentLine {
+						if currentX+i < maxWidth {
+							screen.SetContent(currentX+i, currentY, r, nil, remainingStyle)
+						}
+					}
+					currentY++
+					currentX = x + 2 // Indent continuation lines
+					remainingWidth = maxWidth - currentX
+				}
+				currentLine = word
+			}
+		}
+		
+		// Draw final line
+		if currentLine != "" {
+			for i, r := range currentLine {
+				if currentX+i < maxWidth {
+					screen.SetContent(currentX+i, currentY, r, nil, remainingStyle)
+				}
+			}
+		}
+	}
+	
+	return currentY
 }
 
 func drawText(screen tcell.Screen, x, y, maxWidth int, style tcell.Style, text string) int {
