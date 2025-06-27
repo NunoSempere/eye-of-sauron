@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"time"
 
 	"html"
 	"strings"
@@ -213,7 +214,7 @@ func (a *App) draw() {
 	num_items := len(a.sources)
 	num_pages := int(math.Ceil(float64(num_items) / float64(a.itemsPerPage)))
 	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
-	helpText2 := "O: Open in Browser | M: Toggle mark | S: Save | Q: Quit | [C#/O#]: Cluster Central/Outlier"
+	helpText2 := "O: Open in Browser | M: Toggle mark | S: Save | C: Mark cluster centrals | Q: Quit | [C#/O#]: Cluster Central/Outlier"
 	if a.statusMessage != "" {
 		helpText2 = fmt.Sprintf("%s | %s", helpText2, a.statusMessage)
 	} else if a.failureMark {
@@ -513,6 +514,10 @@ func (a *App) run() error {
 					if !a.detailMode && len(a.sources) > 0 {
 						a.showImportance[a.selectedIdx] = !a.showImportance[a.selectedIdx]
 					}
+				case 'c', 'C':
+					if !a.detailMode && len(a.sources) > 0 {
+						a.markClusterCentralsAsProcessed(a.selectedIdx)
+					}
 				}
 			case tcell.KeyUp:
 				if !a.detailMode && a.selectedIdx > 0 {
@@ -533,6 +538,37 @@ func (a *App) run() error {
 		case *tcell.EventResize:
 			a.screen.Sync()
 		}
+	}
+}
+
+func (a *App) markClusterCentralsAsProcessed(selectedIdx int) {
+	if selectedIdx >= len(a.sources) {
+		return
+	}
+	
+	selectedSource := a.sources[selectedIdx]
+	if selectedSource.ClusterID < 0 {
+		return // Not in a cluster
+	}
+	
+	clusterID := selectedSource.ClusterID
+	markedCount := 0
+	
+	// Mark all central members of this cluster as processed
+	for i := range a.sources {
+		if a.sources[i].ClusterID == clusterID && a.sources[i].IsClusterCentral {
+			a.markProcessed(i, a.sources[i])
+			markedCount++
+		}
+	}
+	
+	if markedCount > 0 {
+		a.statusMessage = fmt.Sprintf("Marked %d central cluster members as processed", markedCount)
+		// Clear status message after 2 seconds
+		go func() {
+			time.Sleep(2 * time.Second)
+			a.statusMessage = ""
+		}()
 	}
 }
 
