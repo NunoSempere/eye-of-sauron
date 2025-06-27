@@ -65,8 +65,10 @@
 Improve ops:
 
 - [ ] Automatically deal with logs getting large, including syslogs
-- [ ] Even better deduplication
-  - [ ] Move client dedup & filtering to server
+- [x] Even better deduplication
+  - [ ] ~~Move client dedup & filtering to server~~
+  - [x] Clustering!
+    - [ ] Play around with what embedding distances are pretty indicative of items being the same.
 - [ ] Delete processed items regularly (psql $DATABASE_URL; DELETE from sources WHERE processed = TRUE;)
    - Middle east, Spain, US, UK, Ukraine, etc. maybe start with no keyword first.
    - [ ] Added fast way to do this to makefile
