@@ -16,7 +16,7 @@ The main sources we are parsing are:
 
 We are also parsing: HN, CNN, Weapons sales announcements, the whitehouse presidential actions feed, and have a long list of other sources we want to incorporate in guides/ROADMAP.md.
 
-News are first parsed on a server, filtered using LLMs, and then manually filtered with the UI defined in the client folder. The results are then discussed by forecasters and aggregated into Sentinel's [Global Risks Weekly Roundup](https://blog.sentinel-team.org/).
+News are first parsed on a server, filtered using LLMs, clustered, and then manually filtered with the UI defined in the client folder. The results are then discussed by forecasters and aggregated into Sentinel's [Global Risks Weekly Roundup](https://blog.sentinel-team.org/).
 
 ![](./guides/imgs/architecture.png)
 
@@ -27,6 +27,8 @@ News are first parsed on a server, filtered using LLMs, and then manually filter
 - Ncurses
 - Postgres
 - OpenAI
+  - LLMs
+  - Embeddings
 - Systemd 
 
 ## Getting started
@@ -81,7 +83,7 @@ make
 
 You will see a ncurses based application, which looks as follows.
 
-![](./guides/imgs/client.png)
+![](./guides/imgs/client-clustered.png)
 
 Actions you can do from this screen are:
 
