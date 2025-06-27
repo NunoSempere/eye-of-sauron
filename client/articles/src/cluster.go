@@ -112,7 +112,7 @@ func calculateDistance(point1, point2 []float64) float64 {
 }
 
 func getClusters(data [][]float64) []Cluster {
-	minimumClusterSize := 2
+	minimumClusterSize := 3 // 
 	minimumSpanningTree := false
 
 	// create

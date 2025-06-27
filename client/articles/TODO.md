@@ -3,3 +3,4 @@
 - Only show the cluster if it's more than 4 items. In that case, highlight it with a color, even when it's selected.
 - Add shortcut to mark whole cluster (but not outliers) as done.
 - Sort clusters by topic as well?
+- Look into better algorithms? 
