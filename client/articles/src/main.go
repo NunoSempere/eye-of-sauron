@@ -185,7 +185,7 @@ func (a *App) draw() {
 				cluster := a.clusters[source.ClusterID]
 				if cluster.Centroid != nil {
 					distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
-					distanceInfo = fmt.Sprintf(" %.3f", distance)
+					distanceInfo = fmt.Sprintf("-%.3f", distance)
 				}
 			}
 		}
@@ -215,10 +215,10 @@ func (a *App) draw() {
 				fg, _, _ := clusterStyle.Decompose()
 				clusterStyle = tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attrs)
 			}
-			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s] ", processedMark, clusterMark, distanceInfo))
+			titleParts = append(titleParts, fmt.Sprintf("[%s] %s%s ", processedMark, clusterMark, distanceInfo))
 			titleStyles = append(titleStyles, clusterStyle)
 		} else {
-			titleParts = append(titleParts, fmt.Sprintf("[%s %s%s] ", processedMark, clusterMark, distanceInfo))
+			titleParts = append(titleParts, fmt.Sprintf("[%s] %s%s ", processedMark, clusterMark, distanceInfo))
 			titleStyles = append(titleStyles, currentStyle)
 		}
 		

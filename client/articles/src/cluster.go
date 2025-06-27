@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bringyour/cluster/hdbscan"
 	openai "github.com/sashabaranov/go-openai"
@@ -142,9 +144,97 @@ func cleanTitleForEmbedding(title string) string {
 	return clean
 }
 
+// assignRandomClusters creates fake clusters and distances for testing
+func assignRandomClusters(sources []Source) ([]Cluster, [][]float64) {
+	rand.Seed(time.Now().UnixNano())
+	
+	numSources := len(sources)
+	if numSources == 0 {
+		return []Cluster{}, [][]float64{}
+	}
+	
+	// Create 3-5 random clusters
+	numClusters := 3 + rand.Intn(3)
+	clusters := make([]Cluster, numClusters)
+	
+	// Initialize clusters
+	for i := 0; i < numClusters; i++ {
+		clusters[i] = Cluster{
+			ID:       i,
+			Points:   []int{},
+			Outliers: []int{},
+			Centroid: make([]float64, 512), // Fake embedding dimension
+		}
+		
+		// Random centroid
+		for j := 0; j < 512; j++ {
+			clusters[i].Centroid[j] = rand.Float64()*2 - 1 // Random values between -1 and 1
+		}
+	}
+	
+	// Assign sources to clusters randomly
+	for i := 0; i < numSources; i++ {
+		clusterID := rand.Intn(numClusters)
+		
+		// 70% chance of being central, 30% chance of being outlier
+		if rand.Float64() < 0.7 {
+			clusters[clusterID].Points = append(clusters[clusterID].Points, i)
+		} else {
+			clusters[clusterID].Outliers = append(clusters[clusterID].Outliers, i)
+		}
+	}
+	
+	// Create fake embeddings (needed for distance calculations)
+	embeddings := make([][]float64, numSources)
+	for i := 0; i < numSources; i++ {
+		embeddings[i] = make([]float64, 512)
+		for j := 0; j < 512; j++ {
+			embeddings[i][j] = rand.Float64()*2 - 1
+		}
+	}
+	
+	return clusters, embeddings
+}
+
 func (a *App) clusterSources() error {
 	if len(a.sources) < 2 {
 		return nil // Not enough sources to cluster
+	}
+
+	// Check for random clustering flag
+	if os.Getenv("RANDOM_CLUSTERS") == "true" {
+		fmt.Println("Using random clustering for testing")
+		clusters, embeddings := assignRandomClusters(a.sources)
+		
+		a.embeddings = embeddings
+		a.clusters = clusters
+		
+		// Assign cluster information to sources
+		for i := range a.sources {
+			a.sources[i].ClusterID = -1 // Default: no cluster
+			a.sources[i].IsClusterCentral = false
+		}
+
+		for _, cluster := range clusters {
+			// Mark central points
+			for _, pointIdx := range cluster.Points {
+				if pointIdx < len(a.sources) {
+					a.sources[pointIdx].ClusterID = cluster.ID
+					a.sources[pointIdx].IsClusterCentral = true
+				}
+			}
+			// Mark outliers
+			for _, outlierIdx := range cluster.Outliers {
+				if outlierIdx < len(a.sources) {
+					a.sources[outlierIdx].ClusterID = cluster.ID
+					a.sources[outlierIdx].IsClusterCentral = false
+				}
+			}
+		}
+
+		// Sort sources by cluster
+		a.sortSourcesByCluster()
+		return nil
 	}
 
 	openaiKey := os.Getenv("OPENAI_KEY")
