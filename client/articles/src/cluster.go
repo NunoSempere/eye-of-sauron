@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 
@@ -71,6 +72,45 @@ func extractClusters(clusters hdbscan.Clustering) []Cluster {
 	return cs
 }
 
+// calculateCentroid computes the arithmetic mean of all points in a cluster
+func calculateCentroid(points []int, data [][]float64) []float64 {
+	if len(points) == 0 {
+		return nil
+	}
+	
+	dimensions := len(data[0])
+	centroid := make([]float64, dimensions)
+	
+	// Sum all coordinates
+	for _, pointIdx := range points {
+		for dim := 0; dim < dimensions; dim++ {
+			centroid[dim] += data[pointIdx][dim]
+		}
+	}
+	
+	// Calculate mean
+	for dim := 0; dim < dimensions; dim++ {
+		centroid[dim] /= float64(len(points))
+	}
+	
+	return centroid
+}
+
+// calculateDistance computes Euclidean distance between two points
+func calculateDistance(point1, point2 []float64) float64 {
+	if len(point1) != len(point2) {
+		return 0
+	}
+	
+	sum := 0.0
+	for i := 0; i < len(point1); i++ {
+		diff := point1[i] - point2[i]
+		sum += diff * diff
+	}
+	
+	return math.Sqrt(sum)
+}
+
 func getClusters(data [][]float64) []Cluster {
 	minimumClusterSize := 2
 	minimumSpanningTree := false
@@ -86,6 +126,12 @@ func getClusters(data [][]float64) []Cluster {
 	clustering.Run(hdbscan.EuclideanDistance, hdbscan.VarianceScore, minimumSpanningTree)
 
 	result := extractClusters(*clustering)
+	
+	// Calculate centroids for each cluster
+	for i := range result {
+		result[i].Centroid = calculateCentroid(result[i].Points, data)
+	}
+	
 	return result
 }
 
@@ -108,24 +154,28 @@ func (a *App) clusterSources() error {
 	}
 
 	// Extract titles for embedding
-	titles := make([]string, len(a.sources))
+	texts := make([]string, len(a.sources))
 	for i, source := range a.sources {
-		titles[i] = cleanTitleForEmbedding(source.Title)
+		texts[i] = cleanTitleForEmbedding(source.Title) + "\n" + source.Summary
 	}
 
 	// Get embeddings
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings..."})
-	// fmt.Printf("\nGetting embeddings...")
-	embeddings, err := getEmbeddings(titles, openaiKey)
+	embeddings, err := getEmbeddings(texts, openaiKey)
 	if err != nil {
 		fmt.Printf("Error getting embeddings: %v\n", err)
 		return err
 	}
 
+	// Store embeddings in App for distance calculations
+	a.embeddings = embeddings
+
 	// Get clusters
-	// fmt.Printf("\nCalculating clusters...")
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings...", "Calculating clusters... [this may take a while]"})
 	clusters := getClusters(embeddings)
+
+	// Store clusters in App
+	a.clusters = clusters
 
 	// Assign cluster information to sources
 	for i := range a.sources {

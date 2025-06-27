@@ -161,11 +161,21 @@ func (a *App) draw() {
 		}
 		
 		clusterMark := " "
+		distanceInfo := ""
 		if source.ClusterID >= 0 {
 			if source.IsClusterCentral {
 				clusterMark = fmt.Sprintf("C%d", source.ClusterID)
 			} else {
 				clusterMark = fmt.Sprintf("O%d", source.ClusterID)
+			}
+			
+			// Calculate and display distance to centroid
+			if len(a.embeddings) > idx && len(a.clusters) > source.ClusterID && source.ClusterID >= 0 {
+				cluster := a.clusters[source.ClusterID]
+				if cluster.Centroid != nil {
+					distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
+					distanceInfo = fmt.Sprintf(" (d:%.3f)", distance)
+				}
 			}
 		}
 		
@@ -177,7 +187,7 @@ func (a *App) draw() {
 			host = parsedURL.Host
 		}
 
-		title := fmt.Sprintf("[%s][%s] %s | %s | %s", processedMark, clusterMark, source.Title, host, source.Date.Format("2006-01-02"))
+		title := fmt.Sprintf("[%s][%s%s] %s | %s | %s", processedMark, clusterMark, distanceInfo, source.Title, host, source.Date.Format("2006-01-02"))
 		lineIdx = drawText(a.screen, 0, lineIdx, width, currentStyle, title)
 
 		// If this is the selected item and we're in expanded mode, show the summary

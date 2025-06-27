@@ -38,6 +38,8 @@ type App struct {
 	statusMessage  string
 	detailMode     bool  // New field to track if we're in detail view
 	detailIdx      int   // Index of item being viewed in detail
+	embeddings     [][]float64 // Store embeddings for distance calculations
+	clusters       []Cluster   // Store clusters with centroids
 }
 
 type Topic struct {
@@ -49,4 +51,5 @@ type Cluster struct {
 	ID       int
 	Points   []int // indices of central points
 	Outliers []int // indices of outliers
+	Centroid []float64 // centroid of the cluster
 }
