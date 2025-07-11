@@ -61,6 +61,7 @@
   - [ ] Jihadi Watch
   - [ ] <https://research.checkpoint.com/2024/4th-november-threat-intelligence-report/>
   - [ ] Various press releases, e.g., from US military <https://www.globalsecurity.org/military/library/news/2024/11/mil-241112-dod01.htm>
+- [ ] Create a cluster cache so that rapid iteration is faster.
 
 Improve ops:
 

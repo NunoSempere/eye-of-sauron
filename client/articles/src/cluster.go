@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+	"github.com/tiktoken-go/tokenizer"
 
-	"github.com/bringyour/cluster/hdbscan"
+	"github.com/NunoSempere/hdbscan/hdbscan"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -37,6 +38,52 @@ func getEmbeddings(texts []string, token string) ([][]float64, error) {
 		}
 		es = append(es, f64s)
 	}
+
+	return es, nil
+}
+
+func getEmbeddingsStaggered(texts []string, token string) ([][]float64, error) {
+	//  max 300000 tokens per request
+
+	enc, err := tokenizer.Get(tokenizer.Cl100kBase)
+	if err != nil {
+    log.Printf("Error getting the tokenizer")
+    log.Printf("%v", err)
+  }
+
+	es := [][]float64{}
+	n := 0
+	last_not_in_batch := 0
+	for i, text := range texts {
+		m, err := enc.Count(text)
+		if err != nil {
+			log.Printf("Error counting tokens: %v", err)
+				return [][]float64{}, err
+		}
+		if n < 200000 && (n+m > 200000) {
+			es_batch, err := getEmbeddings(texts[:i], token)
+			if err != nil {
+				log.Printf("Error getting embeddings: %v", err)
+				return [][]float64{}, err
+			}
+			es = append(es, es_batch...)
+			last_not_in_batch = i
+			n = 0
+		} else {
+			n = n + m
+		}
+	}
+
+	// Append last batch
+	es_batch, err := getEmbeddings(texts[last_not_in_batch:len(texts)], token)
+	if err != nil {
+		log.Printf("Error getting embeddings: %v", err)
+		return [][]float64{}, err
+	}
+	es = append(es, es_batch...)
+	
+
+
 
 	return es, nil
 }
@@ -120,7 +167,7 @@ func getClusters(data [][]float64) []Cluster {
 	// create
 	clustering, err := hdbscan.NewClustering(data, minimumClusterSize)
 	if err != nil {
-		fmt.Printf("Error creating clustering: %v\n", err)
+		log.Printf("Error creating clustering: %v\n", err)
 		return []Cluster{}
 	}
 
@@ -203,7 +250,7 @@ func (a *App) clusterSources() error {
 
 	// Check for random clustering flag
 	if os.Getenv("RANDOM_CLUSTERS") == "true" {
-		fmt.Println("Using random clustering for testing")
+		log.Println("Using random clustering for testing")
 		clusters, embeddings := assignRandomClusters(a.sources)
 		
 		a.embeddings = embeddings
@@ -239,7 +286,7 @@ func (a *App) clusterSources() error {
 
 	openaiKey := os.Getenv("OPENAI_KEY")
 	if openaiKey == "" {
-		fmt.Println("OPENAI_KEY not found, skipping clustering")
+		log.Println("OPENAI_KEY not found, skipping clustering")
 		return nil
 	}
 
@@ -251,9 +298,9 @@ func (a *App) clusterSources() error {
 
 	// Get embeddings
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings..."})
-	embeddings, err := getEmbeddings(texts, openaiKey)
+	embeddings, err := getEmbeddingsStaggered(texts, openaiKey)
 	if err != nil {
-		fmt.Printf("Error getting embeddings: %v\n", err)
+		log.Printf("Error getting embeddings: %v\n", err)
 		return err
 	}
 
