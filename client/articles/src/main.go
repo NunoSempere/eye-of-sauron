@@ -582,7 +582,7 @@ func (a *App) run() error {
 								a.selectedIdx++
 							}
 
-							if ((a.selectedIdx+1) >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) {
+							if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) {
 								a.currentPage++
 							}
 
