@@ -578,13 +578,15 @@ func (a *App) run() error {
 						for {
 							if a.sources[a.selectedIdx].ClusterID != currentCluster || a.sources[a.selectedIdx].IsClusterCentral != clusterType {
 								break
-							} else {
+							} else if a.selectedIdx < len(a.sources)-1 {
 								a.selectedIdx++
+								if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) {
+									a.currentPage++
+								}
+							} else {
+								break
 							}
 
-							if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) {
-								a.currentPage++
-							}
 
 						}
 					}
