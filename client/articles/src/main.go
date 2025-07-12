@@ -576,18 +576,16 @@ func (a *App) run() error {
 						currentCluster := a.sources[a.selectedIdx].ClusterID
 						clusterType := a.sources[a.selectedIdx].IsClusterCentral
 						for {
-							if a.sources[a.selectedIdx].ClusterID != currentCluster || a.sources[a.selectedIdx].IsClusterCentral != clusterType {
+							if a.sources[a.selectedIdx].ClusterID != currentCluster || a.sources[a.selectedIdx].IsClusterCentral != clusterType { // we're on a different cluster => stop
 								break
-							} else if a.selectedIdx < len(a.sources)-1 {
+							} else if a.selectedIdx < len(a.sources)-1 { // we are in the same cluster & haven't reached the end => continue
 								a.selectedIdx++
-								if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) {
+								if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) { // we are on a different page => increase page
 									a.currentPage++
 								}
-							} else {
+							} else { // we're in the same cluster, but have reached the end. => stop
 								break
 							}
-
-
 						}
 					}
 				case 'h', 'H':
