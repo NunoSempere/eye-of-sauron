@@ -6,7 +6,7 @@ from typing import Dict, Tuple, Any, Optional
 
 # TODO: These would need to be Python equivalents of the Go libraries
 # For now, we'll define placeholder functions that match the expected interface
-from lib_stubs import filters, llm, readability
+from lib import filters, llm, readability
 
 
 logger = logging.getLogger(__name__)
