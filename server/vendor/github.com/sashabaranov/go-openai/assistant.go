@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -10,20 +11,23 @@ import (
 const (
 	assistantsSuffix      = "/assistants"
 	assistantsFilesSuffix = "/files"
-	openaiAssistantsV1    = "assistants=v1"
 )
 
 type Assistant struct {
-	ID           string          `json:"id"`
-	Object       string          `json:"object"`
-	CreatedAt    int64           `json:"created_at"`
-	Name         *string         `json:"name,omitempty"`
-	Description  *string         `json:"description,omitempty"`
-	Model        string          `json:"model"`
-	Instructions *string         `json:"instructions,omitempty"`
-	Tools        []AssistantTool `json:"tools,omitempty"`
-	FileIDs      []string        `json:"file_ids,omitempty"`
-	Metadata     map[string]any  `json:"metadata,omitempty"`
+	ID             string                 `json:"id"`
+	Object         string                 `json:"object"`
+	CreatedAt      int64                  `json:"created_at"`
+	Name           *string                `json:"name,omitempty"`
+	Description    *string                `json:"description,omitempty"`
+	Model          string                 `json:"model"`
+	Instructions   *string                `json:"instructions,omitempty"`
+	Tools          []AssistantTool        `json:"tools"`
+	ToolResources  *AssistantToolResource `json:"tool_resources,omitempty"`
+	FileIDs        []string               `json:"file_ids,omitempty"` // Deprecated in v2
+	Metadata       map[string]any         `json:"metadata,omitempty"`
+	Temperature    *float32               `json:"temperature,omitempty"`
+	TopP           *float32               `json:"top_p,omitempty"`
+	ResponseFormat any                    `json:"response_format,omitempty"`
 
 	httpHeader
 }
@@ -34,6 +38,7 @@ const (
 	AssistantToolTypeCodeInterpreter AssistantToolType = "code_interpreter"
 	AssistantToolTypeRetrieval       AssistantToolType = "retrieval"
 	AssistantToolTypeFunction        AssistantToolType = "function"
+	AssistantToolTypeFileSearch      AssistantToolType = "file_search"
 )
 
 type AssistantTool struct {
@@ -41,14 +46,56 @@ type AssistantTool struct {
 	Function *FunctionDefinition `json:"function,omitempty"`
 }
 
+type AssistantToolFileSearch struct {
+	VectorStoreIDs []string `json:"vector_store_ids"`
+}
+
+type AssistantToolCodeInterpreter struct {
+	FileIDs []string `json:"file_ids"`
+}
+
+type AssistantToolResource struct {
+	FileSearch      *AssistantToolFileSearch      `json:"file_search,omitempty"`
+	CodeInterpreter *AssistantToolCodeInterpreter `json:"code_interpreter,omitempty"`
+}
+
+// AssistantRequest provides the assistant request parameters.
+// When modifying the tools the API functions as the following:
+// If Tools is undefined, no changes are made to the Assistant's tools.
+// If Tools is empty slice it will effectively delete all of the Assistant's tools.
+// If Tools is populated, it will replace all of the existing Assistant's tools with the provided tools.
 type AssistantRequest struct {
-	Model        string          `json:"model"`
-	Name         *string         `json:"name,omitempty"`
-	Description  *string         `json:"description,omitempty"`
-	Instructions *string         `json:"instructions,omitempty"`
-	Tools        []AssistantTool `json:"tools"`
-	FileIDs      []string        `json:"file_ids,omitempty"`
-	Metadata     map[string]any  `json:"metadata,omitempty"`
+	Model          string                 `json:"model"`
+	Name           *string                `json:"name,omitempty"`
+	Description    *string                `json:"description,omitempty"`
+	Instructions   *string                `json:"instructions,omitempty"`
+	Tools          []AssistantTool        `json:"-"`
+	FileIDs        []string               `json:"file_ids,omitempty"`
+	Metadata       map[string]any         `json:"metadata,omitempty"`
+	ToolResources  *AssistantToolResource `json:"tool_resources,omitempty"`
+	ResponseFormat any                    `json:"response_format,omitempty"`
+	Temperature    *float32               `json:"temperature,omitempty"`
+	TopP           *float32               `json:"top_p,omitempty"`
+}
+
+// MarshalJSON provides a custom marshaller for the assistant request to handle the API use cases
+// If Tools is nil, the field is omitted from the JSON.
+// If Tools is an empty slice, it's included in the JSON as an empty array ([]).
+// If Tools is populated, it's included in the JSON with the elements.
+func (a AssistantRequest) MarshalJSON() ([]byte, error) {
+	type Alias AssistantRequest
+	assistantAlias := &struct {
+		Tools *[]AssistantTool `json:"tools,omitempty"`
+		*Alias
+	}{
+		Alias: (*Alias)(&a),
+	}
+
+	if a.Tools != nil {
+		assistantAlias.Tools = &a.Tools
+	}
+
+	return json.Marshal(assistantAlias)
 }
 
 // AssistantsList is a list of assistants.
@@ -90,7 +137,7 @@ type AssistantFilesList struct {
 // CreateAssistant creates a new assistant.
 func (c *Client) CreateAssistant(ctx context.Context, request AssistantRequest) (response Assistant, err error) {
 	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(assistantsSuffix), withBody(request),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -106,7 +153,7 @@ func (c *Client) RetrieveAssistant(
 ) (response Assistant, err error) {
 	urlSuffix := fmt.Sprintf("%s/%s", assistantsSuffix, assistantID)
 	req, err := c.newRequest(ctx, http.MethodGet, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -123,7 +170,7 @@ func (c *Client) ModifyAssistant(
 ) (response Assistant, err error) {
 	urlSuffix := fmt.Sprintf("%s/%s", assistantsSuffix, assistantID)
 	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(urlSuffix), withBody(request),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -139,7 +186,7 @@ func (c *Client) DeleteAssistant(
 ) (response AssistantDeleteResponse, err error) {
 	urlSuffix := fmt.Sprintf("%s/%s", assistantsSuffix, assistantID)
 	req, err := c.newRequest(ctx, http.MethodDelete, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -155,7 +202,7 @@ func (c *Client) ListAssistants(
 	order *string,
 	after *string,
 	before *string,
-) (reponse AssistantsList, err error) {
+) (response AssistantsList, err error) {
 	urlValues := url.Values{}
 	if limit != nil {
 		urlValues.Add("limit", fmt.Sprintf("%d", *limit))
@@ -177,12 +224,12 @@ func (c *Client) ListAssistants(
 
 	urlSuffix := fmt.Sprintf("%s%s", assistantsSuffix, encodedValues)
 	req, err := c.newRequest(ctx, http.MethodGet, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
 
-	err = c.sendRequest(req, &reponse)
+	err = c.sendRequest(req, &response)
 	return
 }
 
@@ -195,7 +242,7 @@ func (c *Client) CreateAssistantFile(
 	urlSuffix := fmt.Sprintf("%s/%s%s", assistantsSuffix, assistantID, assistantsFilesSuffix)
 	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(urlSuffix),
 		withBody(request),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -212,7 +259,7 @@ func (c *Client) RetrieveAssistantFile(
 ) (response AssistantFile, err error) {
 	urlSuffix := fmt.Sprintf("%s/%s%s/%s", assistantsSuffix, assistantID, assistantsFilesSuffix, fileID)
 	req, err := c.newRequest(ctx, http.MethodGet, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -229,7 +276,7 @@ func (c *Client) DeleteAssistantFile(
 ) (err error) {
 	urlSuffix := fmt.Sprintf("%s/%s%s/%s", assistantsSuffix, assistantID, assistantsFilesSuffix, fileID)
 	req, err := c.newRequest(ctx, http.MethodDelete, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
@@ -268,7 +315,7 @@ func (c *Client) ListAssistantFiles(
 
 	urlSuffix := fmt.Sprintf("%s/%s%s%s", assistantsSuffix, assistantID, assistantsFilesSuffix, encodedValues)
 	req, err := c.newRequest(ctx, http.MethodGet, c.fullURL(urlSuffix),
-		withBetaAssistantV1())
+		withBetaAssistantVersion(c.config.AssistantVersion))
 	if err != nil {
 		return
 	}
