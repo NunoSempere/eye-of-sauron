@@ -1,0 +1,7 @@
+- [ ] Check embedding distance and how small is small enough
+  - [x] Calculate centroid (arithmetic mean) of the central points, and distance from each to it, and display it.
+- [x] Add shortcut to mark whole cluster (but not outliers) as done.
+- [ ] Only show the cluster if it's more than 4 items. In that case, highlight it with a color, even when it's selected.
+- [ ] Sort clusters by topic as well?
+- [ ] Look into better algorithms? 
+- [ ] Save or make up clusters for faster iteration

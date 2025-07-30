@@ -1,0 +1,126 @@
+# Things I definitely don't want to hear about
+Amber alert
+
+# Fewer than 100 deaths
+# "kill"
+\bkill\s\d{1,2}\s
+\bkills\s\d{1,2}\s
+# "killed"
+\b\d{1,2}\skilled\s
+# "dead"
+# may not work for commas?
+\b\d{1,2}dead\b
+
+# markers of irrelevance
+remembered
+anniversary
+Bhopal
+Doomsday clock
+years after
+years later
+eggs
+explainer
+years ago
+morning briefing
+On this date
+Oscar
+Greenpeace
+Boeing
+nightclub
+club
+quake
+Cannes
+actor
+
+# local
+landslide
+
+# nonactions
+condemns
+concern
+urges
+# OTOH some reporting is only of the reaction
+
+# Actors and films
+Robert De Niro
+Prince Harry
+Meghan Markle
+
+# Summaries
+AP News Summary
+key events
+AP News in Brief
+News in Brief
+
+# Events that popped up a lot
+# but I should eventually discard
+# ...
+Tahawwur Rana
+Air India
+
+# natural disasters
+monsoon
+rainfall
+flood
+
+
+# Old filters
+# Haiti
+# ceasefire
+# Sudanese nationals
+# Baalbek
+# undersea cable
+# pig
+# UNRWA
+# Valencia
+# Tuberculosis
+# Thai nationals
+# supermarket
+# Dilapidated Bus
+# Pope
+## Spanish flood
+# Spain.*flood
+# flood.*Spain
+# Spanish.*flood
+# Bhopal
+# Chido
+# Jeju air
+# New Orleans
+# fire.*submarine
+# 'suitable' cease-fire
+# beyond borders
+# daughter's wedding
+# trans.*remembrance
+# ICC
+# Netanyahu.*arrest
+# Colorado.*funeral
+# funeral home
+# COP29
+# Inuit
+# Tibet
+# megaquake
+# mega quake
+# hostage
+# egg prices
+# Sackler 
+# opioid
+# Purdue
+# M23
+# Congo
+# Rwanda
+# Doomsday clock
+
+# Iteractive filtering
+# undersea cables
+# 11 Baltic
+# Sweden
+# American Airlines
+# helicopter
+# Michigan
+# Gaza
+
+# plane crash
+plane crash
+Ahmedabad
+AI 171
+Jeju Air

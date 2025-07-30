@@ -1,7 +1,7 @@
 include .env
 
 run:
-	go run src/main.go
+	go run src/*.go
 
 trim:
 	psql $(DATABASE_URL) -c "DELETE FROM sources WHERE processed = TRUE AND created_at < NOW() - INTERVAL '2 weeks';"
@@ -12,7 +12,7 @@ deps:
 	go mod download
 	go mod vendor
 
-
+# RANDOM_CLUSTERS=true make
 ## SELECT COUNT(*) FROM your_table_name
 # WHERE created_at >= NOW() - INTERVAL '8 HOUR';
 

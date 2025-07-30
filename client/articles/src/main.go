@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -9,57 +8,16 @@ import (
 	"math"
 	"net/url"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"regexp"
-	"runtime"
-	"sort"
 	"time"
 
 	"html"
 	"strings"
-	"sync"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
-	"github.com/adrg/strutil/metrics"
 )
-
-type Source struct {
-	ID                    int
-	Title                 string
-	Link                  string
-	Date                  time.Time
-	Summary               string
-	ImportanceBool        bool
-	ImportanceReasoning   string
-	CreatedAt             time.Time
-	Processed             bool
-	RelevantPerHumanCheck string
-}
-
-var RELEVANT_PER_HUMAN_CHECK_NO = "no"
-var RELEVANT_PER_HUMAN_CHECK_YES = "yes"
-var RELEVANT_PER_HUMAN_CHECK_DEFAULT = "maybe"
-
-type App struct {
-	screen         tcell.Screen
-	sources        []Source
-	selectedIdx    int
-	expandedItems  map[int]bool
-	showImportance map[int]bool
-	currentPage    int
-	itemsPerPage   int
-	failureMark    bool
-	waitgroup      sync.WaitGroup
-	statusMessage  string
-}
-
-type Topic struct {
-	name     string
-	keywords []string
-}
 
 func newApp() (*App, error) {
 	screen, err := tcell.NewScreen()
@@ -77,206 +35,10 @@ func newApp() (*App, error) {
 		expandedItems:  make(map[int]bool),
 		showImportance: make(map[int]bool),
 		currentPage:    0,
-		itemsPerPage:   10, // 17,
+		itemsPerPage:   17, // 17,
+		mode:           "main",
+		detailIdx:      -1,
 	}, nil
-}
-
-// Filtering
-// Could eventually move to a new file
-func readRegexesFromFile(filepath string) ([]*regexp.Regexp, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var regexes []*regexp.Regexp
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		regexStr := scanner.Text()
-		if len(regexStr) > 1 && regexStr[0] != '#' {
-			regex, err := regexp.Compile("(?i)" + regexStr) // make case insensitive
-			if err != nil {
-				return nil, err // exit at first failure
-			}
-			regexes = append(regexes, regex)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return regexes, nil
-}
-
-func testStringAgainstRegexes(rs []*regexp.Regexp, s string) bool {
-	for _, r := range rs {
-		if r.MatchString(s) {
-			return true
-		}
-	}
-	return false
-}
-
-func isSourceRepeat(i int, sources []Source) bool {
-	// TODO: maybe make this a bit more sophisticated, and mark as repeat even if they are not exactly the same but
-	// also if they are pretty near according to some measure of distance
-	for j, _ := range sources {
-		if i != j && strings.ToUpper(cleanTitle(sources[i].Title)) == strings.ToUpper(cleanTitle(sources[j].Title)) {
-			return true
-		}
-	}
-	return false
-}
-
-func filterSources(sources []Source) ([]Source, error) {
-	var filtered_sources []Source
-	regexes, err := readRegexesFromFile("src/filters.txt")
-	if err != nil {
-		log.Printf("Error loading regexes: %v", err)
-		return filtered_sources, err
-	}
-
-	for i, source := range sources {
-		match := testStringAgainstRegexes(regexes, source.Title)
-		is_repeat := isSourceRepeat(i, sources) // TODO: maybe extract this into own loop
-		if !match && !is_repeat {
-			filtered_sources = append(filtered_sources, source)
-		} else {
-			log.Printf("Skipped over: %s", source.Title)
-			go markProcessedInServer(true, source.ID, source)
-		}
-	}
-	return filtered_sources, nil
-}
-
-func filterSourcesForUnread(sources []Source) []Source {
-	var unread_sources []Source
-	for _, source := range sources {
-		if !source.Processed {
-			unread_sources = append(unread_sources, source)
-		} else {
-		}
-	}
-	return unread_sources
-}
-
-func readTopicsFromFile(filepath string) ([]Topic, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var topics []Topic
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		// Skip empty lines and comments
-		if len(line) == 0 || line[0] == '#' {
-			continue
-		}
-		parts := strings.Split(line, ":")
-		if len(parts) != 2 {
-			continue
-		}
-		name := strings.TrimSpace(parts[0])
-		keywords := strings.Split(parts[1], ",")
-		// Clean up each keyword
-		var cleanKeywords []string
-		for _, k := range keywords {
-			k = strings.TrimSpace(k)
-			if k != "" {
-				cleanKeywords = append(cleanKeywords, k)
-			}
-		}
-		if len(cleanKeywords) > 0 {
-			topics = append(topics, Topic{name: name, keywords: cleanKeywords})
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return topics, nil
-}
-
-func reorderSources(sources []Source) ([]Source, error) {
-    var reordered_sources []Source
-    remaining_sources := sources
-
-    topics, err := readTopicsFromFile("src/topics.txt")
-    if err != nil {
-        log.Printf("Error loading topics: %v", err)
-        return sources, err
-    }
-
-    for _, topic := range topics {
-        var topic_regexes []*regexp.Regexp
-        for _, regex_string := range topic.keywords {
-            regex, err := regexp.Compile("(?i)" + regex_string)
-            if err != nil {
-                log.Printf("Regex error: %v", err)
-                return nil, err
-            }
-            topic_regexes = append(topic_regexes, regex)
-        }
-
-        var new_remaining_sources []Source
-        var topic_sources []Source
-        for _, source := range remaining_sources {
-            match := testStringAgainstRegexes(topic_regexes, source.Title)
-            if match {
-                topic_sources = append(topic_sources, source)
-            } else {
-                new_remaining_sources = append(new_remaining_sources, source)
-            }
-        }
-
-        // Sort the topic_sources alphabetically by title
-        sort.Slice(topic_sources, func(i, j int) bool {
-            return topic_sources[i].Title < topic_sources[j].Title
-        })
-        reordered_sources = append(reordered_sources, topic_sources...)
-        remaining_sources = new_remaining_sources
-    }
-
-    // Append remaining sources that didn't fit into any topic, sorted alphabetically
-    sort.Slice(remaining_sources, func(i, j int) bool {
-        return remaining_sources[i].Title < remaining_sources[j].Title
-    })
-    // Show sources that don't fit neatly into a topic first
-    reordered_sources = append(remaining_sources, reordered_sources...)
-
-    return reordered_sources, nil
-}
-
-func skipSourcesWithSimilarityMetric(sources []Source) ([]Source, error) {
-	if len(sources) < 2 {
-		return sources, nil
-	}
-
-	new_sources := []Source{sources[0]}
-
-	last_title := sources[0].Title
-	for i := 1; i < len(sources); i++ {
-		title_i := sources[i].Title
-		if len(title_i) > 30 && len(last_title) > 30 {
-			hamming := metrics.NewHamming()
-			distance := hamming.Distance(title_i[:30], last_title[:30])
-			if distance <= 4 {
-				go markProcessedInServer(true, sources[i].ID, sources[i])
-				continue
-			} 
-			last_title = title_i
-		} 
-		new_sources = append(new_sources, sources[i])
-	}
-	return new_sources, nil
 }
 
 func (a *App) loadSources() error {
@@ -292,6 +54,9 @@ func (a *App) loadSources() error {
 	On top of that, you can define an interface, as a type that implements
 	some method. <https://go.dev/tour/methods/10>
 	*/
+	// fmt.Printf("Getting sources...")
+	a.drawLines([]string{"Getting sources..."})
+	// drawText(a.screen, 0, 0, 0, tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite),"Getting sources...")
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
 	if err != nil {
@@ -299,6 +64,7 @@ func (a *App) loadSources() error {
 	}
 	defer conn.Close(ctx)
 
+	// rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false AND EXTRACT('week' from date) = 22 ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
 	rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
 	// date '+%j'
 	if err != nil {
@@ -333,25 +99,41 @@ func (a *App) loadSources() error {
 	}
 	a.sources = unsimilar_sources
 
-	return nil
-}
-
-func padStringWithWhitespace(s string, n int) string {
-	if len(s) > n {
-		return s
+	// drawText(a.screen, 0, 2, 0, tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite),"Clustering sources")
+	// fmt.Printf("Clustering sources...")
+	a.drawLines([]string{"Getting sources...", "Clustering sources..."})
+	// Add clustering
+	err = a.clusterSources()
+	if err != nil {
+		fmt.Printf("Warning: clustering failed: %v\n", err)
+		// Continue without clustering
 	}
-	padding := strings.Repeat(" ", n-len(s))
-	return s + padding
+
+	// Initialize cluster styles after clustering is done
+	if len(a.clusters) > 0 {
+		a.clusterStyles = generateClusterStyles(len(a.clusters))
+	}
+
+	return nil
 }
 
 func (a *App) draw() {
 	a.screen.Clear()
 	width, height := a.screen.Size()
 	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
-	// selectedStyle := tcell.StyleDefault.Background(tcell.ColorDarkBlue).Foreground(tcell.ColorWhite)
 	selectedStyle := tcell.StyleDefault.Background(tcell.Color24).Foreground(tcell.ColorWhite)
 	summaryStyle := style.Foreground(tcell.Color248)
 	importanceStyle := style.Foreground(tcell.ColorYellow)
+
+	if a.mode == "detail" {
+		a.drawDetailView(width, height, style, summaryStyle, importanceStyle)
+		return
+	} 
+
+	if a.mode == "help" {
+		a.drawHelpView()
+		return
+	}
 
 	startIdx := a.currentPage * a.itemsPerPage
 	endIdx := startIdx + a.itemsPerPage
@@ -388,6 +170,26 @@ func (a *App) draw() {
 		if source.Processed {
 			processedMark = "x"
 		}
+		
+		clusterMark := " "
+		distanceInfo := ""
+		if source.ClusterID >= 0 {
+			if source.IsClusterCentral {
+				clusterMark = fmt.Sprintf("C%d", source.ClusterID)
+			} else {
+				clusterMark = fmt.Sprintf("O%d", source.ClusterID)
+			}
+			
+			// Calculate and display distance to centroid
+			if len(a.embeddings) > idx && len(a.clusters) > source.ClusterID && source.ClusterID >= 0 {
+				cluster := a.clusters[source.ClusterID]
+				if cluster.Centroid != nil {
+					distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
+					distanceInfo = fmt.Sprintf("-%.3f", distance)
+				}
+			}
+		}
+		
 		host := ""
 		parsedURL, err := url.Parse(source.Link)
 		if err != nil {
@@ -396,10 +198,36 @@ func (a *App) draw() {
 			host = parsedURL.Host
 		}
 
-		// title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, padStringWithWhitespace(source.Title, 85), padStringWithWhitespace(host, 30), source.Date.Format("2006-01-02")) // why isn't the padding here working???
-		title := fmt.Sprintf("[%s] %s | %s | %s", processedMark, source.Title, host, source.Date.Format("2006-01-02")) // why isn't the padding here working???
-		// title := "[" + processedMark + "] " + padStringWithWhitespace(source.Title, 85) + " | " + padStringWithWhitespace(host, 30) + " | " + source.Date.Format("2006-01-02")
-		lineIdx = drawText(a.screen, 0, lineIdx, width, currentStyle, title)
+		// Build title with colored cluster section
+		titleParts := []string{}
+		titleStyles := []tcell.Style{}
+		
+		// Processed mark
+		// titleParts = append(titleParts, fmt.Sprintf("[%s]", processedMark))
+		// titleStyles = append(titleStyles, currentStyle)
+		
+		// Cluster mark with color
+		if source.ClusterID >= 0 && source.ClusterID < len(a.clusterStyles) {
+			clusterStyle := a.clusterStyles[source.ClusterID]
+			if idx == a.selectedIdx {
+				// Keep selected background but use cluster foreground color
+				_, bg, attrs := selectedStyle.Decompose()
+				fg, _, _ := clusterStyle.Decompose()
+				clusterStyle = tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attrs)
+			}
+			titleParts = append(titleParts, fmt.Sprintf("[%s] %s%s ", processedMark, clusterMark, distanceInfo))
+			titleStyles = append(titleStyles, clusterStyle)
+		} else {
+			titleParts = append(titleParts, fmt.Sprintf("[%s] %s%s ", processedMark, clusterMark, distanceInfo))
+			titleStyles = append(titleStyles, currentStyle)
+		}
+		
+		// Rest of title
+		titleParts = append(titleParts, fmt.Sprintf(" %s | %s | %s", source.Title, host, source.Date.Format("2006-01-02")))
+		titleStyles = append(titleStyles, currentStyle)
+		
+		// Draw title with overflow handling
+		lineIdx = drawTitleWithOverflow(a.screen, 0, lineIdx, width, titleParts, titleStyles)
 
 		// If this is the selected item and we're in expanded mode, show the summary
 		if a.expandedItems[idx] && source.Summary != "" {
@@ -423,214 +251,73 @@ func (a *App) draw() {
 	current_item := a.selectedIdx
 	num_items := len(a.sources)
 	num_pages := int(math.Ceil(float64(num_items) / float64(a.itemsPerPage)))
-	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: Expand/Collapse | I: Show Importance", current_item+1, num_items, a.currentPage+1, num_pages)
-	helpText2 := "O: Open in Browser \n | M: Toggle mark | S: Save | Q: Quit"
+	helpText := fmt.Sprintf("^/v: Navigate (%d/%d) | <>: Change Page (%d/%d) | Enter: View Details | H: Help", current_item+1, num_items, a.currentPage+1, num_pages)
 	if a.statusMessage != "" {
-		helpText2 = fmt.Sprintf("%s | %s", helpText2, a.statusMessage)
+		helpText =  a.statusMessage
 	} else if a.failureMark {
-		helpText2 = helpText2 + " [database F]"
+		helpText = "[database F]"
 	}
 	if height > 0 {
-		drawText(a.screen, 0, height-2, width, style, helpText)
-		drawText(a.screen, 0, height-1, width, style, helpText2)
+		drawText(a.screen, 0, height-1, width, style, helpText)
 	}
 
 	a.screen.Show()
 }
 
-func markRelevantPerHumanCheckInServer(state string, id int) error {
-	flag := true
-	if flag {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
-		if err != nil {
-			log.Printf("failed to connect to database: %v", err)
-			return fmt.Errorf("database connection error: %v", err)
-		}
-		defer conn.Close(ctx)
-
-		_, err = conn.Exec(ctx, "UPDATE sources SET relevant_per_human_check = $1 WHERE id = $2", state, id)
-		if err != nil {
-			log.Printf("failed to mark source as relevant: %v", err)
-			return fmt.Errorf("database update error: %v", err)
-		}
-	}
-	return nil
-}
-
-func (a *App) markRelevantPerHumanCheck(state string, i int) error {
-	if len(a.sources) == 0 {
-		return nil
+func (a *App) drawDetailView(width, height int, style, summaryStyle, importanceStyle tcell.Style) {
+	if a.detailIdx < 0 || a.detailIdx >= len(a.sources) {
+		return
 	}
 
-	// Toggle processed state in UI immediately
-	a.sources[i].RelevantPerHumanCheck = state
+	source := a.sources[a.detailIdx]
+	lineIdx := 0
 
-	// Update database asynchronously
-	a.waitgroup.Add(1)
-	go func() {
-		defer a.waitgroup.Done()
-		err := markRelevantPerHumanCheckInServer(state, a.sources[i].ID)
-		if err != nil {
-			fmt.Printf("%v", err)
-			go func() {
-				a.failureMark = true
-				time.Sleep(2)
-				a.failureMark = false
-			}()
-			a.sources[i].RelevantPerHumanCheck = state
-		}
-	}()
+	// Title
+	titleStyle := style.Bold(true)
+	lineIdx = drawText(a.screen, 0, lineIdx, width, titleStyle, source.Title)
+	lineIdx++
 
-	return nil
-}
-
-func markProcessedInServer(state bool, id int, source Source) error {
-	flag := true
-	if flag {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
-		if err != nil {
-			log.Printf("failed to connect to database: %v", err)
-			return fmt.Errorf("database connection error: %v", err)
-		}
-		defer conn.Close(ctx)
-
-		_, err = conn.Exec(ctx, "UPDATE sources SET processed = $1 WHERE id = $2", state, id)
-		if err != nil {
-			log.Printf("failed to mark source as processed: %v", err)
-			log.Printf("source: %v", source)
-			return fmt.Errorf("database update error: %v", err)
-		}
+	// URL and Date
+	host := ""
+	parsedURL, err := url.Parse(source.Link)
+	if err == nil {
+		host = parsedURL.Host
 	}
-	return nil
-}
+	metaInfo := fmt.Sprintf("Source: %s | Date: %s", host, source.Date.Format("2006-01-02 15:04"))
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style, metaInfo)
+	lineIdx++
+	lineIdx++
 
-func (a *App) markProcessed(i int, source Source) error {
-	if len(a.sources) == 0 {
-		return nil
+	// Summary
+	if source.Summary != "" {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, summaryStyle.Bold(true), "Summary:")
+		lineIdx++
+		lineIdx = drawText(a.screen, 0, lineIdx, width, summaryStyle, source.Summary)
+		lineIdx++
+		lineIdx++
 	}
 
-	// Toggle processed state in UI immediately
-	newState := !a.sources[i].Processed
-	a.sources[i].Processed = newState
-
-	// Update database asynchronously
-	a.waitgroup.Add(1)
-	go func() {
-		defer a.waitgroup.Done()
-		err := markProcessedInServer(newState, a.sources[i].ID, source)
-		if err != nil {
-			log.Printf("%v", err)
-			go func() {
-				a.failureMark = true
-				time.Sleep(2)
-				a.failureMark = false
-			}()
-			a.sources[i].Processed = !newState
-		}
-	}()
-
-	//
-	if a.sources[i].RelevantPerHumanCheck != RELEVANT_PER_HUMAN_CHECK_YES {
-		a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_NO, i)
+	// Importance Reasoning
+	if source.ImportanceReasoning != "" {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, importanceStyle.Bold(true), "Importance Reasoning:")
+		lineIdx++
+		lineIdx = drawText(a.screen, 0, lineIdx, width, importanceStyle, source.ImportanceReasoning)
+		lineIdx++
+		lineIdx++
 	}
 
-	return nil
-}
+	// Full URL
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style.Bold(true), "URL:")
+	lineIdx++
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style, source.Link)
 
-func (a *App) saveToFile(source Source) error {
-
-	basePath := os.Getenv("MINUTES_FOLDER")
-
-	now := time.Now()
-	year, week := now.ISOWeek()
-	dirName := fmt.Sprintf("%d-%02d", year, week)
-
-	targetDir := filepath.Join(basePath, dirName)
-
-	_, err := os.Stat(targetDir)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(targetDir, 0755)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	}
-	targetFile := filepath.Join(targetDir, "own.md")
-
-	f, err := os.OpenFile(targetFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	data := fmt.Sprintf("\n%s\n%s\n%s\n", source.Title, source.Summary, source.Link)
-	if _, err := f.Write([]byte(data)); err != nil {
-		f.Close()
-		return err
-	}
-	if err := f.Close(); err != nil {
-		return err
+	// Help text at bottom
+	helpText := "ESC/Backspace: Back to list | O: Open in Browser | M: Toggle mark | S: Save | Q: Quit"
+	if height > 0 {
+		drawText(a.screen, 0, height-1, width, style, helpText)
 	}
 
-	// clip_bash_cmd := fmt.Sprintf("{ echo \"%s\"; echo \"%s\"; echo \"%s\"; } | /usr/bin/xclip -sel clip", source.Title, source.Summary, source.Link)
-	// cmd := exec.Command("bash", "-c", clip_bash_cmd)
-	// cmd.Run()
-	// cmd := exec.Command("/usr/bin/tmux", "new-window", "bash -c -i \"mins\"")
-	// cmd.Run()
-	// nvim_cmd := fmt.Sprintf("nvim +$ %s", targetFile)
-	nvim_cmd := fmt.Sprintf("nvim +'$-2' %s", targetFile)
-	cmd := exec.Command("/usr/bin/tmux", "new-window", nvim_cmd)
-	cmd.Run()
-
-	return nil
-}
-
-func cleanTitle(s string) string {
-	return s
-	/*
-	n := 10
-	if len(s) < n {
-		return s
-	} 
-
-	if pos := strings.LastIndex(s[len(s)-n:], " – "); pos != -1 {
-		if pos > n {
-			return s[:len(s)-n+pos]
-		}
-	} 
-	return s
-	*/
-}
-
-func (a *App) webSearch(source Source) {
-	clean_title := cleanTitle(source.Title)
-	web_search_bash_cmd := fmt.Sprintf("bash -i -c \"websearch \\\"%s\\\"\"", clean_title)
-	cmd := exec.Command("/usr/bin/tmux", "new-window", web_search_bash_cmd)
-	// log.Printf(web_search_bash_cmd)
-	// cmd := exec.Command("/usr/bin/tmux", "new-window", "bash -c -i 'websearch 1 && bash'") //web_search_bash_cmd)
-	cmd.Run()
-}
-
-func openBrowser(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
+	a.screen.Show()
 }
 
 func (a *App) getInput(prompt string) string {
@@ -677,6 +364,43 @@ func (a *App) getInput(prompt string) string {
 	}
 }
 
+func (a *App) drawHelpView() {
+	width, _ := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+
+	lines := []string{
+		"^/v: Navigate",
+		"<>: Change Page",
+		"Enter: View Details",
+		"I: Show Importance",
+		"O: Open in Browser",
+		"M: Toggle mark",
+		"S: Save",
+		"C: Mark cluster centrals as processed", 
+		"Q: Quit",
+		"[C#/O#]: Cluster Central/Outlier",
+
+	}
+	lineIdx := 0
+	for _, line := range lines {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
+		lineIdx++
+	}
+	a.screen.Show()
+}
+
+func (a *App) drawLines(lines []string) {
+	width, _ := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+
+	lineIdx := 0
+	for _, line := range lines {
+		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
+		lineIdx++
+	}
+	a.screen.Show()
+}
+
 func (a *App) run() error {
 	err := a.loadSources()
 	if err != nil {
@@ -690,16 +414,30 @@ func (a *App) run() error {
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				return nil
+				if a.mode == "detail"{
+					a.mode = "main"
+					a.detailIdx = -1
+				} else {
+					return nil
+				}
+			case tcell.KeyBackspace, tcell.KeyBackspace2:
+				if a.mode == "detail" {
+					a.mode = "main"
+					a.detailIdx = -1
+				}
 			case tcell.KeyRight:
-				if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
-					a.currentPage++
-					a.selectedIdx = a.currentPage * a.itemsPerPage
+				if a.mode == "main" {
+					if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+						a.currentPage++
+						a.selectedIdx = a.currentPage * a.itemsPerPage
+					}
 				}
 			case tcell.KeyLeft:
-				if a.currentPage > 0 {
-					a.currentPage--
-					a.selectedIdx = a.currentPage * a.itemsPerPage
+				if a.mode == "main" {
+					if a.currentPage > 0 {
+						a.currentPage--
+						a.selectedIdx = a.currentPage * a.itemsPerPage
+					}
 				}
 			case tcell.KeyRune:
 				switch ev.Rune() {
@@ -708,127 +446,331 @@ func (a *App) run() error {
 					return nil
 				case 'o', 'O':
 					if len(a.sources) > 0 {
-						openBrowser(a.sources[a.selectedIdx].Link)
+						idx := a.selectedIdx
+						if a.mode == "detail" {
+							idx = a.detailIdx
+						}
+						openBrowser(a.sources[idx].Link)
 					}
 				case 'n', 'N':
-					if a.selectedIdx < len(a.sources)-1 {
+					if (a.mode == "main") && a.selectedIdx < len(a.sources)-1 {
 						a.selectedIdx++
 					}
-				case 'm', 'M', 'x':
+				case 'M':
+						a.openFile()
+				case 'm', 'x':
 					if len(a.sources) > 0 {
-						a.markProcessed(a.selectedIdx, a.sources[a.selectedIdx])
-						if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
-							a.selectedIdx++
-						} else if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+						idx := a.selectedIdx
+						if a.mode == "detail" {
+							idx = a.detailIdx
+						}
+						a.markProcessed(idx, a.sources[idx])
+						if a.mode == "main" {
+							if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
+								a.selectedIdx++
+							} else if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
+								a.currentPage++
+								a.selectedIdx = a.currentPage * a.itemsPerPage
+							}
+						}
+					}
+				case 'X', 'p':
+					if a.mode == "main" {
+						startIdx := a.currentPage * a.itemsPerPage
+						endIdx := startIdx + a.itemsPerPage
+						if endIdx > len(a.sources) {
+							endIdx = len(a.sources)
+						}
+						for idx := startIdx; idx < endIdx; idx++ {
+							a.markProcessed(idx, a.sources[a.selectedIdx])
+						}
+						if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
 							a.currentPage++
 							a.selectedIdx = a.currentPage * a.itemsPerPage
 						}
 					}
-				case 'X', 'p':
-					startIdx := a.currentPage * a.itemsPerPage
-					endIdx := startIdx + a.itemsPerPage
-					if endIdx > len(a.sources) {
-						endIdx = len(a.sources)
-					}
-					for idx := startIdx; idx < endIdx; idx++ {
-						a.markProcessed(idx, a.sources[a.selectedIdx])
-					}
-					if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
-						a.currentPage++
-						a.selectedIdx = a.currentPage * a.itemsPerPage
-					}
 				case 'r':
-					a.screen.Clear()
-					a.screen.Show()
-					a.currentPage = 0
-					a.selectedIdx = 0
-					for i := range a.expandedItems {
-						a.expandedItems[i] = false
-						a.showImportance[i] = false
-					}
+					if a.mode == "main" {
+						a.screen.Clear()
+						a.screen.Show()
+						a.currentPage = 0
+						a.selectedIdx = 0
+						for i := range a.expandedItems {
+							a.expandedItems[i] = false
+							a.showImportance[i] = false
+						}
 
-					a.sources = filterSourcesForUnread(a.sources)
+						a.sources = filterSourcesForUnread(a.sources)
+					}
 				case 'R':
-					a.screen.Clear()
-					a.screen.Show()
-					a.currentPage = 0
-					a.selectedIdx = 0
-					a.loadSources()
+					if a.mode == "main" {
+						a.screen.Clear()
+						a.screen.Show()
+						a.currentPage = 0
+						a.selectedIdx = 0
+						a.loadSources()
+					}
 				case 's', 'S':
 					if len(a.sources) > 0 {
-						a.saveToFile(a.sources[a.selectedIdx])
+						idx := a.selectedIdx
+						if a.mode == "detail" {
+							idx = a.detailIdx
+						}
+						a.saveToFile(a.sources[idx])
+						a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, idx)
 					}
-					a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, a.selectedIdx)
 				case 'w', 'W':
-					a.webSearch(a.sources[a.selectedIdx])
+					if len(a.sources) > 0 {
+						idx := a.selectedIdx
+						if a.mode == "detail" {
+							idx = a.detailIdx
+						}
+						a.webSearch(a.sources[idx])
+					}
 				case 'f', 'F':
-					// Add new filter
-					filter_input := a.getInput("Enter filter keyword: ")
-					if filter_input != "" {
-						a.statusMessage = "Filtering items..."
-						a.draw()
-
-						// Add to filters file
-						// f, err := os.OpenFile("src/filters.txt", os.O_APPEND|os.O_WRONLY, 0644)
-						// if err == nil {
-						// 	_, err = f.WriteString("\n" + filter)
-						// 	f.Close()
-						// }
-						// if err != nil {
-						// 		log.Printf("Error writing filter: %v", err)
-						// }
-
-						filterRegex, err := regexp.Compile("(?i)" + filter_input)
-						if err != nil {
-							log.Printf("Error compiling regex: %v", err)
-							continue
-						}
-
-						// Filter items locally and mark them in server
-						var remaining_sources []Source
-						for _, source := range a.sources {
-							if filterRegex.MatchString(source.Title) {
-								go markProcessedInServer(true, source.ID, source)
-							} else {
-								remaining_sources = append(remaining_sources, source)
+					if a.mode == "main" {
+						// Add new filter
+						filter_input := a.getInput("Enter filter keyword: ")
+						if filter_input != "" {
+							a.statusMessage = "Filtering items..."
+							a.draw()
+							regex_with_lookaheads := strings.ReplaceAll(filter_input, "ANY(", "(?=.*")
+							// ANY(x)ANY(y) will match sentences that contain both x and y in any order, per o3
+							filterRegex, err := regexp.Compile("(?i)" + regex_with_lookaheads)
+							if err != nil {
+								log.Printf("Error compiling regex: %v", err)
+								continue
 							}
-						}
-						a.sources = remaining_sources
 
-						// Reset page if needed
-						if a.selectedIdx >= len(a.sources) {
-							a.selectedIdx = len(a.sources) - 1
-						}
-						if a.selectedIdx < 0 {
-							a.selectedIdx = 0
-						}
-						a.currentPage = a.selectedIdx / a.itemsPerPage
+							// Filter items locally and mark them in server
+							var remaining_sources []Source
+							for _, source := range a.sources {
+								if filterRegex.MatchString(source.Title) {
+									go markProcessedInServer(true, source.ID, source)
+								} else {
+									remaining_sources = append(remaining_sources, source)
+								}
+							}
+							a.sources = remaining_sources
 
-						// Clear status message
-						a.statusMessage = ""
-						a.draw()
+							// Reset page if needed
+							if a.selectedIdx >= len(a.sources) {
+								a.selectedIdx = len(a.sources) - 1
+							}
+							if a.selectedIdx < 0 {
+								a.selectedIdx = 0
+							}
+							a.currentPage = a.selectedIdx / a.itemsPerPage
+
+							// Clear status message
+							a.statusMessage = ""
+							a.draw()
+						}
 					}
 				case 'i', 'I':
-					if len(a.sources) > 0 {
+					if a.mode == "main" && len(a.sources) > 0 {
 						a.showImportance[a.selectedIdx] = !a.showImportance[a.selectedIdx]
+					}
+				case 'c', 'C':
+					if a.mode == "main" && len(a.sources) > 0 {
+						a.markClusterPartsAsProcessed(a.selectedIdx)
+
+						currentCluster := a.sources[a.selectedIdx].ClusterID
+						clusterType := a.sources[a.selectedIdx].IsClusterCentral
+						for {
+							if a.sources[a.selectedIdx].ClusterID != currentCluster || a.sources[a.selectedIdx].IsClusterCentral != clusterType { // we're on a different cluster => stop
+								break
+							} else if a.selectedIdx < len(a.sources)-1 { // we are in the same cluster & haven't reached the end => continue
+								a.selectedIdx++
+								if (a.selectedIdx >= (a.currentPage+1)*a.itemsPerPage) && ((a.currentPage+1)*a.itemsPerPage < len(a.sources)) { // we are on a different page => increase page
+									a.currentPage++
+								}
+							} else { // we're in the same cluster, but have reached the end. => stop
+								break
+							}
+						}
+					}
+				case 'h', 'H':
+					if a.mode == "main" {
+						a.mode = "help"
 					}
 				}
 			case tcell.KeyUp:
-				if a.selectedIdx > 0 {
+				if a.mode == "main" && a.selectedIdx > 0 {
 					a.selectedIdx--
 				}
 			case tcell.KeyDown:
-				if a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
+				if a.mode == "main" && a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
 					a.selectedIdx++
 				}
 			case tcell.KeyEnter:
-				a.expandedItems[a.selectedIdx] = !a.expandedItems[a.selectedIdx]
-				a.showImportance[a.selectedIdx] = false
+				if a.mode == "main" && len(a.sources) > 0 {
+					a.mode = "detail" 
+					a.detailIdx = a.selectedIdx
+					a.draw()
+				} else if a.mode == "detail" && len(a.sources) > 0 {
+					a.mode = "main" 
+				} else if a.mode == "help" {
+					a.mode = "main"
+				}
 			}
 		case *tcell.EventResize:
 			a.screen.Sync()
 		}
 	}
+}
+
+func (a *App) markClusterPartsAsProcessed(selectedIdx int) {
+	if selectedIdx >= len(a.sources) {
+		return
+	}
+	
+	selectedSource := a.sources[selectedIdx]
+	partType := selectedSource.IsClusterCentral
+	partTypeName := "central"
+	if !partType {
+		partTypeName = "outlier"
+	}
+	if selectedSource.ClusterID < 0 {
+		return // Not in a cluster
+	}
+	
+	clusterID := selectedSource.ClusterID
+	markedCount := 0
+	
+	// Mark all central members of this cluster as processed
+	for i := range a.sources {
+		if a.sources[i].ClusterID == clusterID && a.sources[i].IsClusterCentral == partType {
+			a.markProcessed(i, a.sources[i])
+			markedCount++
+		}
+	}
+	
+	if markedCount > 0 {
+		a.statusMessage = fmt.Sprintf("Marked %d %s cluster members as processed", markedCount, partTypeName)
+		// Clear status message after 2 seconds
+		go func() {
+			time.Sleep(2 * time.Second)
+			a.statusMessage = ""
+			a.screen.Sync()
+		}()
+	}
+}
+
+func generateClusterStyles(numClusters int) []tcell.Style {
+	if numClusters == 0 {
+		return []tcell.Style{}
+	}
+	
+	styles := make([]tcell.Style, numClusters)
+	
+	// Predefined colors that work well in terminals
+	colors := []tcell.Color{
+		tcell.ColorRed,
+		tcell.ColorGreen, 
+		tcell.ColorBlue,
+		tcell.ColorYellow,
+		// tcell.ColorMagenta,
+		// tcell.ColorCyan,
+		tcell.ColorOrange,
+		tcell.ColorPurple,
+		tcell.ColorLime,
+		tcell.ColorPink,
+		tcell.ColorTeal,
+		tcell.ColorSilver,
+		tcell.ColorGold,
+		tcell.ColorCoral,
+		tcell.ColorSkyblue,
+		tcell.ColorViolet,
+	}
+	
+	for i := 0; i < numClusters; i++ {
+		// Cycle through predefined colors
+		colorIndex := i % len(colors)
+		styles[i] = tcell.StyleDefault.Foreground(colors[colorIndex])
+	}
+	
+	return styles
+}
+
+func drawTitleWithOverflow(screen tcell.Screen, x, y, maxWidth int, titleParts []string, titleStyles []tcell.Style) int {
+	if len(titleParts) == 0 {
+		return y
+	}
+	
+	// First, draw the fixed parts (processed mark and cluster mark) on the first line
+	currentX := x
+	currentY := y
+	fixedPartsCount := 1 // processed mark and cluster mark
+	
+	// Draw fixed parts that should always be on the first line
+	for i := 0; i < fixedPartsCount && i < len(titleParts); i++ {
+		part := titleParts[i]
+		style := titleStyles[i]
+		
+		for j, r := range part {
+			if currentX+j < maxWidth {
+				screen.SetContent(currentX+j, currentY, r, nil, style)
+			}
+		}
+		currentX += len(part)
+	}
+	
+	// Handle the remaining parts (title, host, date) with word wrapping
+	if len(titleParts) > fixedPartsCount {
+		remainingText := titleParts[fixedPartsCount]
+		remainingStyle := titleStyles[fixedPartsCount]
+		
+		// Calculate remaining width on first line
+		remainingWidth := maxWidth - currentX
+		
+		// Split the remaining text into words
+		words := strings.Fields(remainingText)
+		if len(words) == 0 {
+			return currentY
+		}
+		
+		currentLine := ""
+		
+		for _, word := range words {
+			// Check if adding this word would exceed the line width
+			testLine := currentLine
+			if testLine != "" {
+				testLine += " "
+			}
+			testLine += word
+			
+			if len(testLine) <= remainingWidth {
+				// Word fits on current line
+				currentLine = testLine
+			} else {
+				// Word doesn't fit, draw current line and start new one
+				if currentLine != "" {
+					// Draw current line
+					for i, r := range currentLine {
+						if currentX+i < maxWidth {
+							screen.SetContent(currentX+i, currentY, r, nil, remainingStyle)
+						}
+					}
+					currentY++
+					currentX = x + 2 // Indent continuation lines
+					remainingWidth = maxWidth - currentX
+				}
+				currentLine = word
+			}
+		}
+		
+		// Draw final line
+		if currentLine != "" {
+			for i, r := range currentLine {
+				if currentX+i < maxWidth {
+					screen.SetContent(currentX+i, currentY, r, nil, remainingStyle)
+				}
+			}
+		}
+	}
+	
+	return currentY
 }
 
 func drawText(screen tcell.Screen, x, y, maxWidth int, style tcell.Style, text string) int {
@@ -861,34 +803,8 @@ func drawText(screen tcell.Screen, x, y, maxWidth int, style tcell.Style, text s
 	return currentY
 }
 
-func stripHTML(s string) string {
-	var result strings.Builder
-	var inTag bool
-	for _, r := range s {
-		if r == '<' {
-			inTag = true
-			continue
-		}
-		if r == '>' {
-			inTag = false
-			continue
-		}
-		if !inTag {
-			result.WriteRune(r)
-		}
-	}
-	return result.String()
-}
-
-func truncateString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
-}
-
 func main() {
-	logFile, err := os.OpenFile("src/client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("data/client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}

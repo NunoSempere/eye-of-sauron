@@ -16,7 +16,7 @@ The main sources we are parsing are:
 
 We are also parsing: HN, CNN, Weapons sales announcements, the whitehouse presidential actions feed, and have a long list of other sources we want to incorporate in guides/ROADMAP.md.
 
-News are first parsed on a server, filtered using LLMs, and then manually filtered with the UI defined in the client folder. The results are then discussed by forecasters and aggregated into Sentinel's [Global Risks Weekly Roundup](https://blog.sentinel-team.org/).
+News are first parsed on a server, filtered using LLMs, clustered, and then manually filtered with the UI defined in the client folder. The results are then discussed by forecasters and aggregated into Sentinel's [Global Risks Weekly Roundup](https://blog.sentinel-team.org/).
 
 ![](./guides/imgs/architecture.png)
 
@@ -27,6 +27,8 @@ News are first parsed on a server, filtered using LLMs, and then manually filter
 - Ncurses
 - Postgres
 - OpenAI
+  - LLMs
+  - Embeddings
 - Systemd 
 
 ## Getting started
@@ -81,9 +83,11 @@ make
 
 You will see a ncurses based application, which looks as follows.
 
-![](./guides/imgs/client.png)
+![](./guides/imgs/client-clustering.png)
 
-Actions you can do from this screen are:
+![](./guides/imgs/summary.png)
+
+Actions you can do from the main screen are:
 
 - navigate between items and pages with the arrow keys
 - mark/unmark an item as processed with x
@@ -92,6 +96,10 @@ Actions you can do from this screen are:
 - open in browser. This might require to customize the logic for your OS+browser combination
 - save to a file. You can configure which folder in the .env file.
 - expand the items with enter to also show their summary
+- mark items in a cluster all as processed
+- etc.
+
+
 
 Similarly, for the wip twitter client:
 
