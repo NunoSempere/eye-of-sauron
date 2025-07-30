@@ -1,26 +1,26 @@
-PYTHON := python3
-VENV := venv
 MAX_LOG_SIZE := 20000
 
 # {{SOURCE_NAME}}
 
-# Setup virtual environment and install dependencies
+# Setup project with uv (creates virtual environment and installs dependencies)
 setup:
-	$(PYTHON) -m venv $(VENV)
-	./$(VENV)/bin/pip install --upgrade pip
-	./$(VENV)/bin/pip install -r requirements.txt
+	uv sync
+
+# Add new dependencies
+add:
+	uv add $(PACKAGE)
+
+# Add development dependencies
+add-dev:
+	uv add --dev $(PACKAGE)
 
 # Run the source processor
 run:
-	./$(VENV)/bin/python main.py
+	uv run main.py
 
-# Run without virtual environment (if system-wide Python is used)
-run-system:
-	$(PYTHON) main.py
-
-# Install dependencies system-wide
+# Install dependencies from existing requirements.txt (if not using pyproject.toml)
 install:
-	pip install -r requirements.txt
+	uv pip install -r requirements.txt
 
 # Watch logs in real-time
 listen:
@@ -34,12 +34,14 @@ rotate:
 
 # Test database connection
 test-db:
-	./$(VENV)/bin/python -c "from save_source import test_database_connection; print('Success' if test_database_connection() else 'Failed')"
+	uv run python -c "from save_source import test_database_connection; print('Success' if test_database_connection() else 'Failed')"
 
-# Clean up virtual environment
+# Clean up virtual environment and cache
 clean:
-	rm -rf $(VENV)
+	rm -rf .venv
+	rm -rf __pycache__
 	rm -f v2.log*
+	rm -f uv.lock
 
 # Install as systemd service
 systemd:
@@ -50,10 +52,10 @@ systemd:
 
 # Development helpers
 format:
-	./$(VENV)/bin/python -m black *.py
+	uv run black *.py
 
 lint:
-	./$(VENV)/bin/python -m flake8 *.py
+	uv run flake8 *.py
 
 # Show service status
 status:
@@ -63,4 +65,4 @@ status:
 logs:
 	sudo journalctl -u {{SOURCE_NAME}} -f
 
-.PHONY: setup run run-system install listen rotate test-db clean systemd format lint status logs
+.PHONY: setup add add-dev run install listen rotate test-db clean systemd format lint status logs

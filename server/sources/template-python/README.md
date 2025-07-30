@@ -30,7 +30,7 @@ This template provides a standardized Python structure for adding new news sourc
 
 3. **Set up Python environment**:
    ```bash
-   make setup  # Creates virtual environment and installs dependencies
+   make setup  # Uses uv to create virtual environment and install dependencies
    ```
 
 4. **Implement fetch logic**:
@@ -118,8 +118,14 @@ DATABASE_POOL_URL=postgresql://user:pass@localhost/dbname
 ## Development Commands
 
 ```bash
-# Setup environment
+# Setup environment (uses uv)
 make setup
+
+# Add new dependency
+make add PACKAGE=requests
+
+# Add development dependency  
+make add-dev PACKAGE=pytest
 
 # Run locally
 make run
@@ -165,7 +171,7 @@ Before installing as a service:
    - Update paths and user in service file
 
 2. **Set up environment**:
-   - Ensure virtual environment is created: `make setup`
+   - Ensure uv environment is set up: `make setup`
    - Verify database connectivity: `make test-db`
 
 3. **Install service**:

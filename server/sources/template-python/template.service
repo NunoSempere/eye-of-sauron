@@ -9,7 +9,7 @@ User=sentinel
 Group=sentinel
 WorkingDirectory=/home/sentinel/news/server/sources/{{SOURCE_NAME}}
 Environment=PYTHONPATH=/home/sentinel/news/server
-ExecStart=/home/sentinel/news/server/sources/{{SOURCE_NAME}}/venv/bin/python main.py
+ExecStart=/usr/local/bin/uv run main.py
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog
