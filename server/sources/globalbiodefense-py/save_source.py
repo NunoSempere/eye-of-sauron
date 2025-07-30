@@ -22,8 +22,7 @@ def save_source(source: Dict[str, Any]) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    return False
-    # Don't save stuff until we have implemented filtering functions!!
+    # Now that filtering functions are implemented, we can save sources
     try:
         # Get database URL from environment
         database_url = os.getenv("DATABASE_POOL_URL")
