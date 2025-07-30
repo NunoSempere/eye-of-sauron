@@ -8,7 +8,24 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"time"
 )
+
+func IsFresh(source types.Source, layout string) bool {
+	date_str := source.Date
+	parsed_time, err := time.Parse(layout, date_str)
+	if err != nil {
+		log.Printf("Error parsing date: %v", err)
+		return false
+	}
+
+	now := time.Now()
+	fifteen_days_before := now.AddDate(0, 0, -15)
+	fifteen_days_after := now.AddDate(0, 0, 15)
+
+	return parsed_time.After(fifteen_days_before) && parsed_time.Before(fifteen_days_after)
+
+}
 
 func IsDupe(source types.Source, database_url string) bool {
 	conn, err := pgx.Connect(context.Background(), database_url)

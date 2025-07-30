@@ -51,6 +51,12 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 		return expanded_source, false
 	}
 
+	// Check is fresh
+	is_fresh := filters.IsFresh(tmp_source, "2006-01-02T15:04:05Z07:00")
+	if !is_fresh {
+		return expanded_source, false
+	}
+
 	// Check if host is acceptable
 	is_good_host := filters.IsGoodHost(tmp_source)
 	if !is_good_host {

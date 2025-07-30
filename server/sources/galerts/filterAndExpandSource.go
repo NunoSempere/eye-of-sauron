@@ -6,26 +6,9 @@ import (
 	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"log"
-	"time"
 )
 
 // Filters
-
-func filterIsFresh(source types.Source) bool {
-	date_str := source.Date
-	layout := "2006-01-02T15:04:05Z"
-	parsed_time, err := time.Parse(layout, date_str)
-	if err != nil {
-		log.Printf("Error parsing date: %v", err)
-		return false
-	}
-
-	now := time.Now()
-	fifteen_days_before := now.AddDate(0, 0, -15)
-	fifteen_days_after := now.AddDate(0, 0, 15)
-
-	return parsed_time.After(fifteen_days_before) && parsed_time.Before(fifteen_days_after)
-}
 
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
 	expanded_source := types.ExpandedSource{Title: source.Title, Link: source.Link, Date: source.Date}
@@ -36,7 +19,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		return expanded_source, false
 	}
 
-	is_fresh := filterIsFresh(source)
+	is_fresh := filters.IsFresh(source, "2006-01-02T15:04:05Z")
 	if !is_fresh {
 		log.Printf("Filtered because: is old")
 		return expanded_source, false
