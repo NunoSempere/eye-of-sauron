@@ -7,10 +7,10 @@ run:
 listen:
 	tail -f v2.log
 
-rotate-data:
+rotate:
 	# TODO: rotate postgres stuff
-	tail -n $(MAX_LOG_SIZE) sources/hn.log | tee -a sources/hn.log.tmp
-	mv sources/hn.log.tmp sources/hn.log
+	tail -n $(MAX_LOG_SIZE) v2.log | tee -a v2.log.tmp
+	mv v2.log.tmp v2.log
 
 
 systemd:
