@@ -9,7 +9,7 @@ User=sentinel
 Group=sentinel
 WorkingDirectory=/home/sentinel/news/server/sources/globalbiodefense-py
 Environment=PYTHONPATH=/home/sentinel/news/server
-ExecStart=/usr/local/bin/uv run main.py
+ExecStart=/home/sentinel/.local/bin/uv run src/main.py
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog

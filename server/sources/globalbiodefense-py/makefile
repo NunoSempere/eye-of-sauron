@@ -47,8 +47,8 @@ clean:
 systemd:
 	sudo cp globalbiodefense.service /etc/systemd/system/
 	sudo systemctl daemon-reload
-	sudo systemctl enable {{SOURCE_NAME}}
-	sudo systemctl restart {{SOURCE_NAME}}
+	sudo systemctl enable globalbiodefense
+	sudo systemctl restart globalbiodefense
 
 # Development helpers
 format:
@@ -59,10 +59,10 @@ lint:
 
 # Show service status
 status:
-	sudo systemctl status {{SOURCE_NAME}}
+	sudo systemctl status globalbiodefense
 
 # Show service logs
 logs:
-	sudo journalctl -u {{SOURCE_NAME}} -f
+	sudo journalctl -u globalbiodefense -f
 
 .PHONY: setup add add-dev run install listen rotate test-db clean systemd format lint status logs
