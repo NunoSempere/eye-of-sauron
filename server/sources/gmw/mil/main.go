@@ -14,7 +14,7 @@ import (
 func main() {
 
 	// Initialize logging
-	logFile, err := os.OpenFile("sources/gmw/mil/v2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("mil/v2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}

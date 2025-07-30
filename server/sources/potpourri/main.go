@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Set up logging
-	logFile, err := os.OpenFile("sources/potpourri/v2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("v2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
