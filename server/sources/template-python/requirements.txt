@@ -1,0 +1,26 @@
+# Core dependencies
+requests>=2.28.0
+python-dotenv>=0.19.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# Web scraping and parsing
+beautifulsoup4>=4.11.0
+feedparser>=6.0.0
+lxml>=4.9.0
+
+# Optional: For more advanced web scraping
+# selenium>=4.0.0
+# playwright>=1.20.0
+
+# Optional: For API rate limiting
+# ratelimit>=2.2.0
+
+# Optional: For better date parsing
+# python-dateutil>=2.8.0
+
+# Development dependencies (uncomment if needed)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
