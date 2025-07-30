@@ -1,11 +1,12 @@
 ## v4
 
 - [ ] Fix technical debt
+  - [x] Remove top-level makefile, and instead have them inside each source?
   - [ ] Update llm sublibrary
   - [ ] Get a better process running than systemd
   - [ ] Reduce deduplication
   - [ ] Take the database boundary more seriously and try services on Rust/systemd.
-  - [ ] Remove top-level makefile, and instead have them inside each source?
+  - [ ] restart the v2.log thing
 
 ## v3
 
