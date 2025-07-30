@@ -44,7 +44,10 @@ func main() {
 				log.Printf("Article #%v/%v [keyword \"%v\"]: %v (%v)", i, len(articles), keyword, article.Title, article.Date)
 				expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
 				if passes_filters {
+					log.Printf("Saving source")
 					SaveSource(expanded_source)
+				} else {
+					log.Printf("Not saving source")
 				}
 			}
 		}
