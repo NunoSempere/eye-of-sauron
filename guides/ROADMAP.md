@@ -1,14 +1,15 @@
-## v4
+## v4: Fix technical debt
 
 - [ ] Fix technical debt
   - [x] Remove top-level makefile, and instead have them inside each source?
-  - [ ] Update llm sublibrary
-  - [ ] Get a better process running than systemd
-  - [ ] Reduce deduplication
-  - [ ] Take the database boundary more seriously and try services on Rust/systemd.
-  - [ ] restart the v2.log thing
+  - [x] Update llm sublibrary to v1.40.1
+  - [ ] ~~Get a better process running than systemd~~
+    - [x] Actually systemd is good enough; just keep it inside each source
+  - [ ] Reduce duplication
+  - [ ] Take the database boundary more seriously and try services on Rust/python/typescript/etc.
+    - [ ] Create templates and ask other people to use them
 
-## v3
+## v3: QoL
 
 - [x] Move server to using eye of sauron repo
 - [ ] Fix cropping after '-' marker when marker is very early on.
@@ -97,7 +98,7 @@ Improve ops:
   - Maybe save items that pass some initial filters?
   - Could get large.
 
-## v2
+## v2: Add database
 
 - [x] Research different databases and possible architectures
 - [x] Move output to postgres rather than email for galerts
@@ -112,7 +113,7 @@ Improve ops:
 - [x] Group items in prospector by keyword, and present them together for ease of process.
 - [x] Add better filtering to the client
 
-## v1 
+## v1: MVP
 
 - [x] Add **GDELT**
   - [x] Parse events
