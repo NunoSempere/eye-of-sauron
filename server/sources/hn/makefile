@@ -16,5 +16,5 @@ rotate:
 systemd:
 	sudo cp hn.service /etc/systemd/system
 	sudo systemctl daemon-reload
-	sudo systemctl enable potpourri
-	sudo systemctl restart potpourri 
+	sudo systemctl enable hn
+	sudo systemctl restart hn 

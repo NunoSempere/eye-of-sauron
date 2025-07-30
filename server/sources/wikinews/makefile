@@ -13,7 +13,7 @@ rotate:
 	mv v2.log.tmp v2.log
 
 systemd:
-	sudo cp gdelt.service /etc/systemd/system
+	sudo cp wikinews.service /etc/systemd/system
 	sudo systemctl daemon-reload
 	sudo systemctl enable wikinews 
 	sudo systemctl restart wikinews

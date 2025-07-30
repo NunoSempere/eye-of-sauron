@@ -42,6 +42,13 @@ func ReplaceWithOSFrontend(u string) (string, error) {
 		// Return the updated URL as a string
 		return parsedURL.String(), nil
 	}
+	if parsedURL.Host == "x.com" {
+		// Replace the host with open_source_alternative.net
+		parsedURL.Host = "nitter.net"
+
+		// Return the updated URL as a string
+		return parsedURL.String(), nil
+	}
 	// Return the original URL if no replacement is necessary
 	return u, nil
 }

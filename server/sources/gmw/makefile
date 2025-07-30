@@ -12,7 +12,7 @@ rotate:
 	mv mil/v2.log.tmp mil/v2.log
 
 systemd:
-	sudo cp gdelt.service /etc/systemd/system
+	sudo cp gmw.service /etc/systemd/system
 	sudo systemctl daemon-reload
 	sudo systemctl enable gmw
 	sudo systemctl restart gmw 
