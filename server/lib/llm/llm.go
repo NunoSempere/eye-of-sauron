@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
+	jsonschema "github.com/sashabaranov/go-openai/jsonschema"
 )
 
 // https://openai.com/api/pricing/
@@ -46,7 +47,7 @@ func fetchOpenAIAnswer(req OpenAIRequest) (string, error) {
 	return result, nil
 
 }
-func fetchOpenAIAnswerJSON(req OpenAIRequest) (string, error) {
+func fetchOpenAIAnswerJSON(req OpenAIRequest, , schema openai.ChatCompletionResponseFormatJSONSchema) (string, error) {
 
 	client := openai.NewClient(req.token)
 	resp, err := client.CreateChatCompletion(
@@ -79,14 +80,24 @@ type SummaryBox struct {
 }
 
 func Summarize(text string, token string) (string, error) {
-	prompt := "The json API endpoint returns a {summary, error} object, like {summary: \"The article is about xyz\", error: null}. The summary contains, as a string, first a general summary of the contents of the article article in two paragraphs or less, and then an outline outlines the most salient, new and informative facts in an additional paragraph. The summary just states the contents of the article, and doesn't say \"The article says\" or similar introductions. For example, given the following article\n\n<INPUT>"
+	prompt := "The json API endpoint returns a {summary, error} object, like {summary: \"The article is about xyz\", error: null}. The summary contains, as a string, first a general summary of the contents of the article article in two paragraphs or less, and then an outline with the most salient, new and informative facts in an additional paragraph. The summary just states the contents of the article, and doesn't say \"The article says\" or similar introductions. For example, given the following article\n\n<INPUT>"
 	prompt += text + "\n\n</INPUT>\n\nThe output is as follows (as a reminder, the json API endpoint returns a {summary, error} object, like {summary: \"The article is about xyz\", error: null}. The summary contains, as a string, first a general summary of the article in two paragraphs or less, and then an outline outlines the most salient, new and informative facts in an additional paragraph):"
+	prompt += "<INPUT>" + text + "</INPUT>"
 
-	summary_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token})
+	var summary_box SummaryBox
+	schema, err := jsonschema.GenerateSchemaForType(summary_box)
+	if err != nil {
+		log.Fatalf("GenerateSchemaForType error: %v", err)
+	}
+	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+		Name:   "Summary",
+		Schema: schema,
+		Strict: true,
+	}
+	summary_json, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
 	if err != nil {
 		return "", err
 	}
-	var summary_box SummaryBox
 	err = json.Unmarshal([]byte(summary_json), &summary_box)
 	if err != nil {
 		log.Printf("Error unmarshalling json: %v", err)
@@ -138,9 +149,19 @@ For example:
 
 For a longer example, given the following item\n\n<INPUT>`
 	prompt += text + "\n\n</INPUT>\n\nThe output is as follows: (As a reminder, the existential importance json API endpoint returns a {existential_importance_reasoning, existential_importance_bool, high_importance_bool, error} object, opinion pieces, or editorials are not categorizes as existentially important.)\n"
-	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token})
 
 	var existential_importance_box ExistentialImportanceBox
+	schema, err := jsonschema.GenerateSchemaForType(existential_importance_box)
+	if err != nil {
+		log.Fatalf("GenerateSchemaForType error: %v", err)
+	}
+	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+		Name:   "ExistentialImportanceBox",
+		Schema: schema,
+		Strict: true,
+	}
+	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+
 	err = json.Unmarshal([]byte(answer_json), &existential_importance_box)
 	if err != nil {
 		log.Printf("Error unmarshalling json: %v", err)
@@ -181,9 +202,19 @@ For now, the API leans towards having a light trigger, because false positives a
 
 For a longer example, given the following article\n\n<INPUT>`
 	prompt += text + "\n\n</INPUT>\n\nThe output is as follows: (As a reminder, the existential importance json API endpoint returns a {existential_importance_reasoning, existential_importance_bool, high_importance_bool, error} object, opinion pieces, or editorials are not categorizes as existentially important.)\n"
-	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token})
 
 	var existential_importance_box ExistentialImportanceBox
+	schema, err := jsonschema.GenerateSchemaForType(existential_importance_box)
+	if err != nil {
+		log.Fatalf("GenerateSchemaForType error: %v", err)
+	}
+	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+		Name:   "ExistentialImportanceBox",
+		Schema: schema,
+		Strict: true,
+	}
+	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+
 	err = json.Unmarshal([]byte(answer_json), &existential_importance_box)
 	if err != nil {
 		log.Printf("Error unmarshalling json: %v", err)
