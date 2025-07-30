@@ -9,3 +9,8 @@
 ## swap files
 *.swp
 _old/
+
+## python cache
+**/.venv
+**/__pycache__
+**/__pycache__/**

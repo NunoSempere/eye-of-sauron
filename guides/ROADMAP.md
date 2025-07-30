@@ -1,3 +1,9 @@
+## v5: Expand and improve
+
+- [ ] Select sources to parse
+- [ ] Add an alternative html/js-based frontend, so that other forecasters can use it
+- [ ] 
+
 ## v4: Fix technical debt
 
 - [ ] Fix technical debt
@@ -5,9 +11,12 @@
   - [x] Update llm sublibrary to v1.40.1
   - [ ] ~~Get a better process running than systemd~~
     - [x] Actually systemd is good enough; just keep it inside each source
-  - [ ] Reduce duplication
+  - [x] Reduce duplication
+    - [x] Dates filtering
+    - [ ] ~~Define common pipeline?~~ => enough unique differences for each source that it's hard
   - [ ] Take the database boundary more seriously and try services on Rust/python/typescript/etc.
     - [ ] Create templates and ask other people to use them
+    - [ ] How might the architecture look like?
 
 ## v3: QoL
 
