@@ -56,6 +56,13 @@ News in Brief
 # but I should eventually discard
 # ...
 Tahawwur Rana
+Air India
+
+# natural disasters
+monsoon
+rainfall
+flood
+
 
 # Old filters
 # Haiti
@@ -116,3 +123,4 @@ Tahawwur Rana
 plane crash
 Ahmedabad
 AI 171
+Jeju Air

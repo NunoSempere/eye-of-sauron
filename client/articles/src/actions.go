@@ -9,6 +9,35 @@ import (
 	"runtime"
 )
 
+func (a *App) openFile() error {
+
+	basePath := os.Getenv("MINUTES_FOLDER")
+
+	now := time.Now()
+	year, week := now.ISOWeek()
+	dirName := fmt.Sprintf("%d-%02d", year, week)
+
+	targetDir := filepath.Join(basePath, dirName)
+
+	_, err := os.Stat(targetDir)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(targetDir, 0755)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+	targetFile := filepath.Join(targetDir, "own.md")
+
+	nvim_cmd := fmt.Sprintf("nvim +'$-2' %s", targetFile)
+	cmd := exec.Command("/usr/bin/tmux", "new-window", nvim_cmd)
+	cmd.Run()
+
+	return nil
+}
+
+
 func (a *App) saveToFile(source Source) error {
 
 	basePath := os.Getenv("MINUTES_FOLDER")
@@ -43,12 +72,6 @@ func (a *App) saveToFile(source Source) error {
 		return err
 	}
 
-	// clip_bash_cmd := fmt.Sprintf("{ echo \"%s\"; echo \"%s\"; echo \"%s\"; } | /usr/bin/xclip -sel clip", source.Title, source.Summary, source.Link)
-	// cmd := exec.Command("bash", "-c", clip_bash_cmd)
-	// cmd.Run()
-	// cmd := exec.Command("/usr/bin/tmux", "new-window", "bash -c -i \"mins\"")
-	// cmd.Run()
-	// nvim_cmd := fmt.Sprintf("nvim +$ %s", targetFile)
 	nvim_cmd := fmt.Sprintf("nvim +'$-2' %s", targetFile)
 	cmd := exec.Command("/usr/bin/tmux", "new-window", nvim_cmd)
 	cmd.Run()

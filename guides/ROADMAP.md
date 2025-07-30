@@ -1,3 +1,12 @@
+## v4
+
+- [ ] Fix technical debt
+  - [ ] Update llm sublibrary
+  - [ ] Get a better process running than systemd
+  - [ ] Reduce deduplication
+  - [ ] Take the database boundary more seriously and try services on Rust/systemd.
+  - [ ] Remove top-level makefile, and instead have them inside each source?
+
 ## v3
 
 - [x] Move server to using eye of sauron repo
@@ -46,12 +55,16 @@
       - [ ] <https://research.checkpoint.com/2024/11th-november-threat-intelligence-report/>
       - [ ] <https://freerepublic.com> for more right wing stuff?
       - [ ] <https://www.globalsecurity.org>
+      - [ ] <https://www.mnd.gov.tw/English/PublishTable.aspx?types=Defense%20News&title=News%20Channel&SelectStyle=Defense%20News>
+      - [ ] <https://x.com/mna_roc/status/1945815999854338122/photo/3>
     - Cyberattacks
       - [ ] <https://www.bbc.com/news/topics/cp3mvpdp1r2t>
       - [ ] <https://www.cisa.gov/news-events/cybersecurity-advisories>
     - Misc
       - [ ] <https://www.newscatcherapi.com/>
       - [ ] <https://www.defenseone.com/topic/The-d-brief/>
+      - [ ] See <https://github.com/MattB543/ai-safety-feed-helpers>?
+      - [ ] <https://www.realclearworld.com/>
   - [ ] EXA? <https://exa.ai/pricing?tab=api>, <https://docs.exa.ai/reference/search>; keyword search by date? <https://simonwillison.net/2025/May/29/llm-tools-exa/#atom-everything>
   - [ ] Forecaster suggestions => this could be a whole thing
   - [ ] Neuters.de <https://neuters.de/> shows what seems to be the most recent 10K news??

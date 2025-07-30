@@ -456,7 +456,9 @@ func (a *App) run() error {
 					if (a.mode == "main") && a.selectedIdx < len(a.sources)-1 {
 						a.selectedIdx++
 					}
-				case 'm', 'M', 'x':
+				case 'M':
+						a.openFile()
+				case 'm', 'x':
 					if len(a.sources) > 0 {
 						idx := a.selectedIdx
 						if a.mode == "detail" {
