@@ -47,7 +47,7 @@ func fetchOpenAIAnswer(req OpenAIRequest) (string, error) {
 	return result, nil
 
 }
-func fetchOpenAIAnswerJSON(req OpenAIRequest, , schema openai.ChatCompletionResponseFormatJSONSchema) (string, error) {
+func fetchOpenAIAnswerJSON(req OpenAIRequest, schema openai.ChatCompletionResponseFormatJSONSchema) (string, error) {
 
 	client := openai.NewClient(req.token)
 	resp, err := client.CreateChatCompletion(
@@ -60,7 +60,10 @@ func fetchOpenAIAnswerJSON(req OpenAIRequest, , schema openai.ChatCompletionResp
 					Content: req.prompt,
 				},
 			},
-			ResponseFormat: &openai.ChatCompletionResponseFormat{"json_object"},
+			ResponseFormat: &openai.ChatCompletionResponseFormat{
+				Type:       openai.ChatCompletionResponseFormatTypeJSONSchema,
+				JSONSchema: &schema,
+			},
 		},
 	)
 
@@ -89,12 +92,12 @@ func Summarize(text string, token string) (string, error) {
 	if err != nil {
 		log.Fatalf("GenerateSchemaForType error: %v", err)
 	}
-	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+	openai_schema := openai.ChatCompletionResponseFormatJSONSchema{
 		Name:   "Summary",
 		Schema: schema,
 		Strict: true,
 	}
-	summary_json, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+	summary_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
 	if err != nil {
 		return "", err
 	}
@@ -155,7 +158,7 @@ For a longer example, given the following item\n\n<INPUT>`
 	if err != nil {
 		log.Fatalf("GenerateSchemaForType error: %v", err)
 	}
-	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+	openai_schema := openai.ChatCompletionResponseFormatJSONSchema{
 		Name:   "ExistentialImportanceBox",
 		Schema: schema,
 		Strict: true,
@@ -208,7 +211,7 @@ For a longer example, given the following article\n\n<INPUT>`
 	if err != nil {
 		log.Fatalf("GenerateSchemaForType error: %v", err)
 	}
-	openai_schema  := openai.ChatCompletionResponseFormatJSONSchema{
+	openai_schema := openai.ChatCompletionResponseFormatJSONSchema{
 		Name:   "ExistentialImportanceBox",
 		Schema: schema,
 		Strict: true,
