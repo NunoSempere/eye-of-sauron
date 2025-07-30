@@ -1,6 +1,6 @@
 MAX_LOG_SIZE := 20000
 
-# {{SOURCE_NAME}}
+# Globalbiodefense.com
 
 # Setup project with uv (creates virtual environment and installs dependencies)
 setup:
@@ -16,7 +16,7 @@ add-dev:
 
 # Run the source processor
 run:
-	uv run main.py
+	uv run src/main.py
 
 # Install dependencies from existing requirements.txt (if not using pyproject.toml)
 install:
@@ -45,7 +45,7 @@ clean:
 
 # Install as systemd service
 systemd:
-	sudo cp {{SOURCE_NAME}}.service /etc/systemd/system/
+	sudo cp globalbiodefense.service /etc/systemd/system/
 	sudo systemctl daemon-reload
 	sudo systemctl enable {{SOURCE_NAME}}
 	sudo systemctl restart {{SOURCE_NAME}}
