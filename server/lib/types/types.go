@@ -30,3 +30,5 @@ type ExpandedSource struct {
 	ImportanceReasoning string
 	Origin              string
 }
+
+type Filter func(ExpandedSource) (ExpandedSource, bool)

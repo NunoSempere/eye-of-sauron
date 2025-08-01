@@ -2,7 +2,7 @@
 
 - [ ] Select sources to parse
 - [ ] Add an alternative html/js-based frontend, so that other forecasters can use it
-- [ ] 
+- [ ] Go back to functional programming. Define pipelines at a higher level of abstraction
 
 ## v4: Fix technical debt
 
