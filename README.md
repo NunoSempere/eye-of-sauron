@@ -23,7 +23,7 @@ News are first parsed on a server, filtered using LLMs, clustered, and then manu
 ## Built with
 
 - Linux
-- Golang
+- Golang/Python
 - Ncurses
 - Postgres
 - OpenAI
@@ -33,9 +33,7 @@ News are first parsed on a server, filtered using LLMs, clustered, and then manu
 
 ## Getting started
 
-Install [golang](https://go.dev/). 
-
-Clone this repository 
+### Clone this repository
 
 with ssh—recommended to be able to make contributions back, but requires setting up ssh keys with github:
 
@@ -53,23 +51,20 @@ git clone https://github.com/NunoSempere/eye-of-sauron.git
 
 Configure .env files. You can see .env.example files, but the easiest way is probably to ask Nuño either for the .env contents, or for authorization for our production server.
 
-Then:
+With [Python](https://www.python.org/)  and [uv](https://github.com/astral-sh/uv):
 
 ```
-cd server
-make run-galerts
-make run-gdelt
-make run-gmw
+cd server/sources/globalbiodefense-py
+make setup
+make run
 ```
 
-There are also makefile recipes for setting up systemd services, which is what we actually use in production.
-
-If the server is running these processes, you can listen to them with
+With [golang](https://go.dev/) :
 
 ```
-make listen-galerts
-make listen-gdelt
-make listen-gmw
+cd server/sources/gdelt
+make run
+make listen
 ```
 
 ### Getting started with the client
@@ -98,8 +93,6 @@ Actions you can do from the main screen are:
 - expand the items with enter to also show their summary
 - mark items in a cluster all as processed
 - etc.
-
-
 
 Similarly, for the wip twitter client:
 

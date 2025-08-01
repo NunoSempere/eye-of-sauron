@@ -14,9 +14,10 @@
   - [x] Reduce duplication
     - [x] Dates filtering
     - [ ] ~~Define common pipeline?~~ => enough unique differences for each source that it's hard
-  - [ ] Take the database boundary more seriously and try services on Rust/python/typescript/etc.
-    - [ ] Create templates and ask other people to use them
-    - [ ] How might the architecture look like?
+  - [x] Take the database boundary more seriously and try services on Rust/python/typescript/etc.
+    - [x] How might the architecture look like?
+    - [x] Create template for python
+    - [ ] ask other people to use them
 
 ## v3: QoL
 
