@@ -297,7 +297,7 @@ func (a *App) clusterSources() error {
 	}
 
 	// Get embeddings
-	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings..."})
+	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings..."})
 	embeddings, err := getEmbeddingsStaggered(texts, openaiKey)
 	if err != nil {
 		log.Printf("Error getting embeddings: %v\n", err)
@@ -308,7 +308,7 @@ func (a *App) clusterSources() error {
 	a.embeddings = embeddings
 
 	// Get clusters
-	a.drawLines([]string{"Getting sources...", "Clustering sources...", "Getting embeddings...", "Calculating clusters... [this may take a while]"})
+	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings...", "  Calculating clusters... [this may take a while]"})
 	clusters := getClusters(embeddings)
 
 	// Store clusters in App
@@ -375,11 +375,28 @@ func (a *App) sortSourcesByCluster() {
 		clusterGroups[clusterID] = append(centralPoints, outliers...)
 	}
 
+	// Sort the cluster group themselves 
+	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings...", "  Calculating clusters... [this may take a while]", "  Grouping clusters"})
+	sss := [][]Source{}
+	for _, ss := range clusterGroups {
+		sss = append(sss, ss)
+	}
+	sss_ordered_by_cluster, err := reorderClusters(sss)
+	if err != nil {
+		log.Printf("Error sorting clusters by topic: %v", err)
+	}
+
+
 	// Rebuild the sources slice: unclustered first, then clusters in order
 	newSources := []Source{}
 	newSources = append(newSources, unclusteredSources...)
 
+	for _, ss := range sss_ordered_by_cluster {
+		newSources = append(newSources, ss...)
+	}
+
 	// Add clusters in order (0, 1, 2, ...)
+	/*
 	maxClusterID := -1
 	for clusterID := range clusterGroups {
 		if clusterID > maxClusterID {
@@ -388,10 +405,11 @@ func (a *App) sortSourcesByCluster() {
 	}
 
 	for clusterID := 0; clusterID <= maxClusterID; clusterID++ {
-		if cluster, exists := clusterGroups[clusterID]; exists {
-			newSources = append(newSources, cluster...)
+		if clusterPoints, exists := clusterGroups[clusterID]; exists {
+			newSources = append(newSources, clusterPoints...)
 		}
 	}
+	*/
 
 	a.sources = newSources
 }
