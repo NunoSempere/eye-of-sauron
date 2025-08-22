@@ -6,5 +6,7 @@ CREATE TABLE IF NOT EXISTS sources (
     summary TEXT,
     importance_bool BOOLEAN,
     importance_reasoning TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed BOOLEAN DEFAULT FALSE,
+    relevant_per_human_check TEXT DEFAULT 'maybe',
 );

@@ -79,7 +79,11 @@ func fetchOpenAIAnswerJSON(req OpenAIRequest, schema openai.ChatCompletionRespon
       		// invalid auth or key (do not retry)
     		case 429: 
     	    // exceeded money in account; refill
-    			outbound.SendPostmarkEmail("Not enough money in OpenAI account; refill")
+    	  	flag := outbound.CheckFlag()
+    	  	if !flag {
+    				outbound.SendPostmarkEmail("Not enough money in OpenAI account; refill")
+    				outbound.SetFlag()
+    	  	}
     		case 500:
       		// openai server error (retry)
           // TODO

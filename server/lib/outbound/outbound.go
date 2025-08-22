@@ -24,7 +24,7 @@ func SendPostmarkEmail(html_body string) (string, error) {
 	}{
 		From:          "server@nunosempere.com",
 		To:            email,
-		Subject:       "SFF results",
+		Subject:       "Warning",
 		TextBody:      "",
 		HtmlBody:      html_body,
 		TrackLinks:    "None",

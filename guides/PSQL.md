@@ -35,6 +35,25 @@ ALTER TABLE sources ADD COLUMN "processed" BOOLEAN DEFAULT FALSE;
 ALTER TABLE sources ADD COLUMN "relevant_per_human_check" TEXT DEFAULT 'maybe';
 ```
 
+
+Flags table:
+
+```
+CREATE TABLE IF NOT EXISTS flags (
+    name VARCHAR(50) PRIMARY KEY,
+    code INTEGER NOT NULL,
+    msg TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+UPDATE flags
+SET code = 0,
+    msg = 'Flag cleared',
+    updated_at = CURRENT_TIMESTAMP
+WHERE name = 'openai_refill';
+```
+
 To read a command from a file:
 
 ```
