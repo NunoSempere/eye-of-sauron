@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"errors"
 
 	openai "github.com/sashabaranov/go-openai"
 	jsonschema "github.com/sashabaranov/go-openai/jsonschema"
+	outbound "git.nunosempere.com/NunoSempere/news/lib/outbound"
 )
 
 // https://openai.com/api/pricing/
@@ -69,6 +71,22 @@ func fetchOpenAIAnswerJSON(req OpenAIRequest, schema openai.ChatCompletionRespon
 
 	if err != nil {
 		log.Printf("ChatCompletion error: %v\n", err)
+
+		e := &openai.APIError{}
+		if errors.As(err, &e) {
+  		switch e.HTTPStatusCode {
+    		case 401:
+      		// invalid auth or key (do not retry)
+    		case 429: 
+    	    // exceeded money in account; refill
+    			outbound.SendPostmarkEmail("Not enough money in OpenAI account; refill")
+    		case 500:
+      		// openai server error (retry)
+          // TODO
+    		default:
+      		// unhandled
+  		}
+		}
 		return "", err
 	}
 
