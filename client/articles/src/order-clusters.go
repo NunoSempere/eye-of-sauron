@@ -2,8 +2,8 @@ package main
 
 import (
   "os"
-    "log"
-    "regexp"
+  "log"
+  "regexp"
   "bufio"
   "strings"
 )
@@ -101,8 +101,13 @@ func reorderClusters(sss [][]Source) ([][]Source, error) {
         remaining_source_lists = new_remaining_source_lists
     }
 
+  	// fmt.Printf("%v", remaining_source_lists)
+  	// fmt.Printf("Press enter to continue")
+    // bufio.NewReader(os.Stdin).ReadBytes('\n') // wait for keyword
+
     // Append remaining sources that didn't fit into any topic, sorted alphabetically
     // Show sources that don't fit neatly into a topic first
+
     reordered_source_lists = append(reordered_source_lists, remaining_source_lists...)
 
     return reordered_source_lists, nil

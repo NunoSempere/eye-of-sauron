@@ -1,6 +1,4 @@
 Iran: Iran, Ayatollah, Tehran
-Gaza: Gaza, Palestine, Hamas
-Israel: Israel, Netanyahu
 Yemen: Yemen, Houthi
 Lebanon: Lebanon, Hezbollah
 Middle East: Syria, Middle East, Qatar, Afghanistan, Saudi
@@ -18,3 +16,5 @@ Europe: UK, France, French, British, Spain, Spanish, German
 Nuclear: nuclear
 US: Trump, US
 Low level threat: hurricane, flood, climate change, school shooting, fire, storm, fentanyl, \s\d\d killed, hot
+Israel: Israel, Netanyahu
+
