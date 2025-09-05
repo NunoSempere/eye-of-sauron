@@ -103,7 +103,7 @@ func reorderClusters(sss [][]Source) ([][]Source, error) {
 
     // Append remaining sources that didn't fit into any topic, sorted alphabetically
     // Show sources that don't fit neatly into a topic first
-    reordered_source_lists = append(remaining_source_lists, reordered_source_lists...)
+    reordered_source_lists = append(reordered_source_lists, remaining_source_lists...)
 
     return reordered_source_lists, nil
 }
