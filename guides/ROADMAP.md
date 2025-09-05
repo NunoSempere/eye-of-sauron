@@ -3,6 +3,8 @@
 - [ ] Select sources to parse
 - [ ] Add an alternative html/js-based frontend, so that other forecasters can use it
 - [ ] Go back to functional programming. Define pipelines at a higher level of abstraction
+- [ ] Check for better/original sources, e.g., Reuters, AP, when the title is the same. Do this after an article has passed filters, not before
+- [ ] Replace sources with AP/Reuters/AlJazeera
 
 ## v4: Fix technical debt
 
