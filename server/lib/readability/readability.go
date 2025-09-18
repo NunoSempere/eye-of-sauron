@@ -6,22 +6,54 @@ import (
 	"log"
 	"net/url"
 	"net/http"
+	"os/exec"
 	"strings"
 	"time"
 	"github.com/PuerkitoBio/goquery"
 )
 
+// LynxDump extracts text content from a URL using the lynx browser
+func LynxDump(url string) (string, error) {
+	cmd := exec.Command("lynx", "-dump", "-nolist", url)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	
+	result := strings.TrimSpace(string(output))
+	if len(result) < 50 {
+		return "", errors.New("lynx output too short")
+	}
+	
+	return result, nil
+}
+
 func GetReadabilityOutput(article_url string) (string, error) {
+	// Helper function to try lynx fallback
+	lynxFallback := func(reason string, originalErr error) (string, error) {
+		lynx_result, lynx_err := LynxDump(article_url)
+		if lynx_err != nil {
+			if originalErr != nil {
+				log.Printf("%s: %v, lynx also failed: %v", reason, originalErr, lynx_err)
+				return "", errors.Join(originalErr, lynx_err)
+			} else {
+				log.Printf("%s, lynx also failed: %v", reason, lynx_err)
+				return "", lynx_err
+			}
+		}
+		log.Printf("%s, using lynx fallback", reason)
+		return lynx_result, nil
+	}
+
 	readability_url := "https://trastos.nunosempere.com/readability?url=" + article_url // url must start with https
 	readability_response, err := web.Get(readability_url)
 	if err != nil {
-		return "", err
+		return lynxFallback("Readability service failed", err)
 	}
 	readability_result := string(readability_response)
 
 	if len(readability_result) < 200 {
-		log.Println("Error in GetReadabilityOutput: readability output too short")
-		return "", errors.New("Readability output too short")
+		return lynxFallback("Readability output too short", nil)
 	}
 	return readability_result, nil
 }
