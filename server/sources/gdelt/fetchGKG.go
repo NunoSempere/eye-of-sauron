@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -25,7 +26,7 @@ type GKGNode struct {
 func cut(s string, delimiter string, n int) (string, error) {
 	parts := strings.Split(s, delimiter)
 	if len(parts) < n {
-		err := fmt.Errorf("Expected at least %d parts, got: %d", n, len(parts))
+		err := fmt.Errorf("expected at least %d parts, got: %d", n, len(parts))
 		log.Println(err)
 		return "", err
 	}
@@ -41,9 +42,9 @@ func findGKGNodeTitle(data string) (string, error) {
 	}
 	matches := re.FindStringSubmatch(data)
 	if len(matches) < 2 {
-		error_msg := "In findGKGNodeTitle, title not found"
+		error_msg := "in findGKGNodeTitle, title not found"
 		log.Printf("%s", error_msg)
-		return "", fmt.Errorf(error_msg)
+		return "", errors.New(error_msg)
 	}
 	return matches[1], nil
 }
@@ -185,11 +186,11 @@ func SearchGKG() ([]types.Source, error) {
 
 	if err != nil {
 		gkg_reader.Seek(0, 0)
-		return nil, fmt.Errorf("Error reading zip content: %w\ndata: %v", err, gkg_data)
+		return nil, fmt.Errorf("error reading zip content: %w\ndata: %v", err, gkg_data)
 	}
 
 	if len(zip_reader.File) == 0 {
-		return nil, fmt.Errorf("Zip file is empty")
+		return nil, fmt.Errorf("zip file is empty")
 	}
 
 	zipped_file, err := zip_reader.File[0].Open()

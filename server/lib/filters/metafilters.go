@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"slices"
 
+	"git.nunosempere.com/NunoSempere/news/lib/llm"
+	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"github.com/jackc/pgx/v5"
 
@@ -93,4 +95,40 @@ func CleanTitleFilter() types.Filter {
 	}
 	return filter
 
+}
+
+func ExtractContentAndSummarizeFilter(openai_key string) types.Filter {
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		content, err := readability.GetArticleContent(source.Link)
+		if err != nil {
+			log.Printf("Filtered because: Error getting article content: %v", err)
+			return source, false
+		}
+
+		summary, err := llm.Summarize(content, openai_key)
+		if err != nil {
+			log.Printf("Filtered because: Error summarizing: %v", err)
+			return source, false
+		}
+		source.Summary = summary
+		return source, true
+	}
+	return filter
+}
+
+func CheckImportanceFilter(openai_key string) types.Filter {
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		existential_importance_snippet := "# " + source.Title + "\n\n" + source.Summary
+		existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
+		if err != nil || existential_importance_box == nil {
+			log.Printf("Filtered because: is not important")
+			return source, false
+		}
+		source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
+		source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
+
+		log.Printf("importance bool: %t", source.ImportanceBool)
+		return source, source.ImportanceBool
+	}
+	return filter
 }

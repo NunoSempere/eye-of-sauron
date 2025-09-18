@@ -19,9 +19,9 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 
 	// Initialize expanded source
 	es := types.ExpandedSource{
-		Title: source.Title,
-		Link:  source.URL,
-		Date:  createdAt,
+		Title:  source.Title,
+		Link:   source.URL,
+		Date:   createdAt,
 		Origin: "HackerNews",
 	}
 
@@ -40,8 +40,13 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	}
 
 	// Apply standard filters
-	filters_list := filters.StandardFilterPipeline(database_url)
-	es, ok := filters.ApplyFilters(es, filters_list)
+	fs := []types.Filter{
+		filters.IsFreshFilter(),
+		filters.IsDupeFilter(database_url),
+		filters.IsGoodHostFilter(),
+		filters.CleanTitleFilter(),
+	}
+	es, ok := filters.ApplyFilters(es, fs)
 	if !ok {
 		return es, false
 	}

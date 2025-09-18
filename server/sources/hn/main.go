@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
 	"github.com/joho/godotenv"
-	// "git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
 func main() {
@@ -42,9 +42,9 @@ func main() {
 				log.Printf("Found %d HackerNews articles", len(hnSources))
 				for i, hit := range hnSources {
 					log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), hit.Title)
-					expanded_source, passes_filters := FilterAndExpandSource(hit, openai_key, pg_database_url)
-					if passes_filters {
-						SaveSource(expanded_source)
+					es, ok := FilterAndExpandSource(hit, openai_key, pg_database_url)
+					if ok {
+						pgx.SaveSource(es)
 					}
 				}
 			}

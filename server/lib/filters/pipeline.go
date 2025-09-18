@@ -21,7 +21,7 @@ func ApplyFilters(source types.ExpandedSource, filters []types.Filter) (types.Ex
 }
 
 // StandardFilterPipeline creates a standard set of filters used by most sources
-func StandardFilterPipeline(database_url string) []types.Filter {
+func DeprecatedStandardFilterPipeline(database_url string) []types.Filter {
 	return []types.Filter{
 		IsFreshFilter(),
 		IsDupeFilter(database_url),
@@ -63,17 +63,17 @@ func CheckImportance(source types.ExpandedSource, openai_key string) (types.Expa
 }
 
 // StandardProcessingPipeline processes source through standard filters, content extraction, and importance check
-func StandardProcessingPipeline(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func DeprecatedStandardProcessingPipeline(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
 	// Initialize expanded source
 	es := types.ExpandedSource{
-		Title: source.Title,
-		Link:  source.Link,
-		Date:  source.Date,
+		Title:  source.Title,
+		Link:   source.Link,
+		Date:   source.Date,
 		Origin: source.Origin,
 	}
 
 	// Apply standard filters
-	filters := StandardFilterPipeline(database_url)
+	filters := DeprecatedStandardFilterPipeline(database_url)
 	es, ok := ApplyFilters(es, filters)
 	if !ok {
 		return es, false

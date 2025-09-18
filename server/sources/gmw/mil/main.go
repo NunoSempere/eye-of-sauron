@@ -3,11 +3,12 @@ package main
 import (
 	"io"
 	"log"
-	"os"
 	"math/rand"
+	"os"
 	"slices"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
 	"github.com/joho/godotenv"
 )
 
@@ -31,49 +32,49 @@ func main() {
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	for {
-	frontpage_articles, err := GetFrontpageUrls()
-	if err != nil {
-		log.Print(err)
-	}
-	// log.Println(frontpage_articles)
-	titles := []string{}
-	for _, url := range frontpage_articles {
-		log.Printf("Url: %s", url)
-
-		// filter here so as to not fetch full article if not necessary
-		date, hasDate := ExtractDateFromURL(url)
-		if hasDate && !IsWithinTwoDays(date) {
-			log.Printf("Article is stale")
-			continue
-		}
-
-		ms := 5000 + int64(2000 * rand.Float32())
-		time.Sleep(time.Duration(ms) * time.Millisecond)
-		article, err := ExtractFrontpageArticle(url)
+		frontpage_articles, err := GetFrontpageUrls()
 		if err != nil {
 			log.Print(err)
-			// log.Print(err)
-			continue
 		}
+		// log.Println(frontpage_articles)
+		titles := []string{}
+		for _, url := range frontpage_articles {
+			log.Printf("Url: %s", url)
 
-		// All articles are duplicated, but with different underlying urls :(
-		if slices.Contains(titles, article.Title) {
-			// log.Println("Article is a duplicate")
-			continue
+			// filter here so as to not fetch full article if not necessary
+			date, hasDate := ExtractDateFromURL(url)
+			if hasDate && !IsWithinTwoDays(date) {
+				log.Printf("Article is stale")
+				continue
+			}
+
+			ms := 5000 + int64(2000*rand.Float32())
+			time.Sleep(time.Duration(ms) * time.Millisecond)
+			article, err := ExtractFrontpageArticle(url)
+			if err != nil {
+				log.Print(err)
+				// log.Print(err)
+				continue
+			}
+
+			// All articles are duplicated, but with different underlying urls :(
+			if slices.Contains(titles, article.Title) {
+				// log.Println("Article is a duplicate")
+				continue
+			}
+			titles = append(titles, article.Title)
+
+			log.Printf("Title: %s", article.Title)
+
+			expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
+			// useful for filtering duplicates within the same batch
+			// eventually I'd need to have a longer database of titles
+			if passes_filters {
+				log.Println(expanded_source.Summary)
+				pgx.SaveSource(expanded_source)
+			}
 		}
-		titles = append(titles, article.Title)
-
-		log.Printf("Title: %s", article.Title)
-
-		expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
-		// useful for filtering duplicates within the same batch
-		// eventually I'd need to have a longer database of titles
-		if passes_filters {
-			log.Println(expanded_source.Summary)
-			SaveSource(expanded_source)
-		}
-	}
-	log.Printf("Finished batch. Continuing in 12 hours")
-	time.Sleep(12 * time.Hour)
+		log.Printf("Finished batch. Continuing in 12 hours")
+		time.Sleep(12 * time.Hour)
 	}
 }

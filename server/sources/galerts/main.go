@@ -6,6 +6,10 @@ import (
 	"os"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/filters"
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+
 	"github.com/joho/godotenv"
 )
 
@@ -41,15 +45,23 @@ func main() {
 			log.Printf("Number of articles in keyword: %v", len(articles))
 
 			for i, article := range articles {
-				log.Printf("\n")
-				log.Printf("Article #%v/%v [keyword \"%v\"]: %v (%v)", i, len(articles), keyword, article.Title, article.Date)
-				expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
-				if passes_filters {
-					log.Printf("Saving source")
-					SaveSource(expanded_source)
-				} else {
-					log.Printf("Not saving source")
+				log.Printf("\nArticle #%v/%v [keyword \"%v\"]: %v (%v)", i, len(articles), keyword, article.Title, article.Date)
+
+				es := types.ExpandedSource{Title: article.Title, Link: article.Link, Date: article.Date}
+
+				fs := []types.Filter{
+					filters.IsFreshFilter(),
+					filters.IsDupeFilter(pg_database_url),
+					filters.IsGoodHostFilter(),
+					filters.CleanTitleFilter(),
+					filters.ExtractContentAndSummarizeFilter(openai_key),
+					filters.CheckImportanceFilter(openai_key),
 				}
+				es, ok := filters.ApplyFilters(es, fs)
+				if !ok {
+					continue
+				}
+				pgx.SaveSource(es)
 			}
 		}
 		log.Printf("Finished Google Alerts batch, pausing for half an hour")

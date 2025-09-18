@@ -1,11 +1,15 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"os"
 	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/filters"
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -58,13 +62,23 @@ func main() {
 			for i, article := range articles {
 				log.Printf("\n\nArticle #%v/%v [GDELT.GKG]: %v (%v)\n", i+1, len(articles), article.Title, article.Date)
 
-				expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
-				if passes_filters {
-					SaveSource(expanded_source)
+				es := types.ExpandedSource{Title: article.Title, Link: article.Link, Date: article.Date}
+
+				fs := []types.Filter{
+					filters.IsFreshFilter(),
+					filters.IsDupeFilter(pg_database_url),
+					filters.IsGoodHostFilter(),
+					filters.CleanTitleFilter(),
+					filters.ExtractContentAndSummarizeFilter(openai_key),
+					filters.CheckImportanceFilter(openai_key),
 				}
+				es, ok := filters.ApplyFilters(es, fs)
+				if !ok {
+					continue
+				}
+				pgx.SaveSource(es)
 			}
 			log.Printf("\n\nFinished processing gkg batch\n")
-			return
 		}()
 	}
 
