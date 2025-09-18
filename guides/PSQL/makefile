@@ -141,15 +141,15 @@ backup-sources-ai:
 	psql $$DATABASE_POOL_URL -c "COPY \"sources-ai\" TO STDOUT WITH CSV HEADER" > sources-ai-backup-$$(date +%Y%m%d).csv
 	@echo "Sources-AI table backed up to sources-ai-backup-$$(date +%Y%m%d).csv"
 
-export-relevant:
+csv-relevant:
 	psql $$DATABASE_POOL_URL -c "COPY (SELECT title, link, date FROM sources WHERE relevant_per_human_check = 'yes') TO STDOUT WITH CSV HEADER;" > relevant-sources-$$(date +%Y%m%d).csv
 	@echo "Relevant sources exported to relevant-sources-$$(date +%Y%m%d).csv"
 
-export-all:
+csv-all:
 	psql $$DATABASE_POOL_URL -c "COPY (SELECT title, link, date, summary FROM sources) TO STDOUT WITH CSV HEADER;" > all-sources-$$(date +%Y%m%d).csv
 	@echo "All sources exported to all-sources-$$(date +%Y%m%d).csv"
 
-export-ai:
+csv-ai:
 	psql $$DATABASE_POOL_URL -c "COPY (SELECT title, link, date, summary FROM \"sources-ai\") TO STDOUT WITH CSV HEADER;" > ai-sources-$$(date +%Y%m%d).csv
 	@echo "AI sources exported to ai-sources-$$(date +%Y%m%d).csv"
 
