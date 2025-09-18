@@ -52,6 +52,7 @@ func TranslateArticle(article GmwMilSource, openai_token string) (GmwMilSourceTr
 }
 
 func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url string) (types.ExpandedSource, bool) {
+	// is there some parsimonious way of doing this in a more functional way that reuses code? Probably not?
 
 	date, _ := ExtractDateFromURL(article.Link)
 	is_dupe := filters.IsDupe(types.Source{Title: article.Title, Link: article.Link}, database_url)

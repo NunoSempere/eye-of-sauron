@@ -1,10 +1,7 @@
 package main
 
 import (
-	"log"
-
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
-	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
@@ -14,33 +11,22 @@ import (
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
 	// Use standard processing pipeline with optional title extraction
 	es := types.ExpandedSource{
-		Title: source.Title,
-		Link:  source.Link,
-		Date:  source.Date,
+		Title:  source.Title,
+		Link:   source.Link,
+		Date:   source.Date,
 		Origin: source.Origin,
 	}
 
-	// Apply standard filters
-	filters_list := filters.StandardFilterPipeline(database_url)
-	es, ok := filters.ApplyFilters(es, filters_list)
-	if !ok {
-		return es, false
+	fs := []types.Filter{
+		filters.IsFreshFilter(),
+		filters.IsDupeFilter(database_url),
+		filters.IsGoodHostFilter(),
+		filters.CleanTitleFilter(),
+		filters.ExtractSummaryFilter(openai_key),
+		filters.CheckImportanceFilter(openai_key),
 	}
+	es, ok := filters.ApplyFilters(es, fs)
 
-	// Try to get a better title from the source HTML
-	if title := readability.ExtractTitle(source.Link); title != "" {
-		es.Title = title
-		log.Printf("Found title from HTML: %s", title)
-		// Clean the extracted title
-		es.Title = filters.CleanTitle(es.Title)
-	}
+	return es, ok
 
-	// Extract content and summarize
-	es, ok = filters.ExtractContentAndSummarize(es, openai_key)
-	if !ok {
-		return es, false
-	}
-
-	// Check importance
-	return filters.CheckImportance(es, openai_key)
 }

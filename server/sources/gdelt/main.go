@@ -69,24 +69,16 @@ func main() {
 					filters.IsDupeFilter(pg_database_url),
 					filters.IsGoodHostFilter(),
 					filters.CleanTitleFilter(),
-					filters.ExtractContentAndSummarizeFilter(openai_key),
+					filters.ExtractSummaryFilter(openai_key),
 					filters.CheckImportanceFilter(openai_key),
 				}
 				es, ok := filters.ApplyFilters(es, fs)
-				if !ok {
-					continue
+				if ok {
+					pgx.SaveSource(es)
 				}
-				pgx.SaveSource(es)
 			}
 			log.Printf("\n\nFinished processing gkg batch\n")
 		}()
 	}
-
-	// Keep main function alive
-	/*
-		done := make(chan bool)
-		log.Println("Main function is now waiting indefinitely...")
-		<-done
-	*/
 
 }

@@ -66,12 +66,12 @@ func main() {
 
 			log.Printf("Title: %s", article.Title)
 
-			expanded_source, passes_filters := FilterAndExpandSource(article, openai_key, pg_database_url)
+			es, ok := FilterAndExpandSource(article, openai_key, pg_database_url)
 			// useful for filtering duplicates within the same batch
 			// eventually I'd need to have a longer database of titles
-			if passes_filters {
-				log.Println(expanded_source.Summary)
-				pgx.SaveSource(expanded_source)
+			if ok {
+				log.Println(es.Summary)
+				pgx.SaveSource(es)
 			}
 		}
 		log.Printf("Finished batch. Continuing in 12 hours")

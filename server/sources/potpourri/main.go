@@ -1,16 +1,17 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
-	"github.com/joho/godotenv"
-	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
+	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 	for {
 		log.Println("Starting potpourri sources processing")
-		
+
 		// Process sources in configured order
 		for _, sourceCfg := range config.GetEnabledSources() {
 			switch sourceCfg.Name {
@@ -46,10 +47,10 @@ func main() {
 					log.Printf("Found %d DSCA articles", len(dscaSources))
 					for i, source := range dscaSources {
 						log.Printf("\nProcessing DSCA article %d/%d: %s", i+1, len(dscaSources), source.Title)
-						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
-						if passes_filters {
-							expanded_source.Origin = source.Origin
-							SaveSource(expanded_source)
+
+						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if ok {
+							pgx.SaveSource(es)
 						}
 					}
 				}
@@ -63,10 +64,10 @@ func main() {
 					log.Printf("Found %d White House articles", len(whSources))
 					for i, source := range whSources {
 						log.Printf("\nProcessing White House article %d/%d: %s", i+1, len(whSources), source.Title)
-						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
-						if passes_filters {
-							expanded_source.Origin = source.Origin
-							SaveSource(expanded_source)
+
+						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if ok {
+							pgx.SaveSource(es)
 						}
 					}
 				}
@@ -80,17 +81,17 @@ func main() {
 					log.Printf("Found %d CNN articles", len(cnnSources))
 					for i, source := range cnnSources {
 						log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
-						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
-						if passes_filters {
-							expanded_source.Origin = source.Origin
-							SaveSource(expanded_source)
+
+						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						if ok {
+							pgx.SaveSource(es)
 						}
 					}
 				}
 
 			}
 		}
-		
+
 		log.Printf("Finished processing potpourri sources, sleeping for 1 hour")
 		time.Sleep(1 * time.Hour)
 	}

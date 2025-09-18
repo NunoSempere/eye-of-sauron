@@ -59,11 +59,3 @@ func SaveToAIDatabase(source types.ExpandedSource) {
 func SaveSource(source types.ExpandedSource) {
 	SaveToMainDatabase(source)
 }
-
-// SaveSourceConditional saves to AI database always, and to main database if passes_filters is true
-func SaveSourceConditional(source types.ExpandedSource, passes_filters bool) {
-	SaveToAIDatabase(source)
-	if passes_filters {
-		SaveToMainDatabase(source)
-	}
-}

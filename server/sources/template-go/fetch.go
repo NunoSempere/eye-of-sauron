@@ -106,7 +106,7 @@ func fetchFromAPI(url string) ([]types.Source, error) {
 }
 
 func doSmth(_ interface{}) {
-	return
+
 }
 
 // fetchFromWebpage scrapes sources from a webpage

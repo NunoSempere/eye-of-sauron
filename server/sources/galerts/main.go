@@ -54,14 +54,13 @@ func main() {
 					filters.IsDupeFilter(pg_database_url),
 					filters.IsGoodHostFilter(),
 					filters.CleanTitleFilter(),
-					filters.ExtractContentAndSummarizeFilter(openai_key),
+					filters.ExtractSummaryFilter(openai_key),
 					filters.CheckImportanceFilter(openai_key),
 				}
 				es, ok := filters.ApplyFilters(es, fs)
-				if !ok {
-					continue
+				if ok {
+					pgx.SaveSource(es)
 				}
-				pgx.SaveSource(es)
 			}
 		}
 		log.Printf("Finished Google Alerts batch, pausing for half an hour")

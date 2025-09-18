@@ -97,7 +97,19 @@ func CleanTitleFilter() types.Filter {
 
 }
 
-func ExtractContentAndSummarizeFilter(openai_key string) types.Filter {
+func ExtractBetterTitle() types.Filter {
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		if title := readability.ExtractTitle(source.Link); title != "" {
+			log.Printf("Found title from HTML: %s", title)
+			// Clean the extracted title
+			source.Title = CleanTitle(title)
+		}
+		return source, true
+	}
+	return filter
+}
+
+func ExtractSummaryFilter(openai_key string) types.Filter {
 	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
 		content, err := readability.GetArticleContent(source.Link)
 		if err != nil {

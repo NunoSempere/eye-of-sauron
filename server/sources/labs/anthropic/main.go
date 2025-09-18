@@ -1,11 +1,12 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
 	"github.com/joho/godotenv"
 )
 
@@ -29,22 +30,25 @@ func main() {
 
 	for {
 		log.Println("Starting Anthropic news processing")
-		
+
 		sources, err := FetchSources()
 		if err != nil {
 			log.Printf("Error fetching sources: %v", err)
 			continue
 		}
-		
+
 		log.Printf("Found %d sources", len(sources))
-		
+
 		// Process each source
 		for i, source := range sources {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
-			
-			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+
+			es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
 			// Always save to AI database, and save to main database if passes filters
-			SaveSource(expanded_source, passes_filters)
+			if ok {
+				pgx.SaveToMainDatabase(es)
+			}
+			pgx.SaveToAIDatabase(es)
 		}
 
 		log.Printf("Finished processing Anthropic news, sleeping for 6 hours")

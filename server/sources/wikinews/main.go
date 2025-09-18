@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/pgx"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"github.com/joho/godotenv"
 )
@@ -64,7 +65,7 @@ func main() {
 			}
 			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 			if passes_filters {
-				SaveSource(expanded_source)
+				pgx.SaveSource(expanded_source)
 			}
 		}
 
