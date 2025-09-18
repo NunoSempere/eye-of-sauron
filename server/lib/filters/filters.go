@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+func isFreshDate(t time.Time) bool{
+
+	now := time.Now()
+	fifteen_days_before := now.AddDate(0, 0, -15)
+	fifteen_days_after := now.AddDate(0, 0, 15)
+
+	return t.After(fifteen_days_before) && t.Before(fifteen_days_after)
+
+}
+
 func IsFresh(source types.Source, layout string) bool {
 	date_str := source.Date
 	parsed_time, err := time.Parse(layout, date_str)
@@ -19,12 +29,7 @@ func IsFresh(source types.Source, layout string) bool {
 		return false
 	}
 
-	now := time.Now()
-	fifteen_days_before := now.AddDate(0, 0, -15)
-	fifteen_days_after := now.AddDate(0, 0, 15)
-
-	return parsed_time.After(fifteen_days_before) && parsed_time.Before(fifteen_days_after)
-
+	return isFreshDate(parsed_time)
 }
 
 func IsDupe(source types.Source, database_url string) bool {
