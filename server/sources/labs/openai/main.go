@@ -43,9 +43,8 @@ func main() {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
 			
 			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
-			if passes_filters {
-				SaveSource(expanded_source)
-			}
+			// Always save to AI database, and save to main database if passes filters
+			SaveSource(expanded_source, passes_filters)
 		}
 
 		log.Printf("Finished processing OpenAI news, sleeping for 6 hours")
