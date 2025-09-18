@@ -1,0 +1,16 @@
+[Unit]
+Description=Anthropic News Fetcher
+After=network.target
+
+[Service]
+Type=simple
+# TODO: Replace with the appropriate user
+User=nuno
+# TODO: Update with the correct path to the project
+WorkingDirectory=/home/nuno/Software/golang/eye-of-sauron/server/sources/labs/anthropic
+ExecStart=/usr/local/go/bin/go run fetch.go filterAndExpandSource.go saveSource.go main.go
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
