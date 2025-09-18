@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
-	"git.nunosempere.com/NunoSempere/news/lib/llm"
-	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
@@ -19,93 +17,60 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 		createdAt = time.Now()
 	}
 
-	tmp_source := types.Source{
-		Title:  source.Title,
-		Link:   source.URL,
-		Date:   createdAt,
-		Origin: "HackerNews",
-	}
-	expanded_source := types.ExpandedSource{
+	// Initialize expanded source
+	es := types.ExpandedSource{
 		Title: source.Title,
-		// Summary: source.StoryText, : will add later
-		Link:   source.URL,
-		Date:   createdAt,
+		Link:  source.URL,
+		Date:  createdAt,
 		Origin: "HackerNews",
 	}
 
+	// HN-specific pre-filters
 	if source.URL == "" && source.StoryText == "" {
 		log.Printf("No url or text")
-		return expanded_source, false
+		return es, false
 	}
 	if source.Points < 2 && source.NumComments < 2 {
 		log.Printf("< 2 points and < 2comments")
-		return expanded_source, false
+		return es, false
 	}
 	if startsWithAny(source.Title, []string{"Ask HN:", "Launch HN:", "Show HN:"}) {
 		log.Printf("Ask/Launch/Show HN")
-		return expanded_source, false
+		return es, false
 	}
 
-	// Check for duplicates
-	is_dupe := filters.IsDupe(tmp_source, database_url)
-	if is_dupe {
-		return expanded_source, false
+	// Apply standard filters
+	filters_list := filters.StandardFilterPipeline(database_url)
+	es, ok := filters.ApplyFilters(es, filters_list)
+	if !ok {
+		return es, false
 	}
 
-	// Check is fresh
-	is_fresh := filters.IsFreshDate(tmp_source.Date)
-	if !is_fresh {
-		return expanded_source, false
-	}
-
-	// Check if host is acceptable
-	is_good_host := filters.IsGoodHost(tmp_source)
-	if !is_good_host {
-		return expanded_source, false
-	}
-
-	// Clean the title
-	expanded_source.Title = filters.CleanTitle(expanded_source.Title)
-
-	// If story text is larger than a tweet, evaluate as is
+	// Custom content handling for HN
 	if len(source.StoryText) > 100 {
-		expanded_source.Summary = source.StoryText
+		// Use story text directly if substantial
+		es.Summary = source.StoryText
 	} else {
-		// Get article content
-		content, err := readability.GetArticleContent(tmp_source.Link)
-		if err != nil {
-			log.Printf("Content extraction failed for %s: %v", tmp_source.Link, err)
-			return expanded_source, false
+		// Extract and summarize content
+		es, ok = filters.ExtractContentAndSummarize(es, openai_key)
+		if !ok {
+			return es, false
 		}
-
-		// Summarize the article
-		summary, err := llm.Summarize(content, openai_key)
-		if err != nil {
-			log.Printf("Summarization failed for %s: %v", tmp_source.Link, err)
-			return expanded_source, false
-		}
-		expanded_source.Summary = summary
-		log.Printf("Summary: %s", expanded_source.Summary)
 	}
 
 	// Check importance
-	existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + expanded_source.Summary
-	existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
-	if err != nil || existential_importance_box == nil {
-		log.Printf("Importance check failed for %s: %v", tmp_source.Link, err)
-		return expanded_source, false
+	es, ok = filters.CheckImportance(es, openai_key)
+	if !ok {
+		return es, false
 	}
-	expanded_source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
-	expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
-	log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
-	log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
 
+	// HN-specific importance boost
 	if strings.Contains(source.Title, "Saudi Arabia") {
-		expanded_source.ImportanceBool = true
-		expanded_source.ImportanceReasoning = "Contains keyword"
+		es.ImportanceBool = true
+		es.ImportanceReasoning = "Contains keyword"
 	}
 
-	return expanded_source, expanded_source.ImportanceBool
+	return es, es.ImportanceBool
 }
 
 func startsWithAny(s string, prefixes []string) bool {

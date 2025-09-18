@@ -12,36 +12,32 @@ import (
 )
 
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
-	expanded_source := types.ExpandedSource{
+	// Initialize expanded source
+	es := types.ExpandedSource{
 		Title: source.Title,
 		Link:  source.Link,
 		Date:  source.Date,
+		Origin: source.Origin,
 	}
 
-	// Check for duplicates
-	is_dupe := filters.IsDupe(source, database_url)
-	if is_dupe {
-		return expanded_source, false
+	// Apply standard filters
+	filters_list := filters.StandardFilterPipeline(database_url)
+	es, ok := filters.ApplyFilters(es, filters_list)
+	if !ok {
+		return es, false
 	}
 
-	// Check if host is acceptable
-	is_good_host := filters.IsGoodHost(source)
-	if !is_good_host {
-		return expanded_source, false
-	}
-
+	// Try to get a better title from the source HTML
 	if title := readability.ExtractTitle(source.Link); title != "" {
-		expanded_source.Title = title
+		es.Title = title
 		log.Printf("Found title from HTML: %s", title)
+		// Clean the extracted title
+		es.Title = filters.CleanTitle(es.Title)
 	}
 
-	expanded_source.Title = filters.CleanTitle(expanded_source.Title)
-
-	// Get article content
+	// Custom content extraction for DSCA articles
 	var content string
 	var err error
-
-	// Use direct extraction for DSCA articles
 	if strings.Contains(source.Origin, "DSCA") {
 		content, err = dsca.GetArticleContent(source.Link)
 	} else {
@@ -50,29 +46,18 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 
 	if err != nil {
 		log.Printf("Content extraction failed for %s: %v", source.Link, err)
-		return expanded_source, false
+		return es, false
 	}
 
 	// Summarize the article
 	summary, err := llm.Summarize(content, openai_key)
 	if err != nil {
 		log.Printf("Summarization failed for %s: %v", source.Link, err)
-		return expanded_source, false
+		return es, false
 	}
-	expanded_source.Summary = summary
-	log.Printf("Summary: %s", expanded_source.Summary)
+	es.Summary = summary
+	log.Printf("Summary: %s", es.Summary)
 
 	// Check importance
-	existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + summary
-	existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
-	if err != nil || existential_importance_box == nil {
-		log.Printf("Importance check failed for %s: %v", source.Link, err)
-		return expanded_source, false
-	}
-	expanded_source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
-	expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
-	log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
-	log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
-
-	return expanded_source, expanded_source.ImportanceBool
+	return filters.CheckImportance(es, openai_key)
 }

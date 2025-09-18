@@ -57,7 +57,7 @@ func isDupeTitleOrLink(database_url string, title string, link string) bool {
 
 func IsDupeFilter(database_url string) types.Filter {
 	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
-		return source, isDupeTitleOrLink(database_url, source.Title, source.Link)
+		return source, !isDupeTitleOrLink(database_url, source.Title, source.Link)
 	}
 	return filter
 }
