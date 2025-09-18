@@ -30,6 +30,7 @@ News are first parsed on a server, filtered using LLMs, clustered, and then manu
   - LLMs
   - Embeddings
 - Systemd 
+- Lynx (sudo apt install lynx)
 
 ## Getting started
 

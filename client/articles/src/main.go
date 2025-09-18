@@ -65,7 +65,9 @@ func (a *App) loadSources() error {
 	defer conn.Close(ctx)
 
 	// rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false AND EXTRACT('week' from date) = 22 ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
-	rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false ORDER BY date ASC, id ASC") // AND DATE_PART('doy', date) < 34
+	rows, err := conn.Query(ctx, "SELECT id, title, link, date, summary, importance_bool, importance_reasoning, created_at, processed FROM sources WHERE processed = false ORDER BY date ASC, id ASC") 
+	// AND DATE_PART('doy', date) < 35
+	// AND date < '2025-09-08'
 	// date '+%j'
 	if err != nil {
 		return fmt.Errorf("failed to query sources: %v", err)
