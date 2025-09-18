@@ -2,7 +2,7 @@ MAX_LOG_SIZE=20000
 
 # Anthropic News
 run:
-	go run fetch.go filterAndExpandSource.go saveSource.go main.go
+	go run fetch.go filterAndExpandSource.go  main.go
 
 listen:
 	tail -f v2.log
@@ -13,7 +13,7 @@ rotate:
 	mv v2.log.tmp v2.log
 
 systemd:
-	sudo cp anthropic-news.service /etc/systemd/system
+	sudo cp anthropic.service /etc/systemd/system
 	sudo systemctl daemon-reload
-	sudo systemctl enable anthropic-news
-	sudo systemctl restart anthropic-news
+	sudo systemctl enable anthropic
+	sudo systemctl restart anthropic

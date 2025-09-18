@@ -1,7 +1,7 @@
 MAX_LOG_SIZE=20000
 
 run:
-	 go run main.go filterAndExpandSource.go saveSource.go fetchGKG.go
+	 go run main.go fetchGKG.go
 	
 listen:
 	tail -f v2.log

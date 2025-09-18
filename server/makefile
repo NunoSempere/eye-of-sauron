@@ -15,3 +15,6 @@ restart-sources:
 	sudo systemctl restart hn 
 	sudo systemctl restart potpourri 
 	sudo systemctl restart wikinews
+	sudo systemctl restart anthropic
+	sudo systemctl restart openai
+

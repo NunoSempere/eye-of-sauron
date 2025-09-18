@@ -36,10 +36,12 @@ func main() {
 		link, err := ExtractCurrentEventsLink(rssURL)
 		if err != nil {
 			log.Printf("Error extracting current events link: %v", err)
+			time.Sleep(1 * time.Hour)
 			continue
 		}
 		if link == "" {
 			log.Printf("No current events link found")
+			time.Sleep(1 * time.Hour)
 			continue
 		}
 		log.Printf("Current events link: %s", link)
@@ -47,6 +49,7 @@ func main() {
 		// Fetch the content
 		content, err := FetchCurrentEvents(link)
 		if err != nil {
+			time.Sleep(1 * time.Hour)
 			log.Printf("Error fetching current events: %v", err)
 			continue
 		}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Anthropic News Fetcher
+After=network.target
+
+[Service]
+Type=simple
+User=sentinel
+Group=sentinel
+WorkingDirectory=/home/sentinel/news/server/sources/anthropic
+ExecStart=/usr/local/go/bin/go run fetch.go filterAndExpandSource.go main.go
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

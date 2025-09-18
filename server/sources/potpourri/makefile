@@ -3,7 +3,7 @@ MAX_LOG_SIZE=20000
 # gmw
 # potpourri
 run:
-	go run main.go filterAndExpandSource.go saveSource.go 
+	go run main.go filterAndExpandSource.go 
 listen:
 	tail -f v2.log
 
