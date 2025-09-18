@@ -1,21 +1,16 @@
 package main
 
 import (
-	"io"
 	"log"
 	"os"
-
+	"io"
 	"time"
 
-	"git.nunosempere.com/NunoSempere/news/lib/filters"
-	"git.nunosempere.com/NunoSempere/news/lib/llm"
-	"git.nunosempere.com/NunoSempere/news/lib/readability"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"github.com/joho/godotenv"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/config"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/cnn"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/whitehouse"
-	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -51,7 +46,7 @@ func main() {
 					log.Printf("Found %d DSCA articles", len(dscaSources))
 					for i, source := range dscaSources {
 						log.Printf("\nProcessing DSCA article %d/%d: %s", i+1, len(dscaSources), source.Title)
-						expanded_source, passes_filters := processSourceWithCustomContent(source, openai_key, pg_database_url, true)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 						if passes_filters {
 							expanded_source.Origin = source.Origin
 							SaveSource(expanded_source)
@@ -68,7 +63,7 @@ func main() {
 					log.Printf("Found %d White House articles", len(whSources))
 					for i, source := range whSources {
 						log.Printf("\nProcessing White House article %d/%d: %s", i+1, len(whSources), source.Title)
-						expanded_source, passes_filters := processSourceWithCustomContent(source, openai_key, pg_database_url, false)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 						if passes_filters {
 							expanded_source.Origin = source.Origin
 							SaveSource(expanded_source)
@@ -85,7 +80,7 @@ func main() {
 					log.Printf("Found %d CNN articles", len(cnnSources))
 					for i, source := range cnnSources {
 						log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
-						expanded_source, passes_filters := processSourceWithCustomContent(source, openai_key, pg_database_url, false)
+						expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 						if passes_filters {
 							expanded_source.Origin = source.Origin
 							SaveSource(expanded_source)
@@ -99,56 +94,4 @@ func main() {
 		log.Printf("Finished processing potpourri sources, sleeping for 1 hour")
 		time.Sleep(1 * time.Hour)
 	}
-}
-
-// processSourceWithCustomContent processes a source with custom content extraction logic
-func processSourceWithCustomContent(source types.Source, openai_key string, database_url string, isDSCA bool) (types.ExpandedSource, bool) {
-	// Initialize expanded source
-	es := types.ExpandedSource{
-		Title: source.Title,
-		Link:  source.Link,
-		Date:  source.Date,
-		Origin: source.Origin,
-	}
-
-	// Apply standard filters
-	filters_list := filters.StandardFilterPipeline(database_url)
-	es, ok := filters.ApplyFilters(es, filters_list)
-	if !ok {
-		return es, false
-	}
-
-	// Try to get a better title from the source HTML
-	if title := readability.ExtractTitle(source.Link); title != "" {
-		es.Title = title
-		log.Printf("Found title from HTML: %s", title)
-		// Clean the extracted title
-		es.Title = filters.CleanTitle(es.Title)
-	}
-
-	// Custom content extraction for DSCA articles
-	var content string
-	var err error
-	if isDSCA {
-		content, err = dsca.GetArticleContent(source.Link)
-	} else {
-		content, err = readability.GetArticleContent(source.Link)
-	}
-
-	if err != nil {
-		log.Printf("Content extraction failed for %s: %v", source.Link, err)
-		return es, false
-	}
-
-	// Summarize the article
-	summary, err := llm.Summarize(content, openai_key)
-	if err != nil {
-		log.Printf("Summarization failed for %s: %v", source.Link, err)
-		return es, false
-	}
-	es.Summary = summary
-	log.Printf("Summary: %s", es.Summary)
-
-	// Check importance
-	return filters.CheckImportance(es, openai_key)
 }

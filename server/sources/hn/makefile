@@ -2,7 +2,7 @@ MAX_LOG_SIZE=20000
 
 # hackernews
 run:
-	go run main.go fetch.go types.go saveSource.go
+	go run main.go fetch.go types.go filterAndExpandSource.go saveSource.go
 
 listen:
 	tail -f v2.log

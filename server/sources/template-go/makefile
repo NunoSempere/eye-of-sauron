@@ -2,7 +2,7 @@ MAX_LOG_SIZE=20000
 
 # {{SOURCE_NAME}}
 run:
-	go run fetch.go saveSource.go main.go
+	go run fetch.go filterAndExpandSource.go saveSource.go main.go
 
 listen:
 	tail -f v2.log

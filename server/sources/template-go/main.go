@@ -6,9 +6,6 @@ import (
 	"os"
 	"time"
 
-	"git.nunosempere.com/NunoSempere/news/lib/filters"
-	"git.nunosempere.com/NunoSempere/news/lib/readability"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"github.com/joho/godotenv"
 )
 
@@ -46,37 +43,7 @@ func main() {
 		for i, source := range sources {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
 
-			// Use standard processing pipeline with optional title extraction
-			es := types.ExpandedSource{
-				Title: source.Title,
-				Link:  source.Link,
-				Date:  source.Date,
-				Origin: source.Origin,
-			}
-
-			// Apply standard filters
-			filters_list := filters.StandardFilterPipeline(pg_database_url)
-			es, ok := filters.ApplyFilters(es, filters_list)
-			if !ok {
-				continue
-			}
-
-			// Try to get a better title from the source HTML
-			if title := readability.ExtractTitle(source.Link); title != "" {
-				es.Title = title
-				log.Printf("Found title from HTML: %s", title)
-				// Clean the extracted title
-				es.Title = filters.CleanTitle(es.Title)
-			}
-
-			// Extract content and summarize
-			es, ok = filters.ExtractContentAndSummarize(es, openai_key)
-			if !ok {
-				continue
-			}
-
-			// Check importance
-			expanded_source, passes_filters := filters.CheckImportance(es, openai_key)
+			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 			if passes_filters {
 				SaveSource(expanded_source)
 			}

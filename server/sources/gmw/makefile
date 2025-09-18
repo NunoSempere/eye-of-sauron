@@ -1,7 +1,7 @@
 MAX_LOG_SIZE=20000
 
 run:
-	go run mil/fetchGmwMil.go mil/main.go mil/types.go mil/saveSource.go
+	go run mil/fetchGmwMil.go mil/filterAndExpandSource.go mil/main.go mil/types.go mil/saveSource.go
 
 listen:
 	tail -f mil/v2.log
