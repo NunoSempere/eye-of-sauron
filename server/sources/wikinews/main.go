@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/filters"
+	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"github.com/joho/godotenv"
 )
@@ -60,9 +62,45 @@ func main() {
 			source := types.Source{
 				Title: extLink,
 				Link:  extLink,
-				Date:  time.Now(), // FilterAndExpandSource will set date
+				Date:  time.Now(),
+				Origin: "Wikinews",
 			}
-			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+
+			// Initialize expanded source
+			es := types.ExpandedSource{
+				Title: source.Title,
+				Link:  source.Link,
+				Date:  source.Date,
+				Origin: source.Origin,
+			}
+
+			// Apply standard filters (skip freshness check since we assume fresh)
+			filters_list := []types.Filter{
+				filters.IsDupeFilter(pg_database_url),
+				filters.IsGoodHostFilter(),
+				filters.CleanTitleFilter(),
+			}
+			es, ok := filters.ApplyFilters(es, filters_list)
+			if !ok {
+				continue
+			}
+
+			// Try to get a better title from the source HTML
+			if title := readability.ExtractTitle(source.Link); title != "" {
+				es.Title = title
+				log.Printf("Found title from HTML: %s", title)
+				// Clean the extracted title
+				es.Title = filters.CleanTitle(es.Title)
+			}
+
+			// Extract content and summarize
+			es, ok = filters.ExtractContentAndSummarize(es, openai_key)
+			if !ok {
+				continue
+			}
+
+			// Check importance
+			expanded_source, passes_filters := filters.CheckImportance(es, openai_key)
 			if passes_filters {
 				SaveSource(expanded_source)
 			}

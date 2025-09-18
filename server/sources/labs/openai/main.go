@@ -1,11 +1,15 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
+	"git.nunosempere.com/NunoSempere/news/lib/filters"
+	"git.nunosempere.com/NunoSempere/news/lib/llm"
+	"git.nunosempere.com/NunoSempere/news/lib/readability"
+	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"github.com/joho/godotenv"
 )
 
@@ -42,9 +46,65 @@ func main() {
 		for i, source := range sources {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
 			
-			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+			// Initialize expanded source with basic info
+			expanded_source := types.ExpandedSource{
+				Title: source.Title,
+				Link:  source.Link,
+				Date:  source.Date,
+				Origin: "OpenAI",
+			}
+
+			// Check for duplicates
+			if filters.IsDupe(source, pg_database_url) {
+				log.Printf("Duplicate source found: %s", source.Link)
+				continue
+			}
+
+			// Check if host is acceptable
+			if !filters.IsGoodHost(source) {
+				log.Printf("Host not acceptable: %s", source.Link)
+				continue
+			}
+
+			// Try to get a better title from the source HTML
+			if title := readability.ExtractTitle(source.Link); title != "" {
+				expanded_source.Title = title
+				log.Printf("Found title from HTML: %s", title)
+			}
+
+			// Clean up the title
+			expanded_source.Title = filters.CleanTitle(expanded_source.Title)
+
+			// Get article content using a readability extractor
+			content, err := readability.GetArticleContent(source.Link)
+			if err != nil {
+				log.Printf("Readability extraction failed for %s: %v", source.Link, err)
+				continue
+			}
+
+			// Summarize the article using an LLM
+			summary, err := llm.Summarize(content, openai_key)
+			if err != nil {
+				log.Printf("Summarization failed for %s: %v", source.Link, err)
+				continue
+			}
+			expanded_source.Summary = summary
+			log.Printf("Summary: %s", expanded_source.Summary)
+
+			// Check existential or importance threshold
+			existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + summary
+			existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
+			if err != nil || existential_importance_box == nil {
+				log.Printf("Importance check failed for %s: %v", source.Link, err)
+				continue
+			}
+			expanded_source.ImportanceBool = existential_importance_box.ExistentialImportanceBool
+			expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
+			log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
+			log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
+
 			// Always save to AI database, and save to main database if passes filters
-			SaveSource(expanded_source, passes_filters)
+			SaveSource(expanded_source, expanded_source.ImportanceBool)
 		}
 
 		log.Printf("Finished processing OpenAI news, sleeping for 6 hours")

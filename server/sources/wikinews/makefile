@@ -2,7 +2,7 @@ MAX_LOG_SIZE=20000
 
 # wikinews
 run:
-	go run fetchWikinews.go filterAndExpandSource.go saveSource.go main.go
+	go run fetchWikinews.go saveSource.go main.go
 
 listen:
 	tail -f v2.log
