@@ -58,13 +58,13 @@ create-database:
 	sudo -u postgres createdb -O nuno nuno || true
 
 create-sources-table:
-	psql $$DATABASE_POOL_URL -c "CREATE TABLE IF NOT EXISTS sources (id SERIAL PRIMARY KEY, title TEXT NOT NULL, link TEXT NOT NULL UNIQUE, date TIMESTAMP NOT NULL, summary TEXT, importance_bool BOOLEAN, importance_reasoning TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, processed BOOLEAN DEFAULT FALSE, relevant_per_human_check TEXT DEFAULT 'maybe');"
+	psql $DATABASE_POOL_URL -f sql/create_sources_table.sql
 
 create-sources-ai-table:
-	psql $$DATABASE_POOL_URL -c "CREATE TABLE IF NOT EXISTS \"sources-ai\" (id SERIAL PRIMARY KEY, title TEXT NOT NULL, link TEXT NOT NULL UNIQUE, date TIMESTAMP NOT NULL, summary TEXT, importance_bool BOOLEAN, importance_reasoning TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, processed BOOLEAN DEFAULT FALSE, relevant_per_human_check TEXT DEFAULT 'maybe');"
+	psql $DATABASE_POOL_URL -f sql/create_sources_ai_table.sql
 
 create-flags-table:
-	psql $$DATABASE_POOL_URL -c "CREATE TABLE IF NOT EXISTS flags (name VARCHAR(50) PRIMARY KEY, code INTEGER NOT NULL, msg TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+	psql $DATABASE_POOL_URL -f sql/create_flags_table.sql
 
 # Connection
 connect:
@@ -78,7 +78,7 @@ recent-ai-sources:
 	psql $$DATABASE_POOL_URL -c "SELECT title, link, date FROM \"sources-ai\" WHERE created_at > NOW() - INTERVAL '1 week' ORDER BY date DESC;"
 
 count-sources:
-	psql $$DATABASE_POOL_URL -c "SELECT 'main' as table_name, COUNT(*) as total FROM sources UNION ALL SELECT 'ai' as table_name, COUNT(*) as total FROM \"sources-ai\";"
+	psql $DATABASE_POOL_URL -f sql/count_sources.sql
 
 unprocessed:
 	psql $$DATABASE_POOL_URL -c "SELECT id, title, link, date FROM sources WHERE processed = false ORDER BY date ASC;"
@@ -93,7 +93,7 @@ important-ai:
 	psql $$DATABASE_POOL_URL -c "SELECT title, link, importance_reasoning FROM \"sources-ai\" WHERE importance_bool = true ORDER BY date DESC;"
 
 table-sizes:
-	psql $$DATABASE_POOL_URL -c "SELECT 'sources' as table_name, pg_size_pretty(pg_total_relation_size('sources')) as size UNION ALL SELECT 'sources-ai' as table_name, pg_size_pretty(pg_total_relation_size('\"sources-ai\"')) as size;"
+	psql $DATABASE_POOL_URL -f sql/table_sizes.sql
 
 activity:
 	psql $$DATABASE_POOL_URL -c "SELECT DATE(created_at) as date, COUNT(*) as sources_added FROM sources WHERE created_at > NOW() - INTERVAL '7 days' GROUP BY DATE(created_at) ORDER BY date;"
@@ -105,10 +105,10 @@ activity-ai:
 clear-duplicates: clear-duplicates-main clear-duplicates-ai
 
 clear-duplicates-main:
-	psql $DATABASE_POOL_URL -c "DELETE FROM sources WHERE id NOT IN (SELECT MIN(id) FROM sources GROUP BY link);"
+	psql $DATABASE_POOL_URL -f sql/clear_duplicates_main.sql
 
 clear-duplicates-ai:
-	psql $DATABASE_POOL_URL -c "DELETE FROM \"sources-ai\" WHERE id NOT IN (SELECT MIN(id) FROM \"sources-ai\" GROUP BY link);"
+	psql $DATABASE_POOL_URL -f sql/clear_duplicates_ai.sql
 
 reset-processed: reset-processed-main reset-processed-ai
 
@@ -127,7 +127,7 @@ clear-old-ai:
 	psql $DATABASE_POOL_URL -c "DELETE FROM \"sources-ai\" WHERE created_at < NOW() - INTERVAL '6 months';"
 
 terminate-connections:
-	psql $$DATABASE_POOL_URL -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid();"
+	psql $DATABASE_POOL_URL -f sql/terminate_connections.sql
 
 # Backup and export commands
 backup: backup-sources backup-sources-ai

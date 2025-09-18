@@ -100,6 +100,18 @@ CREATE TABLE flags (
 );
 ```
 
+## SQL Files
+
+The following SQL files are located in the `sql/` subfolder:
+- `sql/create_sources_table.sql`: Creates main sources table
+- `sql/create_sources_ai_table.sql`: Creates AI sources table  
+- `sql/create_flags_table.sql`: Creates flags table
+- `sql/clear_duplicates_main.sql`: Removes duplicates from sources
+- `sql/clear_duplicates_ai.sql`: Removes duplicates from sources-ai
+- `sql/count_sources.sql`: Counts entries in both tables
+- `sql/table_sizes.sql`: Shows table sizes
+- `sql/terminate_connections.sql`: Terminates database connections
+
 ## Notes
 
 - All commands use `$DATABASE_POOL_URL` from your `.env` file
