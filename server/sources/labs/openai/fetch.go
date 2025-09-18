@@ -51,25 +51,19 @@ func fetchFromRSS(url string) ([]types.Source, error) {
 	var sources []types.Source
 	for _, item := range rss.Channel.Items {
 		// Parse date from RSS format to RFC3339
-		// `time.RFC1123` 
-		var dateStr string
+		// `time.RFC1123`
 		date, err := time.Parse(time.RFC1123, item.PubDate)
 		if err != nil {
-				dateStr = date.Format(time.RFC3339)
-		} else {
-			dateStr = time.Now().Format(time.RFC3339)
+			date = time.Now()
 		}
-		
+
 		source := types.Source{
 			Title: item.Title,
 			Link:  item.Link,
-			Date:  dateStr,
+			Date:  date,
 		}
 		sources = append(sources, source)
 	}
 
 	return sources, nil
 }
-
-
-

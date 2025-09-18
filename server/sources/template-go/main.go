@@ -1,13 +1,12 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
 	"github.com/joho/godotenv"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
 func main() {
@@ -30,20 +29,20 @@ func main() {
 
 	for {
 		log.Println("Starting {{SOURCE_NAME}} processing")
-		
+
 		// TODO: Replace with your source-specific fetching logic
 		sources, err := FetchSources()
 		if err != nil {
 			log.Printf("Error fetching sources: %v", err)
 			continue
 		}
-		
+
 		log.Printf("Found %d sources", len(sources))
-		
+
 		// Process each source
 		for i, source := range sources {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
-			
+
 			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 			if passes_filters {
 				SaveSource(expanded_source)
@@ -51,6 +50,6 @@ func main() {
 		}
 
 		log.Printf("Finished processing {{SOURCE_NAME}}, sleeping for {{SLEEP_DURATION}}")
-		time.Sleep({{SLEEP_DURATION}}) // TODO: Replace with appropriate duration
+		time.Sleep(10000) // TODO: Replace with appropriate duration
 	}
 }

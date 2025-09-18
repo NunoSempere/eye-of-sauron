@@ -1,19 +1,20 @@
 package main
 
 import (
+	"log"
+	"regexp"
+	"time"
+
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"log"
-	"time"
-	"regexp"
 )
 
 func ExtractDateFromURL(url string) (time.Time, bool) {
 	// Pattern matches URLs like "https://mil.gmw.cn/2025-02/10/content_37841910.htm"
 	pattern := regexp.MustCompile(`/(\d{4})-(\d{2})/(\d{2})/`)
 	matches := pattern.FindStringSubmatch(url)
-	
+
 	if len(matches) == 4 {
 		year := matches[1]
 		month := matches[2]
@@ -52,7 +53,7 @@ func TranslateArticle(article GmwMilSource, openai_token string) (GmwMilSourceTr
 
 func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url string) (types.ExpandedSource, bool) {
 
-	date, _:= ExtractDateFromURL(article.Link)
+	date, _ := ExtractDateFromURL(article.Link)
 	is_dupe := filters.IsDupe(types.Source{Title: article.Title, Link: article.Link}, database_url)
 	if is_dupe {
 		return types.ExpandedSource{}, false
@@ -68,10 +69,10 @@ func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url
 	expanded_source := types.ExpandedSource{
 		Title: gmw.EnglishTitle,
 		Link:  gmw.Link,
-		Date:  date.Format(time.RFC3339),
+		Date:  date,
 	}
 
-	summary, err := llm.Summarize(gmw.EnglishContent + "\n\nWhen summarizing a Chinese article, give the gist in idiomatic English, rather than selecting the most important phrases in Chinese", openai_key)
+	summary, err := llm.Summarize(gmw.EnglishContent+"\n\nWhen summarizing a Chinese article, give the gist in idiomatic English, rather than selecting the most important phrases in Chinese", openai_key)
 	if err != nil {
 		log.Printf("%v", err)
 		return expanded_source, false

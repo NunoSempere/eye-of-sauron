@@ -35,16 +35,16 @@ type RSSItem struct {
 // TODO: Implement your source-specific fetching logic
 func FetchSources() ([]types.Source, error) {
 	var sources []types.Source
-	
+
 	// Example for RSS feed:
 	// sources, err := fetchFromRSS("{{RSS_URL}}")
-	
+
 	// Example for API:
 	// sources, err := fetchFromAPI("{{API_URL}}")
-	
+
 	// Example for web scraping:
 	// sources, err := fetchFromWebpage("{{WEBPAGE_URL}}")
-	
+
 	// TODO: Replace with actual implementation
 	return sources, nil
 }
@@ -69,13 +69,16 @@ func fetchFromRSS(url string) ([]types.Source, error) {
 
 	var sources []types.Source
 	for _, item := range rss.Channel.Items {
-		// TODO: Parse date if needed
-		// date, _ := time.Parse(time.RFC1123Z, item.PubDate)
-		
+		// TODO: Parse date in a different format if needed
+		date, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			date = time.Now()
+		}
+
 		source := types.Source{
 			Title: item.Title,
 			Link:  item.Link,
-			Date:  item.PubDate, // TODO: Convert to RFC3339 format if needed
+			Date:  date,
 		}
 		sources = append(sources, source)
 	}
@@ -98,8 +101,12 @@ func fetchFromAPI(url string) ([]types.Source, error) {
 
 	var sources []types.Source
 	// TODO: Convert API response to types.Source slice
-	
+
 	return sources, nil
+}
+
+func doSmth(_ interface{}) {
+	return
 }
 
 // fetchFromWebpage scrapes sources from a webpage
@@ -114,10 +121,11 @@ func fetchFromWebpage(url string) ([]types.Source, error) {
 	if err != nil {
 		return nil, err
 	}
+	doSmth(content)
 
 	// TODO: Parse HTML content to extract sources
 	// This might involve regex, HTML parsing, or other extraction methods
 	var sources []types.Source
-	
+
 	return sources, nil
 }

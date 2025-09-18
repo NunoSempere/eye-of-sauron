@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
 type GKGNode struct {
@@ -206,7 +207,11 @@ func SearchGKG() ([]types.Source, error) {
 		return sources, nil
 	}
 	for i, _ := range nodes {
-		sources = append(sources, types.Source{Title: nodes[i].Title, Link: nodes[i].Link, Date: nodes[i].GKG_Date})
+		date, err := time.Parse("20060102150405", nodes[i].GKG_Date)
+		if err != nil {
+			date = time.Now()
+		}
+		sources = append(sources, types.Source{Title: nodes[i].Title, Link: nodes[i].Link, Date: date})
 	}
 	return sources, nil
 }

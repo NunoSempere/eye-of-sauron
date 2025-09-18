@@ -1,32 +1,28 @@
 package filters
 
 import (
-	"log"
 	"context"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"github.com/jackc/pgx/v5"
+	"log"
 	"net/url"
 	"slices"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"github.com/jackc/pgx/v5"
+
 	// "strings"
 	"time"
 )
 
-func isFreshTime(t time.Time) bool { 
+func isFreshTime(t time.Time) bool {
 	now := time.Now()
 	fifteen_days_before := now.AddDate(0, 0, -15)
 	fifteen_days_after := now.AddDate(0, 0, 15)
-  return t.After(fifteen_days_before) && t.Before(fifteen_days_after)
+	return t.After(fifteen_days_before) && t.Before(fifteen_days_after)
 }
 
-func IsFreshFilter(layout string) types.Filter {
+func IsFreshFilter() types.Filter {
 	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
-		date_str := source.Date
-		parsed_time, err := time.Parse(layout, date_str)
-		if err != nil {
-			log.Printf("Error parsing date: %v", err)
-			return types.ExpandedSource{}, false
-		}
-		return source, isFreshTime(parsed_time)
+		return source, isFreshTime(source.Date)
 	}
 	return filter
 }
@@ -60,12 +56,11 @@ func isDupeTitleOrLink(database_url string, title string, link string) bool {
 }
 
 func IsDupeFilter(database_url string) types.Filter {
-  filter := func (source types.ExpandedSource) (types.ExpandedSource, bool) {
-  	return source, isDupeTitleOrLink(database_url, source.Title, source.Link)
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		return source, isDupeTitleOrLink(database_url, source.Title, source.Link)
 	}
 	return filter
-} 
-
+}
 
 func isGoodHost(link string) bool {
 	parsedURL, err := url.Parse(link)
@@ -85,17 +80,17 @@ func isGoodHost(link string) bool {
 }
 
 func IsGoodHostFilter() types.Filter {
-  filter := func (source types.ExpandedSource) (types.ExpandedSource, bool) {
-  	return source, isGoodHost(source.Link)
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		return source, isGoodHost(source.Link)
 	}
 	return filter
-} 
+}
 
 func CleanTitleFilter() types.Filter {
-  filter := func (source types.ExpandedSource) (types.ExpandedSource, bool) {
-  	source.Title = CleanTitle(source.Title)
-  	return source, true
-  }
+	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
+		source.Title = CleanTitle(source.Title)
+		return source, true
+	}
 	return filter
-	
+
 }

@@ -1,13 +1,14 @@
 package main
 
 import (
+	"log"
+	"strings"
+	"time"
+
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
 	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"log"
-	"strings"
-	"time"
 )
 
 func FilterAndExpandSource(source HNHit, openai_key string, database_url string) (types.ExpandedSource, bool) {
@@ -21,14 +22,14 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	tmp_source := types.Source{
 		Title:  source.Title,
 		Link:   source.URL,
-		Date:   createdAt.Format(time.RFC3339),
+		Date:   createdAt,
 		Origin: "HackerNews",
 	}
 	expanded_source := types.ExpandedSource{
-		Title:  source.Title,
+		Title: source.Title,
 		// Summary: source.StoryText, : will add later
 		Link:   source.URL,
-		Date:   createdAt.Format(time.RFC3339),
+		Date:   createdAt,
 		Origin: "HackerNews",
 	}
 
@@ -52,7 +53,7 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	}
 
 	// Check is fresh
-	is_fresh := filters.IsFresh(tmp_source, "2006-01-02T15:04:05Z07:00")
+	is_fresh := filters.IsFreshDate(tmp_source.Date)
 	if !is_fresh {
 		return expanded_source, false
 	}
@@ -76,7 +77,7 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 			log.Printf("Content extraction failed for %s: %v", tmp_source.Link, err)
 			return expanded_source, false
 		}
-		
+
 		// Summarize the article
 		summary, err := llm.Summarize(content, openai_key)
 		if err != nil {
@@ -98,7 +99,7 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	expanded_source.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
 	log.Printf("Importance bool: %t", expanded_source.ImportanceBool)
 	log.Printf("Reasoning: %s", expanded_source.ImportanceReasoning)
-	
+
 	if strings.Contains(source.Title, "Saudi Arabia") {
 		expanded_source.ImportanceBool = true
 		expanded_source.ImportanceReasoning = "Contains keyword"
@@ -107,13 +108,11 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 	return expanded_source, expanded_source.ImportanceBool
 }
 
-
 func startsWithAny(s string, prefixes []string) bool {
-        for _, prefix := range prefixes {
-                if strings.HasPrefix(s, prefix) {
-                        return true
-                }
-        }
-        return false
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return false
 }
-

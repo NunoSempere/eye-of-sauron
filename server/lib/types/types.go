@@ -1,9 +1,13 @@
 package types
 
+import (
+	"time"
+)
+
 type Source struct {
 	Title  string
 	Link   string
-	Date   string
+	Date   time.Time
 	Origin string
 }
 
@@ -24,7 +28,7 @@ type ProspectorInput struct {
 type ExpandedSource struct {
 	Title               string
 	Link                string
-	Date                string
+	Date                time.Time
 	Summary             string
 	ImportanceBool      bool
 	ImportanceReasoning string

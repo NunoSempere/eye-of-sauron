@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
 	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"log"
 )
 
 // Filters
@@ -17,7 +18,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		return expanded_source, false
 	}
 
-	is_fresh := filters.IsFresh(source, "20060102150405")
+	is_fresh := filters.IsFreshDate(source.Date)
 	if !is_fresh {
 		return expanded_source, false
 	}

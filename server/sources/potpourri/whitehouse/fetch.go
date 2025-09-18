@@ -2,21 +2,23 @@ package whitehouse
 
 import (
 	"encoding/xml"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"git.nunosempere.com/NunoSempere/news/lib/web"
 	"log"
 	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"git.nunosempere.com/NunoSempere/news/lib/web"
 )
 
 const feedURL = "https://www.whitehouse.gov/presidential-actions/feed/"
-	// "https://www.whitehouse.gov/briefing-room/statements-releases/feed/index.xml"
-	//"https://www.whitehouse.gov/blog/feed/"
-  // https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bpresident%5D%5B%5D=donald-trump&conditions%5Bpresidential_document_type%5D%5B%5D=executive_order&conditions%5Btype%5D%5B%5D=PRESDOCU
-  // https://www.reddit.com/r/InoReader/comments/1i6nopb/white_house_rss_feed/
+
+// "https://www.whitehouse.gov/briefing-room/statements-releases/feed/index.xml"
+//"https://www.whitehouse.gov/blog/feed/"
+// https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bpresident%5D%5B%5D=donald-trump&conditions%5Bpresidential_document_type%5D%5B%5D=executive_order&conditions%5Btype%5D%5B%5D=PRESDOCU
+// https://www.reddit.com/r/InoReader/comments/1i6nopb/white_house_rss_feed/
 
 func FetchFeed() ([]types.Source, error) {
 	log.Printf("Fetching White House feed: %s", feedURL)
-	
+
 	xml_bytes, err := web.Get(feedURL)
 	if err != nil {
 		return nil, err
@@ -37,7 +39,7 @@ func FetchFeed() ([]types.Source, error) {
 			time.RFC1123,
 			time.RFC1123Z,
 			"Mon, 02 Jan 2006 15:04:05 MST",
-			"Mon, 2 Jan 2006 15:04:05 MST", 
+			"Mon, 2 Jan 2006 15:04:05 MST",
 			"Mon, 02 Jan 2006 15:04:05 -0700",
 		}
 
@@ -63,7 +65,7 @@ func FetchFeed() ([]types.Source, error) {
 		sources = append(sources, types.Source{
 			Title:  item.Title,
 			Link:   item.Link,
-			Date:   pubDate.Format(time.RFC3339),
+			Date:   pubDate,
 			Origin: "White House",
 		})
 	}

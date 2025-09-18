@@ -1,12 +1,13 @@
 package cnn
 
 import (
+	"encoding/xml"
+	"log"
+	"strings"
+	"time"
+
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 	"git.nunosempere.com/NunoSempere/news/lib/web"
-	"log"
-	"time"
-	"strings"
-  "encoding/xml"
 )
 
 var feeds = map[string]string{
@@ -20,7 +21,7 @@ var feeds = map[string]string{
 
 func FetchFeed(feedName string, feedURL string) ([]types.Source, error) {
 	log.Printf("Fetching CNN feed: %s", feedURL)
-	
+
 	xml_bytes, err := web.Get(feedURL)
 	if err != nil {
 		return nil, err
@@ -36,18 +37,18 @@ func FetchFeed(feedName string, feedURL string) ([]types.Source, error) {
 	var sources []types.Source
 	for _, item := range feed.Channel.Items {
 		// Skip podcast content
-		if strings.Contains(strings.ToLower(item.Link), "/audio/") || 
-		   strings.Contains(strings.ToLower(item.Link), "podcast") ||
-		   strings.Contains(strings.ToLower(item.Title), "podcast") {
+		if strings.Contains(strings.ToLower(item.Link), "/audio/") ||
+			strings.Contains(strings.ToLower(item.Link), "podcast") ||
+			strings.Contains(strings.ToLower(item.Title), "podcast") {
 			continue
 		}
 
 		// If PubDate is empty, use current time
 		if item.PubDate == "" {
 			sources = append(sources, types.Source{
-				Title: item.Title,
-				Link:  item.Link,
-				Date:  time.Now().Format(time.RFC3339),
+				Title:  item.Title,
+				Link:   item.Link,
+				Date:   time.Now(),
 				Origin: "CNN/" + feedName,
 			})
 			continue
@@ -86,9 +87,9 @@ func FetchFeed(feedName string, feedURL string) ([]types.Source, error) {
 		}
 
 		sources = append(sources, types.Source{
-			Title: item.Title,
-			Link:  item.Link,
-			Date:  pubDate.Format(time.RFC3339),
+			Title:  item.Title,
+			Link:   item.Link,
+			Date:   pubDate,
 			Origin: "CNN/" + feedName,
 		})
 	}
@@ -98,7 +99,7 @@ func FetchFeed(feedName string, feedURL string) ([]types.Source, error) {
 
 func FetchAllFeeds() ([]types.Source, error) {
 	var allSources []types.Source
-	
+
 	for feedName, feedURL := range feeds {
 		log.Printf("Processing CNN %s feed", feedName)
 		sources, err := FetchFeed(feedName, feedURL)

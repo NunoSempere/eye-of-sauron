@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"git.nunosempere.com/NunoSempere/news/lib/web"
 	"log"
 	"net/url"
+	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"git.nunosempere.com/NunoSempere/news/lib/web"
 )
 
 type Feed struct {
@@ -52,7 +54,7 @@ func KeywordToRSSFeed(keyword string) (string, error) {
 		return identifier, nil
 	}
 
-	return "", fmt.Errorf("Identifier not found in alerts map")
+	return "", fmt.Errorf("identifier not found in alerts map")
 }
 
 func extractActualLink(encodedURL string) (string, error) {
@@ -106,7 +108,11 @@ func SearchGoogleAlerts(query string) ([]types.Source, error) {
 			log.Printf("Error parsing url parameter from %v", entry.Link.Url)
 			continue
 		}
-		sources = append(sources, types.Source{Title: entry.Title, Link: actual_link, Date: entry.PubDate})
+		date, err := time.Parse("2006-01-02T15:04:05Z", entry.PubDate)
+		if err != nil {
+			date = time.Now()
+		}
+		sources = append(sources, types.Source{Title: entry.Title, Link: actual_link, Date: date})
 	}
 
 	return sources, nil

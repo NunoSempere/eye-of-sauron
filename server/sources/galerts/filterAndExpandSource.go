@@ -1,18 +1,19 @@
 package main
 
 import (
+	"log"
+
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
 	"git.nunosempere.com/NunoSempere/news/lib/readability"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"log"
 )
 
 // Filters
 
 func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
 	fs := []types.Filter{
-		filters.IsFreshFilter("2006-01-02T15:04:05Z"),
+		filters.IsFreshFilter(),
 		filters.IsDupeFilter(database_url),
 		filters.IsGoodHostFilter(),
 		filters.CleanTitleFilter(),
@@ -48,7 +49,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	es.ImportanceBool = existential_importance_box.ExistentialImportanceBool
 	es.ImportanceReasoning = existential_importance_box.ExistentialImportanceReasoning
 
-	log.Printf("Importance bool: %b", es.ImportanceBool)
+	log.Printf("importance bool: %t", es.ImportanceBool)
 
 	return es, es.ImportanceBool
 }

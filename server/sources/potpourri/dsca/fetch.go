@@ -3,14 +3,15 @@ package dsca
 import (
 	"encoding/xml"
 	"fmt"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"git.nunosempere.com/NunoSempere/news/lib/web"
-	"github.com/PuerkitoBio/goquery"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"git.nunosempere.com/NunoSempere/news/lib/web"
+	"github.com/PuerkitoBio/goquery"
 )
 
 const feedURL = "https://www.dsca.mil/DesktopModules/ArticleCS/RSS.ashx?ContentType=700&Site=1509&isdashboardselected=0&max=20"
@@ -89,7 +90,7 @@ func GetArticleContent(url string) (string, error) {
 
 func FetchFeed() ([]types.Source, error) {
 	log.Printf("Fetching DSCA feed: %s", feedURL)
-	
+
 	client := getClient()
 	req, err := makeRequest(feedURL)
 	if err != nil {
@@ -126,7 +127,7 @@ func FetchFeed() ([]types.Source, error) {
 	var sources []types.Source
 	for _, item := range feed.Channel.Items {
 		log.Printf("Processing item with date: %s", item.PubDate)
-		
+
 		// Try to parse the date
 		var pubDate time.Time
 		formats := []string{
@@ -166,7 +167,7 @@ func FetchFeed() ([]types.Source, error) {
 		sources = append(sources, types.Source{
 			Title:  title,
 			Link:   item.Link,
-			Date:   pubDate.Format(time.RFC3339),
+			Date:   pubDate,
 			Origin: "DSCA",
 		})
 	}

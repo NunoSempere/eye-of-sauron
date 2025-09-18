@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	keywords := []string{"War", "Emergency", "disaster", "alert", "nuclear", "combat duty", "human-to-human", "pandemic", "blockade", "invasion", "undersea cables", "nuclear", "Carrington event", "mystery pneumonia", "Taiwan", "Ukraine", "OpenAI announces AGI", "AI rights", "military exercise", "Kessler syndrome", "Cyberattack"}
-	for true {
+	for {
 		log.Println("(Re)starting Google Alerts keyword loop")
 		for _, keyword := range keywords {
 			log.Printf("Keyword: %v", keyword)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 	"log"
 
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
@@ -21,11 +20,6 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		Date:  source.Date,
 	}
 
-	// If no date provided, use current time
-	if expanded_source.Date == "" {
-		expanded_source.Date = time.Now().Format(time.RFC3339)
-	}
-
 	// Check for duplicates
 	is_dupe := filters.IsDupe(source, database_url)
 	if is_dupe {
@@ -36,7 +30,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	// TODO: Add source-specific freshness check if needed
 	// For sources without timestamps, you might want to assume freshness
 	// or try to extract date from the article content
-	
+
 	// Check if host is acceptable
 	is_good_host := filters.IsGoodHost(source)
 	if !is_good_host {
@@ -59,7 +53,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		log.Printf("Readability extraction failed for %s: %v", source.Link, err)
 		return expanded_source, false
 	}
-	
+
 	// Summarize the article using an LLM
 	summary, err := llm.Summarize(content, openai_key)
 	if err != nil {

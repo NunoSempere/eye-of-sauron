@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"strings"
-	"time"
 
 	"git.nunosempere.com/NunoSempere/news/lib/filters"
 	"git.nunosempere.com/NunoSempere/news/lib/llm"
@@ -16,7 +15,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	expanded_source := types.ExpandedSource{
 		Title: source.Title,
 		Link:  source.Link,
-		Date:  time.Now().Format(time.RFC3339),
+		Date:  source.Date,
 	}
 
 	// Check for duplicates
@@ -41,7 +40,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 	// Get article content
 	var content string
 	var err error
-	
+
 	// Use direct extraction for DSCA articles
 	if strings.Contains(source.Origin, "DSCA") {
 		content, err = dsca.GetArticleContent(source.Link)
@@ -53,7 +52,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		log.Printf("Content extraction failed for %s: %v", source.Link, err)
 		return expanded_source, false
 	}
-	
+
 	// Summarize the article
 	summary, err := llm.Summarize(content, openai_key)
 	if err != nil {

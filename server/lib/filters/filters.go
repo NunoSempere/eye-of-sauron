@@ -2,16 +2,17 @@ package filters
 
 import (
 	"context"
-	"git.nunosempere.com/NunoSempere/news/lib/types"
-	"github.com/jackc/pgx/v5"
 	"log"
 	"net/url"
 	"slices"
 	"strings"
 	"time"
+
+	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"github.com/jackc/pgx/v5"
 )
 
-func isFreshDate(t time.Time) bool{
+func IsFreshDate(t time.Time) bool {
 
 	now := time.Now()
 	fifteen_days_before := now.AddDate(0, 0, -15)
@@ -19,17 +20,6 @@ func isFreshDate(t time.Time) bool{
 
 	return t.After(fifteen_days_before) && t.Before(fifteen_days_after)
 
-}
-
-func IsFresh(source types.Source, layout string) bool {
-	date_str := source.Date
-	parsed_time, err := time.Parse(layout, date_str)
-	if err != nil {
-		log.Printf("Error parsing date: %v", err)
-		return false
-	}
-
-	return isFreshDate(parsed_time)
 }
 
 func IsDupe(source types.Source, database_url string) bool {
@@ -93,14 +83,13 @@ func CleanTitle(s string) string {
 	s2 := CleanTitle0(s, " – ")
 	s3 := CleanTitle0(s2, " - ")
 	s4 := CleanTitle0(s3, "|")
-  s5 := strings.ReplaceAll(s4, "<b>", "")
+	s5 := strings.ReplaceAll(s4, "<b>", "")
 	s6 := strings.ReplaceAll(s5, "</b>", "")
 	s7 := strings.ReplaceAll(s6, "&#39;", "'")
 
 	s8 := strings.TrimSpace(s7)
 	return s8
 }
-
 
 /*
 func main(){

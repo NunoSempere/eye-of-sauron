@@ -1,13 +1,13 @@
 package main
 
 import (
+	"io"
 	"log"
 	"os"
-	"io"
 	"time"
 
-	"github.com/joho/godotenv"
 	"git.nunosempere.com/NunoSempere/news/lib/types"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 	for {
 		log.Println("Starting Wikipedia current events processing")
 		rssURL := "https://www.to-rss.xyz/wikipedia/current_events/"
-		
+
 		link, err := ExtractCurrentEventsLink(rssURL)
 		if err != nil {
 			log.Printf("Error extracting current events link: %v", err)
@@ -42,25 +42,25 @@ func main() {
 			continue
 		}
 		log.Printf("Current events link: %s", link)
-		
+
 		// Fetch the content
 		content, err := FetchCurrentEvents(link)
 		if err != nil {
 			log.Printf("Error fetching current events: %v", err)
 			continue
 		}
-		
+
 		// Extract and process external links
 		externalLinks := ExtractExternalLinks(content)
 		log.Printf("Found %d external news source links", len(externalLinks))
-		
+
 		// Process each external link
 		for i, extLink := range externalLinks {
 			log.Printf("\nProcessing link %d/%d: %s", i+1, len(externalLinks), extLink)
 			source := types.Source{
 				Title: extLink,
 				Link:  extLink,
-				Date:  "", // FilterAndExpandSource will set date
+				Date:  time.Now(), // FilterAndExpandSource will set date
 			}
 			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
 			if passes_filters {
