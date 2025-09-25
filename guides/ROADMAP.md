@@ -1,10 +1,13 @@
 ## v5: Expand and improve
 
-- [ ] Select sources to parse
+- [ ] Parse more sources
+  - [ ] Major AI labs
+  - [ ] Twitter personalities
 - [ ] Add an alternative html/js-based frontend, so that other forecasters can use it
 - [ ] Go back to functional programming. Define pipelines at a higher level of abstraction
 - [ ] Check for better/original sources, e.g., Reuters, AP, when the title is the same. Do this after an article has passed filters, not before
 - [ ] Replace sources with AP/Reuters/AlJazeera
+- [ ] Improve logging so that it is clear why a given article falls through.
 
 ## v4: Fix technical debt
 

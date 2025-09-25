@@ -1,0 +1,14 @@
+[Unit]
+Description=xAI Tweets Source
+After=network.target
+
+[Service]
+Type=simple
+User=nuno
+WorkingDirectory=/home/nuno/Software/golang/eye-of-sauron/server/sources/labs/xai
+ExecStart=/usr/local/bin/xai
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
