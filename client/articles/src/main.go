@@ -17,6 +17,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
+
 )
 
 func newApp() (*App, error) {
@@ -134,6 +135,11 @@ func (a *App) draw() {
 
 	if a.mode == "help" {
 		a.drawHelpView()
+		return
+	}
+
+	if a.mode == "search" {
+		a.drawSearchView(width, height, style)
 		return
 	}
 
@@ -314,7 +320,7 @@ func (a *App) drawDetailView(width, height int, style, summaryStyle, importanceS
 	lineIdx = drawText(a.screen, 0, lineIdx, width, style, source.Link)
 
 	// Help text at bottom
-	helpText := "ESC/Backspace: Back to list | O: Open in Browser | M: Toggle mark | S: Save | Q: Quit"
+	helpText := "ESC/Backspace: Back to list | O: Open in Browser | M: Toggle mark | S: Save | W: Web Search | Q: Quit"
 	if height > 0 {
 		drawText(a.screen, 0, height-1, width, style, helpText)
 	}
@@ -378,6 +384,7 @@ func (a *App) drawHelpView() {
 		"O: Open in Browser",
 		"M: Toggle mark",
 		"S: Save",
+		"W: Web Search",
 		"C: Mark cluster centrals as processed", 
 		"Q: Quit",
 		"[C#/O#]: Cluster Central/Outlier",
@@ -388,6 +395,49 @@ func (a *App) drawHelpView() {
 		lineIdx = drawText(a.screen, 0, lineIdx, width, style, line)
 		lineIdx++
 	}
+	a.screen.Show()
+}
+
+func (a *App) drawSearchView(width, height int, style tcell.Style) {
+	if a.searchInstance == nil {
+		return
+	}
+
+	selectedStyle := tcell.StyleDefault.Background(tcell.Color24).Foreground(tcell.ColorWhite)
+
+	lineIdx := 0
+	// Title
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style.Bold(true), "Search results for: "+a.searchInstance.GetQuery())
+	lineIdx++
+	lineIdx = drawText(a.screen, 0, lineIdx, width, style, "----------------------------------------")
+	lineIdx++
+
+	// Results
+	results := a.searchInstance.GetResults()
+	selected := a.searchInstance.GetSelected()
+	for i, result := range results {
+		currentStyle := style
+		if i == selected {
+			currentStyle = selectedStyle
+		}
+
+		// Extract host from URL
+		host := ""
+		if parsedURL, err := url.Parse(result.URL); err == nil {
+			host = parsedURL.Host
+		}
+
+		text := fmt.Sprintf("[%s] %s", host, result.Title)
+		lineIdx = drawText(a.screen, 2, lineIdx, width-2, currentStyle, text)
+		lineIdx++
+	}
+
+	// Help text
+	helpText := "^/v: Navigate | Enter/O: Open in Browser | S: Save to Minutes | ESC: Back"
+	if height > 0 {
+		drawText(a.screen, 0, height-1, width, style, helpText)
+	}
+
 	a.screen.Show()
 }
 
@@ -419,6 +469,9 @@ func (a *App) run() error {
 				if a.mode == "detail"{
 					a.mode = "main"
 					a.detailIdx = -1
+				} else if a.mode == "search" {
+					a.mode = "main"
+					a.searchInstance = nil
 				} else {
 					return nil
 				}
@@ -426,6 +479,9 @@ func (a *App) run() error {
 				if a.mode == "detail" {
 					a.mode = "main"
 					a.detailIdx = -1
+				} else if a.mode == "search" {
+					a.mode = "main"
+					a.searchInstance = nil
 				}
 			case tcell.KeyRight:
 				if a.mode == "main" {
@@ -447,7 +503,11 @@ func (a *App) run() error {
 					a.waitgroup.Wait() // gracefully wait for all goroutines to finish
 					return nil
 				case 'o', 'O':
-					if len(a.sources) > 0 {
+					if a.mode == "search" && a.searchInstance != nil {
+						if result := a.searchInstance.GetSelectedResult(); result != nil {
+							openBrowser(result.URL)
+						}
+					} else if len(a.sources) > 0 {
 						idx := a.selectedIdx
 						if a.mode == "detail" {
 							idx = a.detailIdx
@@ -513,7 +573,30 @@ func (a *App) run() error {
 						a.loadSources()
 					}
 				case 's', 'S':
-					if len(a.sources) > 0 {
+					if a.mode == "search" && a.searchInstance != nil {
+						// Save search result with original source description
+						if result := a.searchInstance.GetSelectedResult(); result != nil {
+							idx := a.selectedIdx
+							if a.detailIdx >= 0 {
+								idx = a.detailIdx
+							}
+							if err := a.saveSearchResult(result, a.sources[idx]); err != nil {
+								a.statusMessage = fmt.Sprintf("Save error: %v", err)
+							} else {
+								a.statusMessage = "Saved to minutes file"
+								// Clear status message after 2 seconds
+								go func() {
+									time.Sleep(2 * time.Second)
+									a.statusMessage = ""
+									a.screen.Sync()
+								}()
+								a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, idx)
+								// Go back to main mode
+								a.mode = "main"
+								a.searchInstance = nil
+							}
+						}
+					} else if len(a.sources) > 0 && (a.mode == "main" || a.mode == "detail") {
 						idx := a.selectedIdx
 						if a.mode == "detail" {
 							idx = a.detailIdx
@@ -522,12 +605,14 @@ func (a *App) run() error {
 						a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, idx)
 					}
 				case 'w', 'W':
-					if len(a.sources) > 0 {
+					if len(a.sources) > 0 && (a.mode == "main" || a.mode == "detail") {
 						idx := a.selectedIdx
 						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
-						a.webSearch(a.sources[idx])
+						if err := a.webSearch(a.sources[idx]); err != nil {
+							a.statusMessage = fmt.Sprintf("Search error: %v", err)
+						}
 					}
 				case 'f', 'F':
 					if a.mode == "main" {
@@ -600,10 +685,14 @@ func (a *App) run() error {
 			case tcell.KeyUp:
 				if a.mode == "main" && a.selectedIdx > 0 {
 					a.selectedIdx--
+				} else if a.mode == "search" && a.searchInstance != nil {
+					a.searchInstance.SelectPrevious()
 				}
 			case tcell.KeyDown:
 				if a.mode == "main" && a.selectedIdx < len(a.sources)-1 && (a.selectedIdx+1) < (a.currentPage+1)*a.itemsPerPage {
 					a.selectedIdx++
+				} else if a.mode == "search" && a.searchInstance != nil {
+					a.searchInstance.SelectNext()
 				}
 			case tcell.KeyEnter:
 				if a.mode == "main" && len(a.sources) > 0 {
@@ -614,6 +703,10 @@ func (a *App) run() error {
 					a.mode = "main" 
 				} else if a.mode == "help" {
 					a.mode = "main"
+				} else if a.mode == "search" && a.searchInstance != nil {
+					if result := a.searchInstance.GetSelectedResult(); result != nil {
+						openBrowser(result.URL)
+					}
 				}
 			}
 		case *tcell.EventResize:

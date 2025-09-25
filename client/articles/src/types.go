@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 	"github.com/gdamore/tcell/v2"
+	"nunosempere.com/eye-of-sauron/client/src/search"
 )
 
 type Source struct {
@@ -36,8 +37,9 @@ type App struct {
 	failureMark    bool
 	waitgroup      sync.WaitGroup
 	statusMessage  string
-	mode           string // "main", "detail", "help"
+	mode           string // "main", "detail", "help", "search"
 	detailIdx      int   // Index of item being viewed in detail
+	searchInstance *search.Search // Search instance for web search mode
 	embeddings     [][]float64 // Store embeddings for distance calculations
 	clusters       []Cluster   // Store clusters with centroids
 	clusterStyles  []tcell.Style // Store cluster-specific colors

@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"nunosempere.com/eye-of-sauron/client/src/search"
 )
 
 func (a *App) openFile() error {
@@ -38,8 +39,8 @@ func (a *App) openFile() error {
 }
 
 
-func (a *App) saveToFile(source Source) error {
-
+// Helper function to append content to minutes file
+func (a *App) appendToMinutesFile(title, summary, link string) error {
 	basePath := os.Getenv("MINUTES_FOLDER")
 
 	now := time.Now()
@@ -63,12 +64,10 @@ func (a *App) saveToFile(source Source) error {
 	if err != nil {
 		return err
 	}
-	data := fmt.Sprintf("\n%s\n%s\n%s\n", source.Title, source.Summary, source.Link)
+	defer f.Close()
+
+	data := fmt.Sprintf("\n%s\n%s\n%s\n", title, summary, link)
 	if _, err := f.Write([]byte(data)); err != nil {
-		f.Close()
-		return err
-	}
-	if err := f.Close(); err != nil {
 		return err
 	}
 
@@ -79,14 +78,24 @@ func (a *App) saveToFile(source Source) error {
 	return nil
 }
 
+func (a *App) saveToFile(source Source) error {
+	return a.appendToMinutesFile(source.Title, source.Summary, source.Link)
+}
 
-func (a *App) webSearch(source Source) {
+func (a *App) webSearch(source Source) error {
 	clean_title := cleanTitle(source.Title)
-	web_search_bash_cmd := fmt.Sprintf("bash -i -c \"websearch \\\"%s\\\"\"", clean_title)
-	cmd := exec.Command("/usr/bin/tmux", "new-window", web_search_bash_cmd)
-	// log.Printf(web_search_bash_cmd)
-	// cmd := exec.Command("/usr/bin/tmux", "new-window", "bash -c -i 'websearch 1 && bash'") //web_search_bash_cmd)
-	cmd.Run()
+	searchInstance, err := search.New(clean_title)
+	if err != nil {
+		return err
+	}
+	a.searchInstance = searchInstance
+	a.mode = "search"
+	return nil
+}
+
+// Save search result to minutes file along with original source description
+func (a *App) saveSearchResult(searchResult *search.Result, originalSource Source) error {
+	return a.appendToMinutesFile(searchResult.Title, originalSource.Summary, searchResult.URL)
 }
 
 func openBrowser(url string) error {
