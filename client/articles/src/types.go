@@ -40,6 +40,7 @@ type App struct {
 	mode           string // "main", "detail", "help", "search"
 	detailIdx      int   // Index of item being viewed in detail
 	searchInstance *search.Search // Search instance for web search mode
+	searchOriginIdx int   // Index of the source that initiated the search
 	embeddings     [][]float64 // Store embeddings for distance calculations
 	clusters       []Cluster   // Store clusters with centroids
 	clusterStyles  []tcell.Style // Store cluster-specific colors

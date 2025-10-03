@@ -82,13 +82,14 @@ func (a *App) saveToFile(source Source) error {
 	return a.appendToMinutesFile(source.Title, source.Summary, source.Link)
 }
 
-func (a *App) webSearch(source Source) error {
+func (a *App) webSearch(source Source, sourceIdx int) error {
 	clean_title := cleanTitle(source.Title)
 	searchInstance, err := search.New(clean_title)
 	if err != nil {
 		return err
 	}
 	a.searchInstance = searchInstance
+	a.searchOriginIdx = sourceIdx
 	a.mode = "search"
 	return nil
 }

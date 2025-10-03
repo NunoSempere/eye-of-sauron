@@ -576,10 +576,8 @@ func (a *App) run() error {
 					if a.mode == "search" && a.searchInstance != nil {
 						// Save search result with original source description
 						if result := a.searchInstance.GetSelectedResult(); result != nil {
-							idx := a.selectedIdx
-							if a.detailIdx >= 0 {
-								idx = a.detailIdx
-							}
+							// Use searchOriginIdx to get the correct source that initiated the search
+							idx := a.searchOriginIdx
 							if err := a.saveSearchResult(result, a.sources[idx]); err != nil {
 								a.statusMessage = fmt.Sprintf("Save error: %v", err)
 							} else {
@@ -590,7 +588,7 @@ func (a *App) run() error {
 									a.statusMessage = ""
 									a.screen.Sync()
 								}()
-								a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, idx)
+								a.markRelevantPerHumanCheck(RELEVANT_PER_HUMAN_CHECK_YES, a.searchOriginIdx)
 								// Go back to main mode
 								a.mode = "main"
 								a.searchInstance = nil
@@ -610,7 +608,7 @@ func (a *App) run() error {
 						if a.mode == "detail" {
 							idx = a.detailIdx
 						}
-						if err := a.webSearch(a.sources[idx]); err != nil {
+						if err := a.webSearch(a.sources[idx], idx); err != nil {
 							a.statusMessage = fmt.Sprintf("Search error: %v", err)
 						}
 					}
