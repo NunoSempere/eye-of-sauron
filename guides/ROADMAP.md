@@ -1,10 +1,28 @@
+## v6
+
+Add more sources
+
+- [ ] Twitter
+  - Have everything else but still need list of AI personalities
+  - Could get a sense of number of infections?
+- [ ] Reddit
+  - [ ] AI psychosis/parasitism
+  -  [ ] Financial panic
+  - [ ] 100K subreddits, just parse for alarmingness
+- Chinese social media and news
+  - [ ] Red Note
+  - [ ] More news, right now we are parsing 1 out of maybe 4-5 military sites
+- [ ] 4chan
+  - [ ] AI developments
+  - [ ] New AI experimentation
+
 ## v5: Expand and improve
 
 - [ ] Parse more sources
   - [ ] Major AI labs
-  - [ ] Twitter personalities
+  - [x] Twitter personalities
 - [ ] Add an alternative html/js-based frontend, so that other forecasters can use it
-- [ ] Go back to functional programming. Define pipelines at a higher level of abstraction
+- [x] Go back to functional programming. Define pipelines at a higher level of abstraction
 - [ ] Check for better/original sources, e.g., Reuters, AP, when the title is the same. Do this after an article has passed filters, not before
 - [ ] Replace sources with AP/Reuters/AlJazeera
 - [ ] Improve logging so that it is clear why a given article falls through.
