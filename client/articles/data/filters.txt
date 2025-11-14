@@ -127,3 +127,6 @@ plane crash
 Ahmedabad
 AI 171
 Jeju Air
+
+# Weather
+typhoon

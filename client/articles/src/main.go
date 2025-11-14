@@ -17,6 +17,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
+	"golang.org/x/net/publicsuffix"
 
 )
 
@@ -192,18 +193,23 @@ func (a *App) draw() {
 			if len(a.embeddings) > idx && len(a.clusters) > source.ClusterID && source.ClusterID >= 0 {
 				cluster := a.clusters[source.ClusterID]
 				if cluster.Centroid != nil {
-					distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
-					distanceInfo = fmt.Sprintf("-%.3f", distance)
+					_ = calculateDistance(a.embeddings[idx], cluster.Centroid)
+					// distance := calculateDistance(a.embeddings[idx], cluster.Centroid)
+					// distanceInfo = fmt.Sprintf("-%.3f", distance)
 				}
 			}
 		}
-		
+	
 		host := ""
 		parsedURL, err := url.Parse(source.Link)
 		if err != nil {
 			host = ""
 		} else {
 			host = parsedURL.Host
+			shorthost, err  := publicsuffix.EffectiveTLDPlusOne(host)
+			if err == nil {
+				host = shorthost
+			}
 		}
 
 		// Build title with colored cluster section

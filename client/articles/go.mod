@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/sashabaranov/go-openai v1.40.3
 	github.com/tiktoken-go/tokenizer v0.6.2
+	golang.org/x/net v0.25.0
 )
 
 require (
