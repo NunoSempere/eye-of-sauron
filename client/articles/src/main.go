@@ -237,7 +237,7 @@ func (a *App) draw() {
 		}
 		
 		// Rest of title
-		titleParts = append(titleParts, fmt.Sprintf(" %s | %s | %s", source.Title, host, source.Date.Format("2006-01-02")))
+		titleParts = append(titleParts, fmt.Sprintf(" %s | %s | %s", source.Title, host, source.Date.Format("01-02")))
 		titleStyles = append(titleStyles, currentStyle)
 		
 		// Draw title with overflow handling
