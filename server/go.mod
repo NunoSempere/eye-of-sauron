@@ -9,7 +9,7 @@ require github.com/joho/godotenv v1.5.1
 require (
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/jackc/pgx/v5 v5.7.1
-	github.com/sashabaranov/go-openai v1.40.2
+	github.com/sashabaranov/go-openai v1.41.1
 	golang.org/x/net v0.33.0
 )
 

@@ -3,13 +3,13 @@ package llm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"strings"
-	"errors"
 
+	outbound "git.nunosempere.com/NunoSempere/news/lib/outbound"
 	openai "github.com/sashabaranov/go-openai"
 	jsonschema "github.com/sashabaranov/go-openai/jsonschema"
-	outbound "git.nunosempere.com/NunoSempere/news/lib/outbound"
 )
 
 // https://openai.com/api/pricing/
@@ -76,22 +76,22 @@ func fetchOpenAIAnswerJSON(req OpenAIRequest, schema openai.ChatCompletionRespon
 
 		e := &openai.APIError{}
 		if errors.As(err, &e) {
-  		switch e.HTTPStatusCode {
-    		case 401:
-      		// invalid auth or key (do not retry)
-    		case 429: 
-    	    // exceeded money in account; refill
-    	  	flag := outbound.CheckFlag()
-    	  	if !flag {
-    				outbound.SendPostmarkEmail("Not enough money in OpenAI account; refill")
-    				outbound.SetFlag()
-    	  	}
-    		case 500:
-      		// openai server error (retry)
-          // TODO
-    		default:
-      		// unhandled
-  		}
+			switch e.HTTPStatusCode {
+			case 401:
+				// invalid auth or key (do not retry)
+			case 429:
+				// exceeded money in account; refill
+				flag := outbound.CheckFlag()
+				if !flag {
+					outbound.SendPostmarkEmail("Not enough money in OpenAI account; refill")
+					outbound.SetFlag()
+				}
+			case 500:
+				// openai server error (retry)
+				// TODO
+			default:
+				// unhandled
+			}
 		}
 		return "", err
 	}
@@ -131,7 +131,7 @@ func Summarize(text string, token string) (string, error) {
 		log.Printf("String was: %v", summary_json)
 		return "", err
 	}
-	if summary_box.Error != nil && (*summary_box.Error) != "" {
+	if summary_box.Error != nil && (*summary_box.Error) != "" && (*summary_box.Error) != "null" {
 		log.Printf("OpenAI json error field is not empty: %v", err)
 		log.Printf("OpenAI answer: %v", summary_json)
 		return "", nil
@@ -194,7 +194,7 @@ For a longer example, given the following item\n\n<INPUT>`
 		log.Printf("Error unmarshalling json: %v", err)
 		return nil, err
 	}
-	if existential_importance_box.Error != nil && *existential_importance_box.Error != "" {
+	if existential_importance_box.Error != nil && *existential_importance_box.Error != "" && *existential_importance_box.Error != "null" {
 		log.Printf("OpenAI json error field is not empty: %v", err)
 		log.Printf("OpenAI answer: %v", answer_json)
 		return nil, err
@@ -247,7 +247,7 @@ For a longer example, given the following article\n\n<INPUT>`
 		log.Printf("Error unmarshalling json: %v", err)
 		return nil, err
 	}
-	if existential_importance_box.Error != nil && *existential_importance_box.Error != "" {
+	if existential_importance_box.Error != nil && *existential_importance_box.Error != "" && *existential_importance_box.Error != "null" {
 		log.Printf("OpenAI json error field is not empty: %v", err)
 		log.Printf("OpenAI answer: %v", answer_json)
 		return nil, err
