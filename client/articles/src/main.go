@@ -749,7 +749,7 @@ func (a *App) markClusterPartsAsProcessed(selectedIdx int) {
 		a.statusMessage = fmt.Sprintf("Marked %d %s cluster members as processed", markedCount, partTypeName)
 		// Clear status message after 2 seconds
 		go func() {
-			time.Sleep(2 * time.Second)
+			time.Sleep(500 * time.Millisecond)
 			a.statusMessage = ""
 			a.screen.Sync()
 		}()
