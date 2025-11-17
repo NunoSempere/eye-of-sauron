@@ -17,6 +17,8 @@ var GPT3_5_turbo string = "gpt-3.5-turbo-0125"
 var GPT4_o string = "gpt-4o-2024-05-13"
 var GPT4_turbo string = "gpt-4-turbo"
 var GPT4_o_mini string = "gpt-4o-mini"
+var GPT5_mini string = "gpt-5-mini"
+var GPT5 string = "gpt-5"
 
 type OpenAIRequest struct {
 	prompt string
@@ -119,7 +121,7 @@ func Summarize(text string, token string) (string, error) {
 		Schema: schema,
 		Strict: true,
 	}
-	summary_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+	summary_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT5_mini, token: token}, openai_schema)
 	if err != nil {
 		return "", err
 	}
@@ -185,7 +187,7 @@ For a longer example, given the following item\n\n<INPUT>`
 		Schema: schema,
 		Strict: true,
 	}
-	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT5_mini, token: token}, openai_schema)
 
 	err = json.Unmarshal([]byte(answer_json), &existential_importance_box)
 	if err != nil {
@@ -238,7 +240,7 @@ For a longer example, given the following article\n\n<INPUT>`
 		Schema: schema,
 		Strict: true,
 	}
-	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT4_o_mini, token: token}, openai_schema)
+	answer_json, err := fetchOpenAIAnswerJSON(OpenAIRequest{prompt: prompt, model: GPT5_mini, token: token}, openai_schema)
 
 	err = json.Unmarshal([]byte(answer_json), &existential_importance_box)
 	if err != nil {
@@ -255,7 +257,7 @@ For a longer example, given the following article\n\n<INPUT>`
 
 func TranslateString(text string, token string) (string, error) {
 	prompt := "Translate this text into English: " + text + "\n"
-	translation, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT4_turbo, token: token})
+	translation, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT5, token: token})
 	if err != nil {
 		return "", err
 	}
@@ -272,9 +274,9 @@ func MergeArticles(text string, token string) (string, error) {
 		"4. If do some other type of cleanup, point it out at the end.\n\n" +
 		"Don't acknowledge instructions, just answer with the html.\n\n" + text
 
-	summary, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT4_turbo, token: token})
+	summary, err := fetchOpenAIAnswer(OpenAIRequest{prompt: prompt, model: GPT5, token: token})
 	if err != nil {
 		return "", err
 	}
-	return summary + "<details><summary>The above articles were merged by GPT4-turbo. But you can view the originals under this toggle</summary>" + text + "</details>", nil
+	return summary + "<details><summary>The above articles were merged by GPT5. But you can view the originals under this toggle</summary>" + text + "</details>", nil
 }
