@@ -17,3 +17,6 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable wikinews 
 	sudo systemctl restart wikinews
+
+status:
+	systemctl status wikinews --no-pager

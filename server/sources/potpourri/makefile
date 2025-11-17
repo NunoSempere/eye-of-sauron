@@ -17,3 +17,6 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable potpourri
 	sudo systemctl restart potpourri 
+
+status:
+	systemctl status potpourri --no-pager

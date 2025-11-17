@@ -15,3 +15,7 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable gdelt
 	sudo systemctl restart gdelt
+
+status:
+	systemctl status gdelt --no-pager
+

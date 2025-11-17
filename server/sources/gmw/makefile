@@ -16,3 +16,6 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable gmw
 	sudo systemctl restart gmw 
+
+status:
+	systemctl status gmw --no-pager

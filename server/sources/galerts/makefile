@@ -15,3 +15,7 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable galerts
 	sudo systemctl restart galerts
+
+status:
+	 systemctl status galerts --no-pager
+

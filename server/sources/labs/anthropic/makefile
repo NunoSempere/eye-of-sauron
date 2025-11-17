@@ -16,4 +16,7 @@ systemd:
 	sudo cp anthropic.service /etc/systemd/system
 	sudo systemctl daemon-reload
 	sudo systemctl enable anthropic
-	sudo systemctl restart anthropic
+	sudo systemctl restart anthropic 
+
+status:
+	systemctl status anthropic --no-pager

@@ -59,10 +59,12 @@ lint:
 
 # Show service status
 status:
-	sudo systemctl status globalbiodefense
+	sudo systemctl status globalbiodefense --no-pager
 
 # Show service logs
 logs:
 	sudo journalctl -u globalbiodefense -f
 
+
 .PHONY: setup add add-dev run install listen rotate test-db clean systemd format lint status logs
+

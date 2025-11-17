@@ -18,3 +18,6 @@ systemd:
 	sudo systemctl daemon-reload
 	sudo systemctl enable hn
 	sudo systemctl restart hn 
+
+status:
+	systemctl status hn --no-pager
