@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 type Search struct {
@@ -33,7 +34,7 @@ func New(query string) (*Search, error) {
 }
 
 func (s *Search) fetchResults() error {
-	apiKey := "BSALG03YRtfuxYiEeVdwEmmCWCP0aQj"
+	bravekey := os.Getenv("BRAVE_KEY")
 	searchURL := fmt.Sprintf("https://api.search.brave.com/res/v1/web/search?q=%s", 
 		url.QueryEscape(s.query))
 
@@ -44,7 +45,7 @@ func (s *Search) fetchResults() error {
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Accept-Encoding", "gzip")
-	req.Header.Set("X-Subscription-Token", apiKey)
+	req.Header.Set("X-Subscription-Token", bravekey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
