@@ -506,8 +506,12 @@ func (a *App) run() error {
 			case tcell.KeyRune:
 				switch ev.Rune() {
 				case 'q', 'Q':
-					a.waitgroup.Wait() // gracefully wait for all goroutines to finish
-					return nil
+						if a.mode == "main" {
+							a.waitgroup.Wait() // gracefully wait for all goroutines to finish
+							return nil
+						} else {
+							a.mode = "main"
+						}
 				case 'o', 'O':
 					if a.mode == "search" && a.searchInstance != nil {
 						if result := a.searchInstance.GetSelectedResult(); result != nil {
