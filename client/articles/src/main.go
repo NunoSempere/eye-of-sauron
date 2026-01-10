@@ -459,6 +459,42 @@ func (a *App) drawLines(lines []string) {
 	a.screen.Show()
 }
 
+func (a *App) confirmQuit() bool {
+	width, height := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+
+	// Clear bottom line
+	for i := 0; i < width; i++ {
+		a.screen.SetContent(i, height-1, ' ', nil, style)
+	}
+
+	// Show prompt
+	prompt := "Quit? (y/n) "
+	for i, r := range prompt {
+		a.screen.SetContent(i, height-1, r, nil, style)
+	}
+	a.screen.Show()
+
+	// Wait for y/n response
+	for {
+		ev := a.screen.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			switch ev.Key() {
+			case tcell.KeyRune:
+				switch ev.Rune() {
+				case 'y', 'Y':
+					return true
+				case 'n', 'N':
+					return false
+				}
+			case tcell.KeyEscape:
+				return false
+			}
+		}
+	}
+}
+
 func (a *App) run() error {
 	err := a.loadSources()
 	if err != nil {
@@ -478,8 +514,13 @@ func (a *App) run() error {
 				} else if a.mode == "search" {
 					a.mode = "main"
 					a.searchInstance = nil
+				} else if a.mode == "help" {
+					a.mode = "main"
 				} else {
-					return nil
+					if a.confirmQuit() {
+						a.waitgroup.Wait()
+						return nil
+					}
 				}
 			case tcell.KeyBackspace, tcell.KeyBackspace2:
 				if a.mode == "detail" {
@@ -507,8 +548,10 @@ func (a *App) run() error {
 				switch ev.Rune() {
 				case 'q', 'Q':
 						if a.mode == "main" {
-							a.waitgroup.Wait() // gracefully wait for all goroutines to finish
-							return nil
+							if a.confirmQuit() {
+								a.waitgroup.Wait()
+								return nil
+							}
 						} else {
 							a.mode = "main"
 						}

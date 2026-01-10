@@ -276,6 +276,42 @@ func (a *App) webSearch(source Source) {
 	cmd.Run()
 }
 
+func (a *App) confirmQuit() bool {
+	width, height := a.screen.Size()
+	style := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorWhite)
+
+	// Clear bottom line
+	for i := 0; i < width; i++ {
+		a.screen.SetContent(i, height-1, ' ', nil, style)
+	}
+
+	// Show prompt
+	prompt := "Quit? (y/n) "
+	for i, r := range prompt {
+		a.screen.SetContent(i, height-1, r, nil, style)
+	}
+	a.screen.Show()
+
+	// Wait for y/n response
+	for {
+		ev := a.screen.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			switch ev.Key() {
+			case tcell.KeyRune:
+				switch ev.Rune() {
+				case 'y', 'Y':
+					return true
+				case 'n', 'N':
+					return false
+				}
+			case tcell.KeyEscape:
+				return false
+			}
+		}
+	}
+}
+
 func openBrowser(url string) error {
 	var cmd string
 	var args []string
@@ -306,7 +342,9 @@ func (a *App) run() error {
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				return nil
+				if a.confirmQuit() {
+					return nil
+				}
 			case tcell.KeyRight:
 				if (a.currentPage+1)*a.itemsPerPage < len(a.sources) {
 					a.currentPage++
@@ -320,7 +358,9 @@ func (a *App) run() error {
 			case tcell.KeyRune:
 				switch ev.Rune() {
 				case 'q', 'Q':
-					return nil
+					if a.confirmQuit() {
+						return nil
+					}
 				case 'o', 'O':
 					if len(a.sources) > 0 {
 						openBrowser(a.sources[a.selectedIdx].Url)
