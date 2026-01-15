@@ -43,7 +43,9 @@ func getEmbeddings(texts []string, token string) ([][]float64, error) {
 }
 
 func getEmbeddingsStaggered(texts []string, token string) ([][]float64, error) {
-	//  max 300000 tokens per request
+	//  max 300000 tokens per request, using 280000 as threshold for safety
+	maxTokensPerBatch := 280000
+	log.Printf("[CLUSTERING] Starting getEmbeddingsStaggered with %d texts (max tokens per batch: %d)", len(texts), maxTokensPerBatch)
 
 	enc, err := tokenizer.Get(tokenizer.Cl100kBase)
 	if err != nil {
@@ -54,18 +56,22 @@ func getEmbeddingsStaggered(texts []string, token string) ([][]float64, error) {
 	es := [][]float64{}
 	n := 0
 	last_not_in_batch := 0
+	batchCount := 0
 	for i, text := range texts {
 		m, err := enc.Count(text)
 		if err != nil {
 			log.Printf("Error counting tokens: %v", err)
 				return [][]float64{}, err
 		}
-		if n < 200000 && (n+m > 200000) {
-			es_batch, err := getEmbeddings(texts[:i], token)
+		if n < maxTokensPerBatch && (n+m > maxTokensPerBatch) {
+			batchCount++
+			log.Printf("[CLUSTERING] Batch %d: Getting embeddings for texts %d to %d (token count: %d)", batchCount, last_not_in_batch, i, n)
+			es_batch, err := getEmbeddings(texts[last_not_in_batch:i], token)
 			if err != nil {
 				log.Printf("Error getting embeddings: %v", err)
 				return [][]float64{}, err
 			}
+			log.Printf("[CLUSTERING] Batch %d: Received %d embeddings", batchCount, len(es_batch))
 			es = append(es, es_batch...)
 			last_not_in_batch = i
 			n = 0
@@ -75,15 +81,20 @@ func getEmbeddingsStaggered(texts []string, token string) ([][]float64, error) {
 	}
 
 	// Append last batch
+	batchCount++
+	log.Printf("[CLUSTERING] Final batch %d: Getting embeddings for texts %d to %d (token count: %d)", batchCount, last_not_in_batch, len(texts), n)
 	es_batch, err := getEmbeddings(texts[last_not_in_batch:len(texts)], token)
 	if err != nil {
 		log.Printf("Error getting embeddings: %v", err)
 		return [][]float64{}, err
 	}
+	log.Printf("[CLUSTERING] Final batch %d: Received %d embeddings", batchCount, len(es_batch))
 	es = append(es, es_batch...)
-	
 
-
+	log.Printf("[CLUSTERING] Total embeddings generated: %d (expected: %d)", len(es), len(texts))
+	if len(es) > 0 {
+		log.Printf("[CLUSTERING] Embedding dimension: %d", len(es[0]))
+	}
 
 	return es, nil
 }
@@ -161,26 +172,48 @@ func calculateDistance(point1, point2 []float64) float64 {
 }
 
 func getClusters(data [][]float64) []Cluster {
-	minimumClusterSize := 3 // 
+	log.Printf("[CLUSTERING] getClusters called with %d data points", len(data))
+	if len(data) > 0 {
+		log.Printf("[CLUSTERING] Data dimension: %d", len(data[0]))
+	}
+
+	minimumClusterSize := 3 //
 	minimumSpanningTree := false
+	log.Printf("[CLUSTERING] Parameters: minimumClusterSize=%d, minimumSpanningTree=%v", minimumClusterSize, minimumSpanningTree)
 
 	// create
+	log.Printf("[CLUSTERING] Creating HDBSCAN clustering object...")
 	clustering, err := hdbscan.NewClustering(data, minimumClusterSize)
 	if err != nil {
 		log.Printf("Error creating clustering: %v\n", err)
 		return []Cluster{}
 	}
+	log.Printf("[CLUSTERING] HDBSCAN clustering object created successfully")
 
+	log.Printf("[CLUSTERING] Running outlier detection...")
 	clustering = clustering.OutlierDetection()
+	log.Printf("[CLUSTERING] Running HDBSCAN algorithm...")
 	clustering.Run(hdbscan.EuclideanDistance, hdbscan.VarianceScore, minimumSpanningTree)
+	log.Printf("[CLUSTERING] HDBSCAN algorithm completed")
 
+	log.Printf("[CLUSTERING] Extracting clusters...")
 	result := extractClusters(*clustering)
-	
+	log.Printf("[CLUSTERING] Extracted %d clusters", len(result))
+
+	// Log cluster details
+	for i, cluster := range result {
+		log.Printf("[CLUSTERING] Cluster %d: %d central points, %d outliers", i, len(cluster.Points), len(cluster.Outliers))
+	}
+
 	// Calculate centroids for each cluster
+	log.Printf("[CLUSTERING] Calculating centroids...")
 	for i := range result {
 		result[i].Centroid = calculateCentroid(result[i].Points, data)
+		if result[i].Centroid != nil {
+			log.Printf("[CLUSTERING] Cluster %d centroid calculated (dimension: %d)", i, len(result[i].Centroid))
+		}
 	}
-	
+
 	return result
 }
 
@@ -244,13 +277,15 @@ func assignRandomClusters(sources []Source) ([]Cluster, [][]float64) {
 }
 
 func (a *App) clusterSources() error {
+	log.Printf("[CLUSTERING] clusterSources called with %d sources", len(a.sources))
 	if len(a.sources) < 2 {
+		log.Printf("[CLUSTERING] Not enough sources to cluster (need at least 2, have %d)", len(a.sources))
 		return nil // Not enough sources to cluster
 	}
 
 	// Check for random clustering flag
 	if os.Getenv("RANDOM_CLUSTERS") == "true" {
-		log.Println("Using random clustering for testing")
+		log.Println("[CLUSTERING] Using random clustering for testing")
 		clusters, embeddings := assignRandomClusters(a.sources)
 		
 		a.embeddings = embeddings
@@ -286,46 +321,59 @@ func (a *App) clusterSources() error {
 
 	openaiKey := os.Getenv("OPENAI_KEY")
 	if openaiKey == "" {
-		log.Println("OPENAI_KEY not found, skipping clustering")
+		log.Println("[CLUSTERING] OPENAI_KEY not found, skipping clustering")
 		return nil
 	}
+	log.Printf("[CLUSTERING] OPENAI_KEY found, proceeding with real clustering")
 
 	// Extract titles for embedding
 	texts := make([]string, len(a.sources))
 	for i, source := range a.sources {
 		texts[i] = cleanTitleForEmbedding(source.Title) + "\n" + source.Summary
 	}
+	log.Printf("[CLUSTERING] Prepared %d texts for embedding", len(texts))
 
 	// Get embeddings
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings..."})
+	log.Printf("[CLUSTERING] Calling getEmbeddingsStaggered...")
 	embeddings, err := getEmbeddingsStaggered(texts, openaiKey)
 	if err != nil {
-		log.Printf("Error getting embeddings: %v\n", err)
+		log.Printf("[CLUSTERING] Error getting embeddings: %v\n", err)
 		return err
 	}
+	log.Printf("[CLUSTERING] Successfully retrieved %d embeddings", len(embeddings))
 
 	// Store embeddings in App for distance calculations
 	a.embeddings = embeddings
 
 	// Get clusters
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings...", "  Calculating clusters... [this may take a while]"})
+	log.Printf("[CLUSTERING] Calling getClusters with %d embeddings...", len(embeddings))
 	clusters := getClusters(embeddings)
+	log.Printf("[CLUSTERING] getClusters returned %d clusters", len(clusters))
 
 	// Store clusters in App
 	a.clusters = clusters
 
 	// Assign cluster information to sources
+	log.Printf("[CLUSTERING] Initializing all sources with ClusterID=-1 and IsClusterCentral=false")
 	for i := range a.sources {
 		a.sources[i].ClusterID = -1 // Default: no cluster
 		a.sources[i].IsClusterCentral = false
 	}
 
+	log.Printf("[CLUSTERING] Assigning cluster information to sources...")
+	centralCount := 0
+	outlierCount := 0
 	for _, cluster := range clusters {
 		// Mark central points
 		for _, pointIdx := range cluster.Points {
 			if pointIdx < len(a.sources) {
 				a.sources[pointIdx].ClusterID = cluster.ID
 				a.sources[pointIdx].IsClusterCentral = true
+				centralCount++
+			} else {
+				log.Printf("[CLUSTERING] WARNING: Central point index %d is out of bounds (sources length: %d)", pointIdx, len(a.sources))
 			}
 		}
 		// Mark outliers
@@ -333,9 +381,22 @@ func (a *App) clusterSources() error {
 			if outlierIdx < len(a.sources) {
 				a.sources[outlierIdx].ClusterID = cluster.ID
 				a.sources[outlierIdx].IsClusterCentral = false
+				outlierCount++
+			} else {
+				log.Printf("[CLUSTERING] WARNING: Outlier index %d is out of bounds (sources length: %d)", outlierIdx, len(a.sources))
 			}
 		}
 	}
+	log.Printf("[CLUSTERING] Assigned %d central points and %d outliers", centralCount, outlierCount)
+
+	// Count unclustered sources
+	unclusteredCount := 0
+	for _, source := range a.sources {
+		if source.ClusterID == -1 {
+			unclusteredCount++
+		}
+	}
+	log.Printf("[CLUSTERING] %d sources remain unclustered", unclusteredCount)
 
 	// Sort sources by cluster
 	a.sortSourcesByCluster()
@@ -344,11 +405,13 @@ func (a *App) clusterSources() error {
 }
 
 func (a *App) sortSourcesByCluster() {
+	log.Printf("[CLUSTERING] sortSourcesByCluster called")
 	// Create a map to group sources by cluster
 	clusterGroups := make(map[int][]Source)
 	unclusteredSources := []Source{}
 
 	// Group sources by cluster ID
+	log.Printf("[CLUSTERING] Grouping sources by cluster ID...")
 	for _, source := range a.sources {
 		if source.ClusterID >= 0 {
 			clusterGroups[source.ClusterID] = append(clusterGroups[source.ClusterID], source)
@@ -356,8 +419,10 @@ func (a *App) sortSourcesByCluster() {
 			unclusteredSources = append(unclusteredSources, source)
 		}
 	}
+	log.Printf("[CLUSTERING] Found %d unclustered sources and %d cluster groups", len(unclusteredSources), len(clusterGroups))
 
 	// Sort within each cluster: central points first, then outliers
+	log.Printf("[CLUSTERING] Sorting within each cluster (central points first, then outliers)...")
 	for clusterID := range clusterGroups {
 		cluster := clusterGroups[clusterID]
 		centralPoints := []Source{}
@@ -371,29 +436,40 @@ func (a *App) sortSourcesByCluster() {
 			}
 		}
 
+		log.Printf("[CLUSTERING] Cluster %d: %d central, %d outliers", clusterID, len(centralPoints), len(outliers))
 		// Combine central points first, then outliers
 		clusterGroups[clusterID] = append(centralPoints, outliers...)
 	}
 
-	// Sort the cluster group themselves 
+	// Sort the cluster group themselves
 	a.drawLines([]string{"Getting sources...", "Clustering sources...", "  Getting embeddings...", "  Calculating clusters... [this may take a while]", "  Grouping clusters"})
+	log.Printf("[CLUSTERING] Preparing to reorder clusters by topic...")
 	sss := [][]Source{}
 	for _, ss := range clusterGroups {
 		sss = append(sss, ss)
 	}
+	log.Printf("[CLUSTERING] Calling reorderClusters with %d cluster groups...", len(sss))
 	sss_ordered_by_cluster, err := reorderClusters(sss)
 	if err != nil {
-		log.Printf("Error sorting clusters by topic: %v", err)
+		log.Printf("[CLUSTERING] Error sorting clusters by topic: %v", err)
+	} else {
+		log.Printf("[CLUSTERING] Successfully reordered clusters")
 	}
 
 
 	// Rebuild the sources slice: unclustered first, then clusters in order
+	log.Printf("[CLUSTERING] Rebuilding sources slice...")
 	newSources := []Source{}
 	newSources = append(newSources, unclusteredSources...)
+	log.Printf("[CLUSTERING] Added %d unclustered sources", len(unclusteredSources))
 
-	for _, ss := range sss_ordered_by_cluster {
+	totalClusteredSources := 0
+	for i, ss := range sss_ordered_by_cluster {
+		log.Printf("[CLUSTERING] Adding cluster group %d with %d sources", i, len(ss))
 		newSources = append(newSources, ss...)
+		totalClusteredSources += len(ss)
 	}
+	log.Printf("[CLUSTERING] Added %d clustered sources across %d cluster groups", totalClusteredSources, len(sss_ordered_by_cluster))
 
 	// Add clusters in order (0, 1, 2, ...)
 	/*
@@ -412,4 +488,5 @@ func (a *App) sortSourcesByCluster() {
 	*/
 
 	a.sources = newSources
+	log.Printf("[CLUSTERING] sortSourcesByCluster completed. Final sources count: %d (was: %d)", len(newSources), len(a.sources))
 }

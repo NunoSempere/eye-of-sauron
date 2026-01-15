@@ -66,21 +66,25 @@ func  testSourceListAgainstRegexes(rs []*regexp.Regexp, ss []Source) bool {
 
 
 func reorderClusters(sss [][]Source) ([][]Source, error) {
+    log.Printf("[CLUSTERING] reorderClusters called with %d cluster groups", len(sss))
     var reordered_source_lists [][]Source
     remaining_source_lists := sss
 
+    log.Printf("[CLUSTERING] Reading topics from data/topics.txt...")
     topics, err := readTopicsFromFile("data/topics.txt")
     if err != nil {
-        log.Printf("Error loading topics: %v", err)
+        log.Printf("[CLUSTERING] Error loading topics: %v", err)
         return sss, err
     }
+    log.Printf("[CLUSTERING] Loaded %d topics", len(topics))
 
-    for _, topic := range topics {
+    for topicIdx, topic := range topics {
+        log.Printf("[CLUSTERING] Processing topic %d: %s with %d keywords", topicIdx, topic.name, len(topic.keywords))
         var topic_regexes []*regexp.Regexp
         for _, regex_string := range topic.keywords {
             regex, err := regexp.Compile("(?i)" + regex_string)
             if err != nil {
-                log.Printf("Regex error: %v", err)
+                log.Printf("[CLUSTERING] Regex error: %v", err)
                 return nil, err
             }
             topic_regexes = append(topic_regexes, regex)
@@ -88,14 +92,17 @@ func reorderClusters(sss [][]Source) ([][]Source, error) {
 
         var new_remaining_source_lists [][]Source
         var topic_source_lists [][]Source
+        matchCount := 0
         for _, source_list := range remaining_source_lists {
             match := testSourceListAgainstRegexes(topic_regexes, source_list)
             if match {
                 topic_source_lists = append(topic_source_lists, source_list)
+                matchCount++
             } else {
                 new_remaining_source_lists = append(new_remaining_source_lists, source_list)
             }
         }
+        log.Printf("[CLUSTERING] Topic '%s' matched %d cluster groups", topic.name, matchCount)
 
         reordered_source_lists = append(reordered_source_lists, topic_source_lists...)
         remaining_source_lists = new_remaining_source_lists
@@ -107,8 +114,10 @@ func reorderClusters(sss [][]Source) ([][]Source, error) {
 
     // Append remaining sources that didn't fit into any topic, sorted alphabetically
     // Show sources that don't fit neatly into a topic first
+    log.Printf("[CLUSTERING] %d cluster groups did not match any topic", len(remaining_source_lists))
 
     reordered_source_lists = append(reordered_source_lists, remaining_source_lists...)
+    log.Printf("[CLUSTERING] reorderClusters completed. Returning %d cluster groups (input: %d)", len(reordered_source_lists), len(sss))
 
     return reordered_source_lists, nil
 }
