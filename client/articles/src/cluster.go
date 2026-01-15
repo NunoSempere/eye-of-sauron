@@ -15,6 +15,14 @@ import (
 )
 
 func getEmbeddings(texts []string, token string) ([][]float64, error) {
+	return getEmbeddingsWithRetry(texts, token, 0)
+}
+
+func getEmbeddingsWithRetry(texts []string, token string, attemptCount int) ([][]float64, error) {
+	if len(texts) == 0 {
+		return [][]float64{}, nil
+	}
+
 	client := openai.NewClient(token)
 
 	// Create an EmbeddingRequest for the user query
@@ -26,6 +34,34 @@ func getEmbeddings(texts []string, token string) ([][]float64, error) {
 	// Create an embedding for the user query
 	queryResponse, err := client.CreateEmbeddings(context.Background(), queryReq)
 	if err != nil {
+		// Check if it's a token limit error
+		errStr := err.Error()
+		if strings.Contains(errStr, "400") && strings.Contains(errStr, "max 300000 tokens per request") {
+			log.Printf("[CLUSTERING] Token limit exceeded for batch of %d texts (attempt %d). Splitting batch...", len(texts), attemptCount+1)
+
+			// If we only have 1 text and it's too large, we can't proceed
+			if len(texts) == 1 {
+				log.Printf("[CLUSTERING] ERROR: Single text exceeds token limit. Cannot proceed.")
+				return [][]float64{}, err
+			}
+
+			// Split the batch in half and retry recursively
+			mid := len(texts) / 2
+			log.Printf("[CLUSTERING] Splitting into batches of %d and %d texts", mid, len(texts)-mid)
+
+			es1, err1 := getEmbeddingsWithRetry(texts[:mid], token, attemptCount+1)
+			if err1 != nil {
+				return [][]float64{}, err1
+			}
+
+			es2, err2 := getEmbeddingsWithRetry(texts[mid:], token, attemptCount+1)
+			if err2 != nil {
+				return [][]float64{}, err2
+			}
+
+			log.Printf("[CLUSTERING] Successfully split batch. Got %d and %d embeddings", len(es1), len(es2))
+			return append(es1, es2...), nil
+		}
 		return [][]float64{}, err
 	}
 
@@ -43,53 +79,75 @@ func getEmbeddings(texts []string, token string) ([][]float64, error) {
 }
 
 func getEmbeddingsStaggered(texts []string, token string) ([][]float64, error) {
-	//  max 300000 tokens per request, using 280000 as threshold for safety
-	maxTokensPerBatch := 280000
-	log.Printf("[CLUSTERING] Starting getEmbeddingsStaggered with %d texts (max tokens per batch: %d)", len(texts), maxTokensPerBatch)
+	// max 300000 tokens per request
+	// Use conservative estimate (150k) since token counting is approximate
+	// The retry logic in getEmbeddings will handle any overages by splitting batches
+	maxTokensPerBatch := 150000
+	log.Printf("[CLUSTERING] Starting getEmbeddingsStaggered with %d texts (estimated max tokens per batch: %d)", len(texts), maxTokensPerBatch)
 
 	enc, err := tokenizer.Get(tokenizer.Cl100kBase)
 	if err != nil {
-    log.Printf("Error getting the tokenizer")
-    log.Printf("%v", err)
-  }
+		log.Printf("[CLUSTERING] Error getting the tokenizer: %v", err)
+		log.Printf("[CLUSTERING] Will rely on adaptive retry logic only")
+		// Just send everything and let the retry logic handle it
+		return getEmbeddings(texts, token)
+	}
 
 	es := [][]float64{}
-	n := 0
-	last_not_in_batch := 0
+	currentBatchStart := 0
+	currentBatchTokens := 0
 	batchCount := 0
+
 	for i, text := range texts {
-		m, err := enc.Count(text)
+		// Count tokens for this text
+		textTokens, err := enc.Count(text)
 		if err != nil {
-			log.Printf("Error counting tokens: %v", err)
-				return [][]float64{}, err
+			log.Printf("[CLUSTERING] Warning: error counting tokens for text %d: %v", i, err)
+			textTokens = len(text) / 4 // Fallback estimate
 		}
-		if n < maxTokensPerBatch && (n+m > maxTokensPerBatch) {
+
+		// Check if adding this text would exceed the limit
+		wouldExceed := currentBatchTokens + textTokens > maxTokensPerBatch
+
+		if wouldExceed && i > currentBatchStart {
+			// Send the batch without this text
 			batchCount++
-			log.Printf("[CLUSTERING] Batch %d: Getting embeddings for texts %d to %d (token count: %d)", batchCount, last_not_in_batch, i, n)
-			es_batch, err := getEmbeddings(texts[last_not_in_batch:i], token)
+			batchSize := i - currentBatchStart
+			log.Printf("[CLUSTERING] Batch %d: Getting embeddings for texts %d to %d (%d texts, estimated %d tokens)",
+				batchCount, currentBatchStart, i, batchSize, currentBatchTokens)
+
+			es_batch, err := getEmbeddings(texts[currentBatchStart:i], token)
 			if err != nil {
-				log.Printf("Error getting embeddings: %v", err)
+				log.Printf("[CLUSTERING] Error getting embeddings for batch %d: %v", batchCount, err)
 				return [][]float64{}, err
 			}
 			log.Printf("[CLUSTERING] Batch %d: Received %d embeddings", batchCount, len(es_batch))
 			es = append(es, es_batch...)
-			last_not_in_batch = i
-			n = 0
+
+			// Start new batch with current text
+			currentBatchStart = i
+			currentBatchTokens = textTokens
 		} else {
-			n = n + m
+			// Add this text to current batch
+			currentBatchTokens += textTokens
 		}
 	}
 
-	// Append last batch
-	batchCount++
-	log.Printf("[CLUSTERING] Final batch %d: Getting embeddings for texts %d to %d (token count: %d)", batchCount, last_not_in_batch, len(texts), n)
-	es_batch, err := getEmbeddings(texts[last_not_in_batch:len(texts)], token)
-	if err != nil {
-		log.Printf("Error getting embeddings: %v", err)
-		return [][]float64{}, err
+	// Send final batch if there's anything left
+	if currentBatchStart < len(texts) {
+		batchCount++
+		batchSize := len(texts) - currentBatchStart
+		log.Printf("[CLUSTERING] Final batch %d: Getting embeddings for texts %d to %d (%d texts, estimated %d tokens)",
+			batchCount, currentBatchStart, len(texts), batchSize, currentBatchTokens)
+
+		es_batch, err := getEmbeddings(texts[currentBatchStart:], token)
+		if err != nil {
+			log.Printf("[CLUSTERING] Error getting embeddings for final batch: %v", err)
+			return [][]float64{}, err
+		}
+		log.Printf("[CLUSTERING] Final batch %d: Received %d embeddings", batchCount, len(es_batch))
+		es = append(es, es_batch...)
 	}
-	log.Printf("[CLUSTERING] Final batch %d: Received %d embeddings", batchCount, len(es_batch))
-	es = append(es, es_batch...)
 
 	log.Printf("[CLUSTERING] Total embeddings generated: %d (expected: %d)", len(es), len(texts))
 	if len(es) > 0 {
