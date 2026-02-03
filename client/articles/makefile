@@ -1,5 +1,8 @@
 include .env
 
+build:
+	go build -o eye src/*.go
+
 run:
 	go run src/*.go
 
