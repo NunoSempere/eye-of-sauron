@@ -152,7 +152,7 @@ func CheckExistentialImportance(text string, token string) (*ExistentialImportan
 
 The existential_importance_reasoning field contains, as a string, a determination of whether the input describes an event of global importance. existential_importance_bool contains the result of that determination as a true/false boolean. high_importance_bool contains, as a true/false boolean, whether the event is highly important, even if it is not of "existential" importance.
 
-Items are of existential importance if:
+Items are of "existential importance" if:
 
 - They involve more than a hundred deaths.
 - They involve many cases of a sickness that might spread, or a new pathogen
@@ -173,7 +173,8 @@ For example:
 - Later developments of a war (e.g,. current war in Gaza, or current war in Ukraine): probably not of existential importance, as the likelihood of spiraling out declines as the rules of engagement become clearer. Probably still of high importance (just not existentially so).
 - For the purposes of this API, opinion and discussion pieces are not categorized as existentially important. A sign something is an opinion piece—as opposed to considering new events—is a somewhat generic title, like "Why Nuclear Risks Have Not Gone Away", or "At the Brink: Confronting the Risk of Nuclear War". Review articles and lists of events are likewise not existentially important unless they bring up novel events.
 - In a broader conflict, small-fry developments are not existentially important. For example, small developments in the Ukraine or Gaza wars are not existentially important unless the new events themselves involve more than 1k deaths, even if the conflict as a whole involves more than that number of deaths. On the other hand, developments involving escalations or nuclear weapons are not "small fry"
-- We are in 2026. Reviews of past conflicts, like 9/11, or a tornado in 2023, no longer count as existentially important, even if they were so at the time.
+- Car crashes or accidents like floods are not existentially important. However an AMOC reversal would be.
+- We are in 2026. Reviews of past conflicts, like 9/11, no longer count as existentially important, even if they were so at the time.
 
 For a longer example, given the following item\n\n<INPUT>`
 	prompt += text + "\n\n</INPUT>\n\nThe output is as follows: (As a reminder, the existential importance json API endpoint returns a {existential_importance_reasoning, existential_importance_bool, high_importance_bool, error} object, opinion pieces, or editorials are not categorizes as existentially important.)\n"
