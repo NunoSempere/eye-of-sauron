@@ -1,10 +1,10 @@
 include .env
 
-build:
-	go build -o eye src/*.go
-
 run:
 	go run src/*.go
+
+build:
+	go build -o eye src/*.go
 
 trim:
 	psql $(DATABASE_URL) -c "DELETE FROM sources WHERE processed = TRUE AND created_at < NOW() - INTERVAL '2 weeks';"
