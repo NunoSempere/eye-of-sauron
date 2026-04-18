@@ -82,26 +82,6 @@ func markProcessedInServer(state bool, id int, source Source) error {
 	return nil
 }
 
-func markProcessedBeforeDateInServer(date string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
-	if err != nil {
-		log.Printf("failed to connect to database: %v", err)
-		return fmt.Errorf("database connection error: %v", err)
-	}
-	defer conn.Close(ctx)
-
-	_, err = conn.Exec(ctx, "UPDATE sources SET processed = TRUE WHERE date < $1", date)
-	if err != nil {
-		log.Printf("failed to mark sources before date as processed: %v", err)
-		return fmt.Errorf("database update error: %v", err)
-	}
-
-	return nil
-}
-
 func (a *App) markProcessed(i int, source Source) error {
 	if len(a.sources) == 0 {
 		return nil

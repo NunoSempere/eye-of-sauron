@@ -391,8 +391,7 @@ func (a *App) drawHelpView() {
 		"M: Toggle mark",
 		"S: Save",
 		"W: Web Search",
-		"C: Mark cluster centrals as processed",
-		"D: Mark items before date as processed",
+		"C: Mark cluster centrals as processed", 
 		"Q: Quit",
 		"[C#/O#]: Cluster Central/Outlier",
 
@@ -727,72 +726,6 @@ func (a *App) run() error {
 							} else { // we're in the same cluster, but have reached the end. => stop
 								break
 							}
-						}
-					}
-				case 'd', 'D':
-					if a.mode == "main" {
-						// Prompt for date
-						dateInput := a.getInput("Mark items before date as processed (YYYY-MM-DD): ")
-						if dateInput != "" {
-							a.statusMessage = "Marking items before " + dateInput + " as processed..."
-							a.draw()
-
-							// Parse the input date for comparison
-							inputTime, err := time.Parse("2006-01-02", dateInput)
-							if err != nil {
-								a.statusMessage = fmt.Sprintf("Invalid date format. Use YYYY-MM-DD")
-								go func() {
-									time.Sleep(3 * time.Second)
-									a.statusMessage = ""
-									a.screen.Sync()
-								}()
-								continue
-							}
-
-							// Mark in database
-							a.waitgroup.Add(1)
-							go func() {
-								defer a.waitgroup.Done()
-								err := markProcessedBeforeDateInServer(dateInput)
-								if err != nil {
-									a.statusMessage = fmt.Sprintf("Error: %v", err)
-									log.Printf("Error marking items before date: %v", err)
-									go func() {
-										time.Sleep(3 * time.Second)
-										a.statusMessage = ""
-										a.screen.Sync()
-									}()
-								} else {
-									// Filter out items with date before the input date
-									var remaining_sources []Source
-									for _, source := range a.sources {
-										if source.Date.Before(inputTime) {
-											// Mark as processed in UI
-											source.Processed = true
-										} else {
-											remaining_sources = append(remaining_sources, source)
-										}
-									}
-									a.sources = remaining_sources
-
-									// Reset page if needed
-									if a.selectedIdx >= len(a.sources) {
-										a.selectedIdx = len(a.sources) - 1
-									}
-									if a.selectedIdx < 0 {
-										a.selectedIdx = 0
-									}
-									a.currentPage = a.selectedIdx / a.itemsPerPage
-
-									a.statusMessage = fmt.Sprintf("Marked items before %s as processed", dateInput)
-									go func() {
-										time.Sleep(2 * time.Second)
-										a.statusMessage = ""
-										a.screen.Sync()
-									}()
-									a.draw()
-								}
-							}()
 						}
 					}
 				case 'h', 'H':
