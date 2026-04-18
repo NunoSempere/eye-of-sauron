@@ -1,11 +1,17 @@
+## v7: Refactor
+
+- [ ] Try out different languages and their ergonomics. The golang ecosystem is just not as good
+- [ ] Rewrite to be more parsimonious, perhaps from scratch
+- [ ] Connect to people's decisions more.
+
 ## v6
 
 Add more sources
 
-- [ ] Twitter
+- [x] Twitter
   - Have everything else but still need list of AI personalities
   - Could get a sense of number of infections?
-- [ ] Reddit
+- [x] Reddit
   - [ ] AI psychosis/parasitism
   -  [ ] Financial panic
   - [ ] 100K subreddits, just parse for alarmingness
