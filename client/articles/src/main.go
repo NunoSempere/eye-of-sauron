@@ -391,7 +391,8 @@ func (a *App) drawHelpView() {
 		"M: Toggle mark",
 		"S: Save",
 		"W: Web Search",
-		"C: Mark cluster centrals as processed", 
+		"C: Mark cluster centrals as processed",
+		"D: Mark items before date as processed",
 		"Q: Quit",
 		"[C#/O#]: Cluster Central/Outlier",
 
@@ -702,6 +703,58 @@ func (a *App) run() error {
 
 							// Clear status message
 							a.statusMessage = ""
+							a.draw()
+						}
+					}
+				case 'd', 'D':
+					if a.mode == "main" {
+						// Mark items before a given date as processed
+						date_input := a.getInput("Enter date (YYYY-MM-DD): ")
+						if date_input != "" {
+							a.statusMessage = "Processing items before date..."
+							a.draw()
+
+							// Parse the date
+							cutoffDate, err := time.Parse("2006-01-02", date_input)
+							if err != nil {
+								a.statusMessage = fmt.Sprintf("Invalid date format: %v", err)
+								go func() {
+									time.Sleep(2 * time.Second)
+									a.statusMessage = ""
+									a.screen.Sync()
+								}()
+								continue
+							}
+
+							// Mark items before the cutoff date
+							var remaining_sources []Source
+							markedCount := 0
+							for i, source := range a.sources {
+								if source.Date.Before(cutoffDate) {
+									go markProcessedInServer(true, source.ID, source)
+									markedCount++
+								} else {
+									remaining_sources = append(remaining_sources, a.sources[i])
+								}
+							}
+							a.sources = remaining_sources
+
+							// Reset page if needed
+							if a.selectedIdx >= len(a.sources) {
+								a.selectedIdx = len(a.sources) - 1
+							}
+							if a.selectedIdx < 0 {
+								a.selectedIdx = 0
+							}
+							a.currentPage = a.selectedIdx / a.itemsPerPage
+
+							// Show status message
+							a.statusMessage = fmt.Sprintf("Marked %d items before %s as processed", markedCount, date_input)
+							go func() {
+								time.Sleep(2 * time.Second)
+								a.statusMessage = ""
+								a.screen.Sync()
+							}()
 							a.draw()
 						}
 					}
