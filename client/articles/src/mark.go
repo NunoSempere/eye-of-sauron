@@ -114,3 +114,24 @@ func (a *App) markProcessed(i int, source Source) error {
 
 	return nil
 }
+
+func markItemsBeforeDateAsProcessed(cutoffDate time.Time) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_POOL_URL"))
+	if err != nil {
+		log.Printf("failed to connect to database: %v", err)
+		return 0, fmt.Errorf("database connection error: %v", err)
+	}
+	defer conn.Close(ctx)
+
+	result, err := conn.Exec(ctx, "UPDATE sources SET processed = true WHERE date < $1 AND processed = false", cutoffDate)
+	if err != nil {
+		log.Printf("failed to mark sources before date as processed: %v", err)
+		return 0, fmt.Errorf("database update error: %v", err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	return int(rowsAffected), nil
+}

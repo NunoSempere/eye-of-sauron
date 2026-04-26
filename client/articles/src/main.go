@@ -726,15 +726,23 @@ func (a *App) run() error {
 								continue
 							}
 
-							// Mark items before the cutoff date
+							// Mark items before the cutoff date with a single SQL query
+							markedCount, err := markItemsBeforeDateAsProcessed(cutoffDate)
+							if err != nil {
+								a.statusMessage = fmt.Sprintf("Error marking items: %v", err)
+								go func() {
+									time.Sleep(2 * time.Second)
+									a.statusMessage = ""
+									a.screen.Sync()
+								}()
+								continue
+							}
+
+							// Filter out items from the UI
 							var remaining_sources []Source
-							markedCount := 0
-							for i, source := range a.sources {
-								if source.Date.Before(cutoffDate) {
-									go markProcessedInServer(true, source.ID, source)
-									markedCount++
-								} else {
-									remaining_sources = append(remaining_sources, a.sources[i])
+							for _, source := range a.sources {
+								if !source.Date.Before(cutoffDate) {
+									remaining_sources = append(remaining_sources, source)
 								}
 							}
 							a.sources = remaining_sources
