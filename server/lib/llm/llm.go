@@ -20,7 +20,7 @@ var GPT4_o_mini string = "gpt-4o-mini"
 var GPT5_mini string = "gpt-5-mini"
 var GPT5 string = "gpt-5"
 
-var DEFAULT_MODEL="gpt-5-mini" // deepseek/deepseek-v4-flash
+var DEFAULT_MODEL="deepseek/deepseek-v4-flash" // "gpt-5-mini"
 var DEFAULT_MODEL_SMART="gpt-5"
 
 type OpenAIRequest struct {
