@@ -1022,6 +1022,20 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	log.Println("[MAIN] .env file loaded successfully")
+
+	// Debug: Check if OPENROUTER_API_KEY is loaded
+	openrouterKey := os.Getenv("OPENROUTER_API_KEY")
+	log.Printf("[MAIN] DEBUG: OPENROUTER_API_KEY length: %d", len(openrouterKey))
+	if len(openrouterKey) > 0 {
+		prefixLen := 4
+		if len(openrouterKey) < 4 {
+			prefixLen = len(openrouterKey)
+		}
+		log.Printf("[MAIN] DEBUG: OPENROUTER_API_KEY present (starts with: %s...)", openrouterKey[:prefixLen])
+	} else {
+		log.Println("[MAIN] WARNING: OPENROUTER_API_KEY is empty or not set")
+	}
 	app, err := newApp()
 	if err != nil {
 		log.Fatalf("Could not create app: %v", err)

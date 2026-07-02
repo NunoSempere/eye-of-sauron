@@ -24,6 +24,11 @@ func getEmbeddingsWithRetry(texts []string, token string, attemptCount int) ([][
 		return [][]float64{}, nil
 	}
 
+	log.Printf("[CLUSTERING] DEBUG: getEmbeddingsWithRetry called with token length: %d, texts count: %d", len(token), len(texts))
+	if len(token) > 8 {
+		log.Printf("[CLUSTERING] DEBUG: Token starts with: %s...", token[:4])
+	}
+
 	ctx := context.Background()
 	client := openrouter.New(
 		openrouter.WithSecurity(token),
@@ -388,11 +393,19 @@ func (a *App) clusterSources() error {
 	}
 
 	openrouterKey := os.Getenv("OPENROUTER_API_KEY")
+	log.Printf("[CLUSTERING] DEBUG: OPENROUTER_API_KEY loaded, length: %d", len(openrouterKey))
 	if openrouterKey == "" {
 		log.Println("[CLUSTERING] OPENROUTER_API_KEY not found, skipping clustering")
 		return nil
 	}
-	log.Printf("[CLUSTERING] OPENROUTER_API_KEY found, proceeding with real clustering")
+	// Log first and last 4 characters for debugging (mask middle for security)
+	if len(openrouterKey) > 8 {
+		log.Printf("[CLUSTERING] OPENROUTER_API_KEY found: %s...%s (length: %d)",
+			openrouterKey[:4], openrouterKey[len(openrouterKey)-4:], len(openrouterKey))
+	} else {
+		log.Printf("[CLUSTERING] OPENROUTER_API_KEY found but too short: length %d", len(openrouterKey))
+	}
+	log.Printf("[CLUSTERING] Proceeding with real clustering")
 
 	// Extract titles for embedding
 	texts := make([]string, len(a.sources))
