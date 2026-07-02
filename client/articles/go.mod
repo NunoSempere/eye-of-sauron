@@ -1,14 +1,14 @@
 module nunosempere.com/eye-of-sauron/client
 
-go 1.23.4
+go 1.25.10
 
 require (
 	github.com/NunoSempere/hdbscan v0.0.0-20250627164332-2b60979ddfb1
+	github.com/OpenRouterTeam/go-sdk v0.5.10
 	github.com/adrg/strutil v0.3.1
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
-	github.com/sashabaranov/go-openai v1.40.3
 	github.com/tiktoken-go/tokenizer v0.6.2
 	golang.org/x/net v0.25.0
 )
@@ -26,6 +26,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
+	github.com/spyzhov/ajson v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2 // indirect
 	golang.org/x/sys v0.29.0 // indirect

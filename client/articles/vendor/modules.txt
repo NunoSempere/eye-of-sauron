@@ -1,6 +1,20 @@
 # github.com/NunoSempere/hdbscan v0.0.0-20250627164332-2b60979ddfb1
 ## explicit; go 1.13
 github.com/NunoSempere/hdbscan/hdbscan
+# github.com/OpenRouterTeam/go-sdk v0.5.10
+## explicit; go 1.25.10
+github.com/OpenRouterTeam/go-sdk
+github.com/OpenRouterTeam/go-sdk/internal/config
+github.com/OpenRouterTeam/go-sdk/internal/globals
+github.com/OpenRouterTeam/go-sdk/internal/hooks
+github.com/OpenRouterTeam/go-sdk/internal/utils
+github.com/OpenRouterTeam/go-sdk/models/components
+github.com/OpenRouterTeam/go-sdk/models/operations
+github.com/OpenRouterTeam/go-sdk/models/sdkerrors
+github.com/OpenRouterTeam/go-sdk/optionalnullable
+github.com/OpenRouterTeam/go-sdk/retry
+github.com/OpenRouterTeam/go-sdk/types
+github.com/OpenRouterTeam/go-sdk/types/stream
 # github.com/adrg/strutil v0.3.1
 ## explicit; go 1.14
 github.com/adrg/strutil/internal/mathutil
@@ -93,10 +107,10 @@ github.com/mattn/go-runewidth
 # github.com/rivo/uniseg v0.4.3
 ## explicit; go 1.18
 github.com/rivo/uniseg
-# github.com/sashabaranov/go-openai v1.40.3
-## explicit; go 1.18
-github.com/sashabaranov/go-openai
-github.com/sashabaranov/go-openai/internal
+# github.com/spyzhov/ajson v0.8.0
+## explicit; go 1.12
+github.com/spyzhov/ajson
+github.com/spyzhov/ajson/internal
 # github.com/tiktoken-go/tokenizer v0.6.2
 ## explicit; go 1.23
 github.com/tiktoken-go/tokenizer
