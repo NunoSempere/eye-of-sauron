@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENROUTER_API_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	for {
@@ -48,7 +48,7 @@ func main() {
 					for i, source := range dscaSources {
 						log.Printf("\nProcessing DSCA article %d/%d: %s", i+1, len(dscaSources), source.Title)
 
-						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						es, ok := FilterAndExpandSource(source, openrouter_key, pg_database_url)
 						if ok {
 							pgx.SaveSource(es)
 						}
@@ -65,7 +65,7 @@ func main() {
 					for i, source := range whSources {
 						log.Printf("\nProcessing White House article %d/%d: %s", i+1, len(whSources), source.Title)
 
-						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						es, ok := FilterAndExpandSource(source, openrouter_key, pg_database_url)
 						if ok {
 							pgx.SaveSource(es)
 						}
@@ -82,7 +82,7 @@ func main() {
 					for i, source := range cnnSources {
 						log.Printf("\nProcessing CNN article %d/%d [%s]: %s", i+1, len(cnnSources), source.Origin, source.Title)
 
-						es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+						es, ok := FilterAndExpandSource(source, openrouter_key, pg_database_url)
 						if ok {
 							pgx.SaveSource(es)
 						}

@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENROUTER_API_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	for {
@@ -66,7 +66,7 @@ func main() {
 				Link:  extLink,
 				Date:  time.Now(), // FilterAndExpandSource will set date
 			}
-			expanded_source, passes_filters := FilterAndExpandSource(source, openai_key, pg_database_url)
+			expanded_source, passes_filters := FilterAndExpandSource(source, openrouter_key, pg_database_url)
 			if passes_filters {
 				pgx.SaveSource(expanded_source)
 			}

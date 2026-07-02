@@ -10,7 +10,7 @@ import (
 // FilterAndExpandSource processes a xAI tweet article through various filters,
 // expands its content (via summarization and importance check),
 // and returns an ExpandedSource and a boolean indicating if it passes thresholds.
-func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func FilterAndExpandSource(source types.Source, openrouter_key string, database_url string) (types.ExpandedSource, bool) {
 	// Initialize expanded source with basic info
 	// Note: The article content is currently stored in the Title field from fetch.go
 	// We'll extract a proper title and use the content as the summary base
@@ -31,7 +31,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		filters.CleanTitleFilter(),
 		// Use the article content directly as summary instead of extracting from web
 		createDirectSummaryFilter(articleContent),
-		filters.CheckImportanceFilter(openai_key),
+		filters.CheckImportanceFilter(openrouter_key),
 	}
 	es, ok := filters.ApplyFilters(es, fs)
 	if !ok {

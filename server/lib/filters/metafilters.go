@@ -109,7 +109,7 @@ func ExtractBetterTitle() types.Filter {
 	return filter
 }
 
-func ExtractSummaryFilter(openai_key string) types.Filter {
+func ExtractSummaryFilter(openrouter_key string) types.Filter {
 	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
 		content, err := readability.GetArticleContent(source.Link)
 		if err != nil {
@@ -117,7 +117,7 @@ func ExtractSummaryFilter(openai_key string) types.Filter {
 			return source, false
 		}
 
-		summary, err := llm.Summarize(content, openai_key)
+		summary, err := llm.Summarize(content, openrouter_key)
 		if err != nil {
 			log.Printf("Filtered because: Error summarizing: %v", err)
 			return source, false
@@ -128,10 +128,10 @@ func ExtractSummaryFilter(openai_key string) types.Filter {
 	return filter
 }
 
-func CheckImportanceFilter(openai_key string) types.Filter {
+func CheckImportanceFilter(openrouter_key string) types.Filter {
 	filter := func(source types.ExpandedSource) (types.ExpandedSource, bool) {
 		existential_importance_snippet := "# " + source.Title + "\n\n" + source.Summary
-		existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
+		existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openrouter_key)
 		if err != nil || existential_importance_box == nil {
 			log.Printf("Filtered because: is not important")
 			return source, false

@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENAI_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	for {
@@ -43,7 +43,7 @@ func main() {
 		for i, source := range sources {
 			log.Printf("\nProcessing source %d/%d: %s", i+1, len(sources), source.Title)
 
-			es, ok := FilterAndExpandSource(source, openai_key, pg_database_url)
+			es, ok := FilterAndExpandSource(source, openrouter_key, pg_database_url)
 			// Always save to AI database, and save to main database if passes filters
 			if ok {
 				pgx.SaveToMainDatabase(es)

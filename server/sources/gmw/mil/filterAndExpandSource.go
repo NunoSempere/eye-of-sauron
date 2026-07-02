@@ -33,12 +33,12 @@ func IsWithinTwoDays(articleDate time.Time) bool {
 	return articleDate.After(oneWeekAgo)
 }
 
-func TranslateArticle(article GmwMilSource, openai_token string) (GmwMilSourceTranslated, error) {
-	translated_title, err := llm.TranslateString(article.Title, openai_token)
+func TranslateArticle(article GmwMilSource, openrouter_token string) (GmwMilSourceTranslated, error) {
+	translated_title, err := llm.TranslateString(article.Title, openrouter_token)
 	if err != nil {
 		return GmwMilSourceTranslated{}, err
 	}
-	translated_content, err := llm.TranslateString(article.Content, openai_token)
+	translated_content, err := llm.TranslateString(article.Content, openrouter_token)
 	if err != nil {
 		return GmwMilSourceTranslated{}, err
 	}
@@ -51,7 +51,7 @@ func TranslateArticle(article GmwMilSource, openai_token string) (GmwMilSourceTr
 	}, nil
 }
 
-func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func FilterAndExpandSource(article GmwMilSource, openrouter_key string, database_url string) (types.ExpandedSource, bool) {
 	// is there some parsimonious way of doing this in a more functional way that reuses code? Probably not?
 
 	date, _ := ExtractDateFromURL(article.Link)
@@ -60,7 +60,7 @@ func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url
 		return types.ExpandedSource{}, false
 	}
 
-	gmw, err := TranslateArticle(article, openai_key)
+	gmw, err := TranslateArticle(article, openrouter_key)
 	if err != nil {
 		log.Printf("%v", err)
 		return types.ExpandedSource{}, false
@@ -73,7 +73,7 @@ func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url
 		Date:  date,
 	}
 
-	summary, err := llm.Summarize(gmw.EnglishContent+"\n\nWhen summarizing a Chinese article, give the gist in idiomatic English, rather than selecting the most important phrases in Chinese", openai_key)
+	summary, err := llm.Summarize(gmw.EnglishContent+"\n\nWhen summarizing a Chinese article, give the gist in idiomatic English, rather than selecting the most important phrases in Chinese", openrouter_key)
 	if err != nil {
 		log.Printf("%v", err)
 		return expanded_source, false
@@ -82,7 +82,7 @@ func FilterAndExpandSource(article GmwMilSource, openai_key string, database_url
 	log.Printf("\nSummary: %s", expanded_source.Summary)
 
 	existential_importance_snippet := "# " + expanded_source.Title + "\n\n" + summary
-	existential_importance_box, err := llm.CheckExistentialImportanceChina(existential_importance_snippet, openai_key)
+	existential_importance_box, err := llm.CheckExistentialImportanceChina(existential_importance_snippet, openrouter_key)
 	if err != nil || existential_importance_box == nil {
 		log.Printf("%v", err)
 		return expanded_source, false

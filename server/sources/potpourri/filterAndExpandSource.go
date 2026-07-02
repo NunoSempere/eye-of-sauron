@@ -11,7 +11,7 @@ import (
 	"git.nunosempere.com/NunoSempere/news/sources/potpourri/dsca"
 )
 
-func FilterAndExpandSource(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func FilterAndExpandSource(source types.Source, openrouter_key string, database_url string) (types.ExpandedSource, bool) {
 	// Initialize expanded source
 	es := types.ExpandedSource{
 		Title:  source.Title,
@@ -34,7 +34,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 			log.Printf("Content extraction failed for %s: %v", source.Link, err)
 			return es, false
 		}
-		summary, err := llm.Summarize(content, openai_key)
+		summary, err := llm.Summarize(content, openrouter_key)
 		if err != nil {
 			log.Printf("Summarization failed for %s: %v", source.Link, err)
 			return es, false
@@ -49,7 +49,7 @@ func FilterAndExpandSource(source types.Source, openai_key string, database_url 
 		filters.IsGoodHostFilter(),
 		filters.CleanTitleFilter(),
 		TweakedSummaryFilter,
-		filters.CheckImportanceFilter(openai_key),
+		filters.CheckImportanceFilter(openrouter_key),
 	}
 	es, ok := filters.ApplyFilters(es, fs)
 	if !ok {

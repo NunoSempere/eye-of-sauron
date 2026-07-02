@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENROUTER_API_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	for {
@@ -66,7 +66,7 @@ func main() {
 
 			log.Printf("Title: %s", article.Title)
 
-			es, ok := FilterAndExpandSource(article, openai_key, pg_database_url)
+			es, ok := FilterAndExpandSource(article, openrouter_key, pg_database_url)
 			// useful for filtering duplicates within the same batch
 			// eventually I'd need to have a longer database of titles
 			if ok {

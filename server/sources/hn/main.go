@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENROUTER_API_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	ticker_gkg := time.NewTicker(60 * time.Minute)
@@ -42,7 +42,7 @@ func main() {
 				log.Printf("Found %d HackerNews articles", len(hnSources))
 				for i, hit := range hnSources {
 					log.Printf("\nProcessing HackerNews article %d/%d: %s", i+1, len(hnSources), hit.Title)
-					es, ok := FilterAndExpandSource(hit, openai_key, pg_database_url)
+					es, ok := FilterAndExpandSource(hit, openrouter_key, pg_database_url)
 					if ok {
 						pgx.SaveSource(es)
 					}

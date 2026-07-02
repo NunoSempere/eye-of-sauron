@@ -17,7 +17,7 @@ type CacheAdder func(string) error
 type ProspectorInput struct {
 	Article           Source
 	Prospector_type   string
-	Openai_token      string
+	Openrouter_token  string
 	Postmark_token    string
 	LinkCacheChecker  CacheChecker
 	LinkCacheAdder    CacheAdder

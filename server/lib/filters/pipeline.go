@@ -31,14 +31,14 @@ func DeprecatedStandardFilterPipeline(database_url string) []types.Filter {
 }
 
 // ExtractContentAndSummarize extracts article content and generates summary using LLM
-func ExtractContentAndSummarize(source types.ExpandedSource, openai_key string) (types.ExpandedSource, bool) {
+func ExtractContentAndSummarize(source types.ExpandedSource, openrouter_key string) (types.ExpandedSource, bool) {
 	content, err := readability.GetArticleContent(source.Link)
 	if err != nil {
 		log.Printf("Filtered because: Error getting article content: %v", err)
 		return source, false
 	}
 
-	summary, err := llm.Summarize(content, openai_key)
+	summary, err := llm.Summarize(content, openrouter_key)
 	if err != nil {
 		log.Printf("Filtered because: Error summarizing: %v", err)
 		return source, false
@@ -48,9 +48,9 @@ func ExtractContentAndSummarize(source types.ExpandedSource, openai_key string) 
 }
 
 // CheckImportance performs existential importance check using LLM
-func CheckImportance(source types.ExpandedSource, openai_key string) (types.ExpandedSource, bool) {
+func CheckImportance(source types.ExpandedSource, openrouter_key string) (types.ExpandedSource, bool) {
 	existential_importance_snippet := "# " + source.Title + "\n\n" + source.Summary
-	existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openai_key)
+	existential_importance_box, err := llm.CheckExistentialImportance(existential_importance_snippet, openrouter_key)
 	if err != nil || existential_importance_box == nil {
 		log.Printf("Filtered because: is not important")
 		return source, false
@@ -63,7 +63,7 @@ func CheckImportance(source types.ExpandedSource, openai_key string) (types.Expa
 }
 
 // StandardProcessingPipeline processes source through standard filters, content extraction, and importance check
-func DeprecatedStandardProcessingPipeline(source types.Source, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func DeprecatedStandardProcessingPipeline(source types.Source, openrouter_key string, database_url string) (types.ExpandedSource, bool) {
 	// Initialize expanded source
 	es := types.ExpandedSource{
 		Title:  source.Title,
@@ -80,11 +80,11 @@ func DeprecatedStandardProcessingPipeline(source types.Source, openai_key string
 	}
 
 	// Extract content and summarize
-	es, ok = ExtractContentAndSummarize(es, openai_key)
+	es, ok = ExtractContentAndSummarize(es, openrouter_key)
 	if !ok {
 		return es, false
 	}
 
 	// Check importance
-	return CheckImportance(es, openai_key)
+	return CheckImportance(es, openrouter_key)
 }

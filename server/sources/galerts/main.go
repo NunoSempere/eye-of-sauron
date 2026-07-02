@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	openai_key := os.Getenv("OPENAI_KEY")
+	openrouter_key := os.Getenv("OPENROUTER_API_KEY")
 	pg_database_url := os.Getenv("DATABASE_POOL_URL")
 
 	keywords := []string{"War", "Emergency", "disaster", "alert", "nuclear", "combat duty", "human-to-human", "pandemic", "blockade", "invasion", "undersea cables", "nuclear", "Carrington event", "mystery pneumonia", "Taiwan", "Ukraine", "OpenAI announces AGI", "AI rights", "military exercise", "Kessler syndrome", "Cyberattack"}
@@ -54,8 +54,8 @@ func main() {
 					filters.IsDupeFilter(pg_database_url),
 					filters.IsGoodHostFilter(),
 					filters.CleanTitleFilter(),
-					filters.ExtractSummaryFilter(openai_key),
-					filters.CheckImportanceFilter(openai_key),
+					filters.ExtractSummaryFilter(openrouter_key),
+					filters.CheckImportanceFilter(openrouter_key),
 				}
 				es, ok := filters.ApplyFilters(es, fs)
 				if ok {

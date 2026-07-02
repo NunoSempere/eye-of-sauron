@@ -9,7 +9,7 @@ import (
 	"git.nunosempere.com/NunoSempere/news/lib/types"
 )
 
-func FilterAndExpandSource(source HNHit, openai_key string, database_url string) (types.ExpandedSource, bool) {
+func FilterAndExpandSource(source HNHit, openrouter_key string, database_url string) (types.ExpandedSource, bool) {
 	// Parse the created_at time
 	createdAt, err := time.Parse(time.RFC3339, source.CreatedAt)
 	if err != nil {
@@ -57,14 +57,14 @@ func FilterAndExpandSource(source HNHit, openai_key string, database_url string)
 		es.Summary = source.StoryText
 	} else {
 		// Extract and summarize content
-		es, ok = filters.ExtractContentAndSummarize(es, openai_key)
+		es, ok = filters.ExtractContentAndSummarize(es, openrouter_key)
 		if !ok {
 			return es, false
 		}
 	}
 
 	// Check importance
-	es, ok = filters.CheckImportance(es, openai_key)
+	es, ok = filters.CheckImportance(es, openrouter_key)
 	if !ok {
 		return es, false
 	}
