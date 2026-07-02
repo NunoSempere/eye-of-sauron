@@ -497,6 +497,15 @@ func (a *App) confirmQuit() bool {
 }
 
 func (a *App) run() error {
+	// Test OpenRouter API key immediately on startup
+	openrouterKey := os.Getenv("OPENROUTER_API_KEY")
+	if openrouterKey != "" {
+		log.Println("[MAIN] Testing OpenRouter API key on startup...")
+		if err := testOpenRouterAPIKey(openrouterKey); err != nil {
+			log.Printf("[MAIN] WARNING: OpenRouter API key test failed: %v", err)
+		}
+	}
+
 	err := a.loadSources()
 	if err != nil {
 		return err

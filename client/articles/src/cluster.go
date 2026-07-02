@@ -15,6 +15,25 @@ import (
 	"github.com/OpenRouterTeam/go-sdk/models/operations"
 )
 
+func testOpenRouterAPIKey(token string) error {
+	log.Println("[CLUSTERING] Testing OpenRouter API key with simple request...")
+
+	testTexts := []string{"Hello world", "Test embedding"}
+	embeddings, err := getEmbeddingsWithRetry(testTexts, token, 0)
+
+	if err != nil {
+		log.Printf("[CLUSTERING] ERROR: API key test failed: %v", err)
+		return err
+	}
+
+	log.Printf("[CLUSTERING] SUCCESS: API key test passed! Got %d embeddings", len(embeddings))
+	if len(embeddings) > 0 {
+		log.Printf("[CLUSTERING] Embedding dimension: %d", len(embeddings[0]))
+	}
+
+	return nil
+}
+
 func getEmbeddings(texts []string, token string) ([][]float64, error) {
 	return getEmbeddingsWithRetry(texts, token, 0)
 }
