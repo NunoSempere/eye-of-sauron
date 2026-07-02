@@ -28,7 +28,9 @@ type OpenAIRequest struct {
 
 func fetchOpenAIAnswer(req OpenAIRequest) (string, error) {
 
-	client := openai.NewClient(req.token)
+	config := openai.DefaultConfig(req.token)
+	config.BaseURL = "https://openrouter.ai/api/v1"
+	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -53,7 +55,9 @@ func fetchOpenAIAnswer(req OpenAIRequest) (string, error) {
 }
 func fetchOpenAIAnswerJSON(req OpenAIRequest, schema openai.ChatCompletionResponseFormatJSONSchema) (string, error) {
 
-	client := openai.NewClient(req.token)
+	config := openai.DefaultConfig(req.token)
+	config.BaseURL = "https://openrouter.ai/api/v1"
+	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
