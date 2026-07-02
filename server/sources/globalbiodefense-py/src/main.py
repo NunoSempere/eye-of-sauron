@@ -41,11 +41,11 @@ def main():
     
     # Load environment variables
     load_dotenv()
-    openai_key = os.getenv("OPENAI_KEY")
+    openrouter_key = os.getenv("OPENROUTER_API_KEY")
     pg_database_url = os.getenv("DATABASE_POOL_URL")
     
-    if not openai_key or not pg_database_url:
-        logger.error("Missing required environment variables: OPENAI_KEY, DATABASE_POOL_URL")
+    if not openrouter_key or not pg_database_url:
+        logger.error("Missing required environment variables: openrouter_key, DATABASE_POOL_URL")
         sys.exit(1)
     
     while True:
@@ -61,7 +61,7 @@ def main():
                 logger.info(f"\nProcessing source {i}/{len(sources)}: {source['title']}")
                 
                 expanded_source, passes_filters = filter_and_expand_source(
-                    source, openai_key, pg_database_url
+                    source, openrouter_key, pg_database_url
                 )
                 
                 if passes_filters:
