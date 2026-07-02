@@ -29,19 +29,22 @@ func getEmbeddingsWithRetry(texts []string, token string, attemptCount int) ([][
 		openrouter.WithSecurity(token),
 	)
 
-	// Convert texts to the appropriate input format
-	var input operations.CreateEmbeddingsRequestInput
+	// Convert texts to the appropriate input format based on length
+	var embedReq operations.CreateEmbeddingsRequest
 	if len(texts) == 1 {
-		input = operations.CreateInputUnionStr(texts[0])
+		embedReq = operations.CreateEmbeddingsRequest{
+			Input: operations.CreateInputUnionStr(texts[0]),
+			Model: "openai/text-embedding-3-small",
+		}
 	} else {
-		input = operations.CreateInputUnionArrayOfStr(texts)
+		embedReq = operations.CreateEmbeddingsRequest{
+			Input: operations.CreateInputUnionArrayOfStr(texts),
+			Model: "openai/text-embedding-3-small",
+		}
 	}
 
 	// Create an embedding request
-	queryResponse, err := client.Embeddings.Generate(ctx, operations.CreateEmbeddingsRequest{
-		Input: input,
-		Model: "openai/text-embedding-3-small",
-	})
+	queryResponse, err := client.Embeddings.Generate(ctx, embedReq)
 	if err != nil {
 		// Check if it's a token limit error
 		errStr := err.Error()
@@ -75,14 +78,10 @@ func getEmbeddingsWithRetry(texts []string, token string, attemptCount int) ([][
 	}
 
 	es := [][]float64{}
-	if queryResponse.CreateEmbeddingResponse != nil {
-		for _, e := range queryResponse.CreateEmbeddingResponse.Data {
-			f32s := e.Embedding
-			f64s := make([]float64, len(f32s))
-			for i, v := range f32s {
-				f64s[i] = float64(v)
-			}
-			es = append(es, f64s)
+	if queryResponse != nil && queryResponse.CreateEmbeddingsResponseBody != nil {
+		for _, e := range queryResponse.CreateEmbeddingsResponseBody.Data {
+			// The Embedding field is a union type, access the ArrayOfNumber field
+			es = append(es, e.Embedding.ArrayOfNumber)
 		}
 	}
 
